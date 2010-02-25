@@ -23,40 +23,21 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package local.hironytic.moltonf.model;
-
-import java.util.List;
+package com.hironytic.moltonf.model;
 
 /**
- * ストーリーを表すインタフェースです。
- * 通常、ストーリーは1回のプレイデータ全体に相当します。
+ * 発言の種別を表す列挙型です。
  */
-public interface Story {
-
-	/**
-	 * このストーリーに含まれる StoryPeriod を返します。
-	 * @return StoryPeriod のリスト
-	 */
-	public List<StoryPeriod> getPeriods();
+public enum TalkType {
+	/** 通常発言 (白ログ) */
+	PUBLIC,
 	
-	//public ??? getAvatarList(); // TODO:
+	/** 狼の発言 (赤ログ) */
+	WOLF,
 	
-	/**
-	 * ストーリー中で扱う相対 URI のベース URI を返します。
-	 * @return ベース URI 文字列
-	 */
-	public String getBaseUri();
+	/** 独り言 (灰ログ) */
+	PRIVATE,
 	
-	/**
-	 * 村のフルネームを返します。
-	 * @return 村のフルネーム
-	 */
-	public String getVillageFullName();
-	
-	/**
-	 * 村の状態を返します。
-	 * @return 村の状態
-	 */
-	public VillageState getVillageState();
-	
+	/** 墓下発言 (青ログ) */
+	GRAVE,
 }

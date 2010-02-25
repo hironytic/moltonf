@@ -23,21 +23,21 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package local.hironytic.moltonf.model;
+package com.hironytic.moltonf.model;
 
 /**
- * 発言の種別を表す列挙型です。
+ * 村の状態を表す列挙型
  */
-public enum TalkType {
-	/** 通常発言 (白ログ) */
-	PUBLIC,
+public enum VillageState {
+	/** プロローグ中 */
+	PROLOGUE,
 	
-	/** 狼の発言 (赤ログ) */
-	WOLF,
+	/** 進行中 */
+	PROGRESS,
 	
-	/** 独り言 (灰ログ) */
-	PRIVATE,
+	/** エピローグ中 */
+	EPILOGUE,
 	
-	/** 墓下発言 (青ログ) */
-	GRAVE,
+	/** ゲーム終了 */
+	GAMEOVER,
 }

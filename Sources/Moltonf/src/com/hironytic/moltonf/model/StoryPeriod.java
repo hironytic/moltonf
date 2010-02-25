@@ -23,21 +23,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package local.hironytic.moltonf.model;
+package com.hironytic.moltonf.model;
 
 /**
- * 村の状態を表す列挙型
+ * ストーリー中の1単位期間のデータを保持するインタフェースです。
+ * 通常1日（夜明け～夜明け）分の期間を表します。
  */
-public enum VillageState {
-	/** プロローグ中 */
-	PROLOGUE,
-	
-	/** 進行中 */
-	PROGRESS,
-	
-	/** エピローグ中 */
-	EPILOGUE,
-	
-	/** ゲーム終了 */
-	GAMEOVER,
+public interface StoryPeriod {
+
 }

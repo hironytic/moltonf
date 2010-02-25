@@ -23,7 +23,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package local.hironytic.moltonf.model;
+package com.hironytic.moltonf.model;
 
 import java.util.List;
 

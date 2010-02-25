@@ -23,7 +23,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package local.hironytic.moltonf.model;
+package com.hironytic.moltonf.model;
 
 /**
  * ストーリーを構成する要素のインタフェースです。
