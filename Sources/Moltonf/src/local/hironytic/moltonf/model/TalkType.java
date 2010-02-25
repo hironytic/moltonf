@@ -25,32 +25,19 @@
 
 package local.hironytic.moltonf.model;
 
-import java.util.List;
-
 /**
- * 発言を表すインタフェースです。
+ * 発言の種別を表す列挙型です。
  */
-public interface Talk extends StoryElement {
-
-	/**
-	 * 発言の種別を返します。
-	 * @return 発言の種別
-	 */
-	public TalkType getTalkType();
+public enum TalkType {
+	/** 通常発言 (白ログ) */
+	PUBLIC,
 	
-	/**
-	 * 発言内容を返します。
-	 * @return 発言内容の行のリスト。
-	 */
-	public List<String> getMessageLines();
+	/** 狼の発言 (赤ログ) */
+	WOLF,
 	
-	/* TODO: 発言した人 */
+	/** 独り言 (灰ログ) */
+	PRIVATE,
 	
-	/* TODO: 発言時刻 */
-	
-	/* TODO: 発言回数 */
-	public int getTalkCount();
-	
-	
-	
+	/** 墓下発言 (青ログ) */
+	GRAVE,
 }
