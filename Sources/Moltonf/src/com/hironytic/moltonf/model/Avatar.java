@@ -25,41 +25,46 @@
 
 package com.hironytic.moltonf.model;
 
-import java.util.List;
+import java.net.URI;
 
 /**
- * ストーリーを表すインタフェースです。
- * 通常、ストーリーは1回のプレイデータ全体に相当します。
+ * 登場人物のインタフェースです。
  */
-public interface Story {
+public interface Avatar {
 
 	/**
-	 * このストーリーに含まれる StoryPeriod を返します。
-	 * @return StoryPeriod のリスト
+	 * 登場人物の識別子を返します。 
+	 * @return 識別子
 	 */
-	public List<StoryPeriod> getPeriods();
+	public String getAvatarId();
 	
 	/**
-	 * このストーリーに登場する人物のリストを返します。
-	 * @return 登場人物のリスト
+	 * フルネームを返します。
+	 * 
+	 * 例：「楽天家 ゲルト」
+	 * @return フルネーム 
 	 */
-	public List<Avatar> getAvatarList();
+	public String getFullName();
 	
 	/**
-	 * ストーリー中で扱う相対 URI のベース URI を返します。
-	 * @return ベース URI 文字列
+	 * 短い名前を返します。
+	 * 
+	 * 例：「ゲルト」
+	 * @return 短い名前
 	 */
-	public String getBaseUri();
+	public String getShortName();
 	
 	/**
-	 * 村のフルネームを返します。
-	 * @return 村のフルネーム
+	 * 短縮名を返します。
+	 * 
+	 * 例：「楽」
+	 * @return 短縮名
 	 */
-	public String getVillageFullName();
+	public String getAbbreviatedName();
 	
 	/**
-	 * 村の状態を返します。
-	 * @return 村の状態
+	 * 顔アイコン画像のある URI を返します。
+	 * @return 顔アイコンへの URI
 	 */
-	public VillageState getVillageState();
+	public URI getFaceIconUri();
 }

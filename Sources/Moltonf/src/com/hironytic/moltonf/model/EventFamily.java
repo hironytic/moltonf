@@ -25,41 +25,28 @@
 
 package com.hironytic.moltonf.model;
 
-import java.util.List;
-
 /**
- * ストーリーを表すインタフェースです。
- * 通常、ストーリーは1回のプレイデータ全体に相当します。
+ * イベントの種別を表す列挙型です。
  */
-public interface Story {
-
+public enum EventFamily {
 	/**
-	 * このストーリーに含まれる StoryPeriod を返します。
-	 * @return StoryPeriod のリスト
+	 * アナウンスイベント
+	 * 
+	 * 例：「次の日の朝、楽天家 ゲルト が無残な姿で発見された。」
 	 */
-	public List<StoryPeriod> getPeriods();
+	ANNOUNCE,
 	
 	/**
-	 * このストーリーに登場する人物のリストを返します。
-	 * @return 登場人物のリスト
+	 * 操作系のイベント
+	 * 
+	 * 例：「00:15 までに、誰を処刑するべきかの投票先を決定して下さい。」
 	 */
-	public List<Avatar> getAvatarList();
+	ORDER,
 	
 	/**
-	 * ストーリー中で扱う相対 URI のベース URI を返します。
-	 * @return ベース URI 文字列
+	 * 特殊能力系イベント
+	 * 
+	 * 例：「司書 クララ は、村長 ヴァルター を守っている。」
 	 */
-	public String getBaseUri();
-	
-	/**
-	 * 村のフルネームを返します。
-	 * @return 村のフルネーム
-	 */
-	public String getVillageFullName();
-	
-	/**
-	 * 村の状態を返します。
-	 * @return 村の状態
-	 */
-	public VillageState getVillageState();
+	EXTRA,
 }
