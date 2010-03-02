@@ -29,15 +29,15 @@ package com.hironytic.moltonf.model;
  * 発言の種別を表す列挙型です。
  */
 public enum TalkType {
-	/** 通常発言 (白ログ) */
-	PUBLIC,
-	
-	/** 狼の発言 (赤ログ) */
-	WOLF,
-	
-	/** 独り言 (灰ログ) */
-	PRIVATE,
-	
-	/** 墓下発言 (青ログ) */
-	GRAVE,
+    /** 通常発言 (白ログ) */
+    PUBLIC,
+
+    /** 狼の発言 (赤ログ) */
+    WOLF,
+
+    /** 独り言 (灰ログ) */
+    PRIVATE,
+
+    /** 墓下発言 (青ログ) */
+    GRAVE,
 }

@@ -23,34 +23,28 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf.model;
-
-import java.util.List;
+package com.hironytic.moltonf.util;
 
 /**
- * 発言を表すインタフェースです。
+ * コードを簡潔に書くためのユーティリティ
  */
-public interface Talk extends StoryElement {
+public class SmartUtils {
 
+    private SmartUtils() {   
+    }
+    
     /**
-     * 発言の種別を返します。
-     * @return 発言の種別
+     * 指定したオブジェクトを equals で比較した結果を返します。
+     * オブジェクトが両方とも null の場合も等しいとして扱います。
+     * @param obj1 オブジェクト1
+     * @param obj2 オブジェクト2
+     * @return 等しければ true、そうでなければ false
      */
-    public TalkType getTalkType();
-
-    /**
-     * 発言内容を返します。
-     * @return 発言内容の行のリスト。
-     */
-    public List<String> getMessageLines();
-
-    /* TODO: 発言した人 */
-
-    /* TODO: 発言時刻 */
-
-    /* TODO: 発言回数 */
-    public int getTalkCount();
-
-
-
+    public static boolean equals(Object obj1, Object obj2) {
+        if (obj1 == null) {
+            return obj2 == null;
+        } else {
+            return obj1.equals(obj2);
+        }
+    }
 }

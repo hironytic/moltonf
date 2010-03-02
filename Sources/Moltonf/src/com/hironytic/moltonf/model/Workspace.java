@@ -25,32 +25,14 @@
 
 package com.hironytic.moltonf.model;
 
-import java.util.List;
-
 /**
- * 発言を表すインタフェースです。
+ * Moltonf ワークスペースを表すインタフェース
  */
-public interface Talk extends StoryElement {
+public interface Workspace {
 
     /**
-     * 発言の種別を返します。
-     * @return 発言の種別
+     * このワークスペースが扱うストーリーを返します。
+     * @return ストーリー
      */
-    public TalkType getTalkType();
-
-    /**
-     * 発言内容を返します。
-     * @return 発言内容の行のリスト。
-     */
-    public List<String> getMessageLines();
-
-    /* TODO: 発言した人 */
-
-    /* TODO: 発言時刻 */
-
-    /* TODO: 発言回数 */
-    public int getTalkCount();
-
-
-
+    public Story getStory();
 }

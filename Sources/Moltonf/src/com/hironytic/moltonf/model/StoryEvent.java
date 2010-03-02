@@ -30,9 +30,9 @@ package com.hironytic.moltonf.model;
  */
 public interface StoryEvent extends StoryElement {
 
-	/**
-	 * イベントの種別を返します。
-	 * @return イベントの種別
-	 */
-	public EventFamily getEventFamily();
+    /**
+     * イベントの種別を返します。
+     * @return イベントの種別
+     */
+    public EventFamily getEventFamily();
 }

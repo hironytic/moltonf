@@ -32,39 +32,39 @@ import java.net.URI;
  */
 public interface Avatar {
 
-	/**
-	 * 登場人物の識別子を返します。 
-	 * @return 識別子
-	 */
-	public String getAvatarId();
-	
-	/**
-	 * フルネームを返します。
-	 * 
-	 * 例：「楽天家 ゲルト」
-	 * @return フルネーム 
-	 */
-	public String getFullName();
-	
-	/**
-	 * 短い名前を返します。
-	 * 
-	 * 例：「ゲルト」
-	 * @return 短い名前
-	 */
-	public String getShortName();
-	
-	/**
-	 * 短縮名を返します。
-	 * 
-	 * 例：「楽」
-	 * @return 短縮名
-	 */
-	public String getAbbreviatedName();
-	
-	/**
-	 * 顔アイコン画像のある URI を返します。
-	 * @return 顔アイコンへの URI
-	 */
-	public URI getFaceIconUri();
+    /**
+     * 登場人物の識別子を返します。 
+     * @return 識別子
+     */
+    public String getAvatarId();
+
+    /**
+     * フルネームを返します。
+     * 
+     * 例：「楽天家 ゲルト」
+     * @return フルネーム 
+     */
+    public String getFullName();
+
+    /**
+     * 短い名前を返します。
+     * 
+     * 例：「ゲルト」
+     * @return 短い名前
+     */
+    public String getShortName();
+
+    /**
+     * 短縮名を返します。
+     * 
+     * 例：「楽」
+     * @return 短縮名
+     */
+    public String getAbbreviatedName();
+
+    /**
+     * 顔アイコン画像のある URI を返します。
+     * @return 顔アイコンへの URI
+     */
+    public URI getFaceIconUri();
 }

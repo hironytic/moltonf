@@ -23,34 +23,32 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf.model;
+package com.hironytic.moltonf.util;
 
-import java.util.List;
+import org.w3c.dom.Node;
 
 /**
- * 発言を表すインタフェースです。
+ * DOM 関連のユーティリティ
  */
-public interface Talk extends StoryElement {
+public class DomUtils {
+    private DomUtils() {
+    }
 
     /**
-     * 発言の種別を返します。
-     * @return 発言の種別
+     * 指定した名前空間 URI、ローカル名に一致する兄弟ノードを前方方向へ探します。
+     * @param node 探し始める開始点となるノード。条件を満たせばこのノードが返ることもあります。
+     * @param namespaceUri 名前空間 URI
+     * @param localName ローカル名
+     * @return
      */
-    public TalkType getTalkType();
-
-    /**
-     * 発言内容を返します。
-     * @return 発言内容の行のリスト。
-     */
-    public List<String> getMessageLines();
-
-    /* TODO: 発言した人 */
-
-    /* TODO: 発言時刻 */
-
-    /* TODO: 発言回数 */
-    public int getTalkCount();
-
-
-
+    public static Node searchSiblingForward(Node node, String namespaceUri, String localName) {
+        while (node != null) {
+            if (SmartUtils.equals(node.getNamespaceURI(), namespaceUri) &&
+                    SmartUtils.equals(node.getLocalName(), localName)) {
+                break;
+            }
+            node = node.getNextSibling();
+        }
+        return node;
+    }
 }

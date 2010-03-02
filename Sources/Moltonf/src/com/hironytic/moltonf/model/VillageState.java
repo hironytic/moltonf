@@ -29,15 +29,15 @@ package com.hironytic.moltonf.model;
  * 村の状態を表す列挙型
  */
 public enum VillageState {
-	/** プロローグ中 */
-	PROLOGUE,
-	
-	/** 進行中 */
-	PROGRESS,
-	
-	/** エピローグ中 */
-	EPILOGUE,
-	
-	/** ゲーム終了 */
-	GAMEOVER,
+    /** プロローグ中 */
+    PROLOGUE,
+
+    /** 進行中 */
+    PROGRESS,
+
+    /** エピローグ中 */
+    EPILOGUE,
+
+    /** ゲーム終了 */
+    GAMEOVER,
 }
