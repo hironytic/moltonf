@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.util;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
@@ -35,20 +36,37 @@ public class DomUtils {
     }
 
     /**
-     * 指定した名前空間 URI、ローカル名に一致する兄弟ノードを前方方向へ探します。
+     * 指定した名前空間 URI、ローカル名に一致する兄弟要素を前方方向へ探します。
      * @param node 探し始める開始点となるノード。条件を満たせばこのノードが返ることもあります。
      * @param namespaceUri 名前空間 URI
      * @param localName ローカル名
-     * @return 見つかったノード。見つからなければ null。
+     * @return 見つかった要素。見つからなければ null。
      */
-    public static Node searchSiblingForward(Node node, String namespaceUri, String localName) {
+    public static Element searchSiblingElementForward(Node node, String namespaceUri, String localName) {
         while (node != null) {
-            if (SmartUtils.equals(node.getNamespaceURI(), namespaceUri) &&
-                    SmartUtils.equals(node.getLocalName(), localName)) {
-                break;
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                if (isMatchNode(node, namespaceUri, localName)) {
+                    break;
+                }
             }
             node = node.getNextSibling();
         }
-        return node;
+        return (Element)node;
+    }
+    
+    /**
+     * 指定した名前空間 URI、ローカル名に一致するかどうかを返します。
+     * @param node 判定したいノード
+     * @param namespaceUri 名前空間 URI
+     * @param localName ローカル名
+     * @return 一致するなら true、そうでなければ false
+     */
+    public static boolean isMatchNode(Node node, String namespaceUri, String localName) {
+        if (SmartUtils.equals(node.getNamespaceURI(), namespaceUri) &&
+                SmartUtils.equals(node.getLocalName(), localName)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

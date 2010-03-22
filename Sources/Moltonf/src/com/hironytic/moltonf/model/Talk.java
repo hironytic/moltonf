@@ -40,12 +40,6 @@ public interface Talk extends StoryElement {
     public TalkType getTalkType();
 
     /**
-     * 発言内容を返します。
-     * @return 発言内容の行のリスト。
-     */
-    public List<String> getMessageLines();
-
-    /**
      * 発言を行った人物を返します。
      * @return 発言を行った人物。
      */

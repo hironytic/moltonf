@@ -23,18 +23,39 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf.model;
+package com.hironytic.moltonf.model.basic;
 
 import java.util.List;
 
+import com.hironytic.moltonf.model.StoryElement;
+
 /**
- * ストーリーを構成する要素のインタフェースです。
+ * StoryElement の抽象実装
  */
-public interface StoryElement {
+abstract public class BasicStoryElement implements StoryElement {
+
+    private List<String> messageLines;
+    
+    /**
+     * protected コンストラクタ
+     */
+    protected BasicStoryElement() {
+        
+    }
+    
+    /**
+     * @see com.hironytic.moltonf.model.StoryElement#getMessageLines()
+     */
+    @Override
+    public List<String> getMessageLines() {
+        return messageLines;
+    }
 
     /**
-     * メッセージを返します。
-     * @return メッセージの行のリスト。
+     * messageLines をセットします。
+     * @param messageLines セットしたい messageLines の値
      */
-    public List<String> getMessageLines();
+    public void setMessageLines(List<String> messageLines) {
+        this.messageLines = messageLines;
+    }
 }

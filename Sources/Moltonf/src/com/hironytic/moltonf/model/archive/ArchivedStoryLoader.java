@@ -32,16 +32,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.validation.Schema;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
+import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.Story;
+import com.hironytic.moltonf.model.StoryElement;
+import com.hironytic.moltonf.model.StoryPeriod;
 import com.hironytic.moltonf.model.VillageState;
+import com.hironytic.moltonf.model.basic.BasicStoryElement;
 import com.hironytic.moltonf.model.basic.BasicAvatar;
 import com.hironytic.moltonf.model.basic.BasicStory;
+import com.hironytic.moltonf.model.basic.BasicStoryEvent;
+import com.hironytic.moltonf.model.basic.BasicStoryPeriod;
+import com.hironytic.moltonf.model.basic.BasicTalk;
 import com.hironytic.moltonf.util.DomUtils;
 
 /**
@@ -102,6 +111,7 @@ public class ArchivedStoryLoader {
         loadAvatarList();
         
         // 日
+        loadPeriods();
     }
     
     /**
@@ -139,9 +149,12 @@ public class ArchivedStoryLoader {
         story.setVillageState(state);
     }
     
+    /**
+     * 村のフルネームを読み込みます。
+     */
     private void loadVillageFullName() {
         Element villageElem = archiveDoc.getDocumentElement();
-        String fullName = villageElem.getAttributeNS(null, SchemaConstants.LN_FORMAL_NAME);
+        String fullName = villageElem.getAttributeNS(null, SchemaConstants.LN_FULL_NAME);
         story.setVillageFullName(fullName);
     }
     
@@ -153,11 +166,11 @@ public class ArchivedStoryLoader {
         
         avatarMap = new HashMap<String, Avatar>();
         List<Avatar> list = new ArrayList<Avatar>();
-        Node avatarListElem = DomUtils.searchSiblingForward(villageElem.getFirstChild(),
-                SchemaConstants.NS_TNS, SchemaConstants.LN_AVATAR_LIST);
+        Node avatarListElem = DomUtils.searchSiblingElementForward(villageElem.getFirstChild(),
+                SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR_LIST);
         if (avatarListElem != null) {
-            Element avatarElem = (Element)DomUtils.searchSiblingForward(avatarListElem.getFirstChild(),
-                    SchemaConstants.NS_TNS, SchemaConstants.LN_AVATAR);
+            Element avatarElem = DomUtils.searchSiblingElementForward(avatarListElem.getFirstChild(),
+                    SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR);
             while (avatarElem != null) {
                 BasicAvatar avatar = new BasicAvatar();
                 String avatarId =  avatarElem.getAttributeNS(null, SchemaConstants.LN_AVATAR_ID);
@@ -165,16 +178,181 @@ public class ArchivedStoryLoader {
                 avatar.setFullName(avatarElem.getAttributeNS(null, SchemaConstants.LN_FULL_NAME));
                 avatar.setShortName(avatarElem.getAttributeNS(null, SchemaConstants.LN_SHORT_NAME));
                 
-                /* TODO; faceIconURI をベース URI に連結したものを URI として格納 */
+                // 顔アイコン
+                String faceIconUriString = avatarElem.getAttributeNS(null, SchemaConstants.LN_FACE_ICON_URI);
+                URI faceIconUri;
+                try {
+                    if (baseUri != null) {
+                        faceIconUri = baseUri.resolve(new URI(faceIconUriString));
+                    } else {
+                        faceIconUri = new URI(faceIconUriString);
+                    }
+                } catch (URISyntaxException e) {
+                    faceIconUri = null;
+                }
+                avatar.setFaceIconUri(faceIconUri);
+                
                 /* TODO: 短縮名をどうにかしてセット */
                 
                 list.add(avatar);                
                 avatarMap.put(avatarId, avatar);
 
-                avatarElem = (Element)DomUtils.searchSiblingForward(avatarElem.getNextSibling(),
-                        SchemaConstants.NS_TNS, SchemaConstants.LN_AVATAR);
+                avatarElem = DomUtils.searchSiblingElementForward(avatarElem.getNextSibling(),
+                        SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR);
             }
         }
         story.setAvatarList(list);
+    }
+    
+    /**
+     * それぞれの日の情報を読み込みます。
+     */
+    private void loadPeriods() {
+        Element villageElem = archiveDoc.getDocumentElement();
+        
+        List<StoryPeriod> periodList = new ArrayList<StoryPeriod>();
+        Element periodElem = DomUtils.searchSiblingElementForward(villageElem.getFirstChild(),
+                SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_PERIOD);
+        while (periodElem != null) {
+            StoryPeriod period = loadOnePeriod(periodElem);
+            periodList.add(period);
+            
+            periodElem = DomUtils.searchSiblingElementForward(periodElem.getNextSibling(),
+                    SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_PERIOD);
+        }
+        story.setPeriods(periodList);
+    }
+    
+    /**
+     * 1 日分の情報を読み込みます。
+     * @param periodElem period 要素
+     * @return 読み込んだ結果の StoryPeriod オブジェクト
+     */
+    private StoryPeriod loadOnePeriod(Element periodElem) {
+        BasicStoryPeriod period = new BasicStoryPeriod();
+        List<StoryElement> elementList = new ArrayList<StoryElement>();
+        
+        Node child = periodElem.getFirstChild();
+        while (child != null) {
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                Element childElem = (Element)child;
+                StoryElement storyElement = null;
+                if (DomUtils.isMatchNode(childElem, SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_TALK)) {
+                    storyElement = loadTalk(childElem);
+                }
+                storyElement = (storyElement != null) ? storyElement : loadEventAnnounceGroupIfMaches(childElem);
+                storyElement = (storyElement != null) ? storyElement : loadEventOrderGroupIfMatches(childElem);
+                storyElement = (storyElement != null) ? storyElement : loadEventExtraGroupIfMathces(childElem);
+                
+                if (storyElement != null) {
+                    elementList.add(storyElement);
+                }
+            }
+            child = child.getNextSibling();
+        }
+        period.setStoryElements(elementList);
+        return period;
+    }
+    
+    /**
+     * 指定された要素が EventAnounceGroup に一致するなら読み込みます。
+     * @param elem 要素
+     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
+     *          一致しなければ null を返します。
+     */
+    private StoryElement loadEventAnnounceGroupIfMaches(Element elem) {
+        final String[] eventLocalNames = {
+            SchemaConstants.LN_START_ENTRY, SchemaConstants.LN_ON_STAGE,
+            SchemaConstants.LN_START_MIRROR, SchemaConstants.LN_OPEN_ROLE,
+            SchemaConstants.LN_MURDERED, SchemaConstants.LN_START_ASSAULT,
+            SchemaConstants.LN_SURVIVOR, SchemaConstants.LN_COUNTING,
+            SchemaConstants.LN_SUDDEN_DEATH, SchemaConstants.LN_NO_MURDER,
+            SchemaConstants.LN_WIN_VILLAGE, SchemaConstants.LN_WIN_WOLF,
+            SchemaConstants.LN_WIN_HAMSTER, SchemaConstants.LN_PLAYER_LIST,
+            SchemaConstants.LN_PANIC,
+        };
+        return loadEventIfMatches(elem, eventLocalNames, EventFamily.ANNOUNCE);
+    }
+    
+    /**
+     * 指定された要素が EventOrderGroup に一致するなら読み込みます。
+     * @param elem 要素
+     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
+     *          一致しなければ null を返します。
+     */
+    private StoryElement loadEventOrderGroupIfMatches(Element elem) {
+        final String[] eventLocalNames = {
+            SchemaConstants.LN_ASK_ENTRY, SchemaConstants.LN_ASK_COMMIT,
+            SchemaConstants.LN_NO_COMMENT, SchemaConstants.LN_STAY_EPILOGUE,
+            SchemaConstants.LN_GAME_OVER,
+        };
+        return loadEventIfMatches(elem, eventLocalNames, EventFamily.ORDER);        
+    }
+    
+    /**
+     * 指定された要素が EventExtraGroup に一致するなら読み込みます。
+     * @param elem 要素
+     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
+     *          一致しなければ null を返します。
+     */
+    private StoryElement loadEventExtraGroupIfMathces(Element elem) {
+        final String[] eventLocalNames = {
+            SchemaConstants.LN_JUDGE, SchemaConstants.LN_GUARD,
+            SchemaConstants.LN_ASSAULT,
+        };
+        return loadEventIfMatches(elem, eventLocalNames, EventFamily.EXTRA);        
+    }
+
+    /**
+     * 指定された要素がイベント要素に一致するなら読み込みます。
+     * @param elem 要素
+     * @param eventLocalNames 一致するイベントのローカル名の配列
+     * @param eventFamily 一致した場合に StoryElement にセットする EventFamily
+     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
+     *          一致しなければ null を返します。
+     */
+    private StoryElement loadEventIfMatches(Element elem, String[] eventLocalNames, EventFamily eventFamily) {
+        for (String localName : eventLocalNames) {
+            if (DomUtils.isMatchNode(elem, SchemaConstants.NS_ARCHIVE, localName)) {
+                BasicStoryEvent storyEvent = new BasicStoryEvent();
+                storyEvent.setEventFamily(eventFamily);
+                loadMessageLines(elem, storyEvent);
+                return storyEvent;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * talk 要素を読み込んで StoryElement を返します。
+     * @param talkElement talk 要素
+     * @return
+     */
+    private StoryElement loadTalk(Element talkElement) {
+        BasicTalk talk = new BasicTalk();
+        loadMessageLines(talkElement, talk);
+        
+        /* TODO: その他の情報も読み込む */
+        return talk;
+    }
+    
+    /**
+     * メッセージ行を読み込んで指定された StoryElement オブジェクトにセットします。
+     * @param elem メッセージを含む要素
+     * @param storyElement ここに読み込んだメッセージがセットされます。
+     */
+    private void loadMessageLines(Element elem, BasicStoryElement storyElement) {
+        List<String> messageLines = new ArrayList<String>();
+        Element liElem = DomUtils.searchSiblingElementForward(elem.getFirstChild(),
+                SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_LI);
+        while (liElem != null) {
+            /* TODO: これでは <rawdata> が入ったときにうまくいかない */
+            String line = liElem.getTextContent();
+            messageLines.add(line);
+            
+            liElem = DomUtils.searchSiblingElementForward(liElem.getNextSibling(),
+                    SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_LI);
+        }
+        storyElement.setMessageLines(messageLines);
     }
 }

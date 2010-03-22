@@ -128,4 +128,12 @@ public class BasicAvatar implements Avatar {
     public void setShortName(String shortName) {
         this.shortName = shortName;
     }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "BasicAvatar [shortName=" + shortName + "]";
+    }
 }

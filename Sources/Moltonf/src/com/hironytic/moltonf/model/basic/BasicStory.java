@@ -119,4 +119,12 @@ public class BasicStory implements Story {
     public void setVillageState(VillageState villageState) {
         this.villageState = villageState;
     }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "BasicStory [villageFullName=" + villageFullName + "]";
+    }
 }

@@ -35,13 +35,10 @@ import com.hironytic.moltonf.model.TalkType;
 /**
  * 基本的な Talk 実装
  */
-public class BasicTalk implements Talk {
+public class BasicTalk extends BasicStoryElement  implements Talk {
 
     /** 発言種別 */
     public TalkType talkType;
-    
-    /** 発言内容 */
-    public List<String> messageLines;
     
     /** 発言を行った人物 */
     public Avatar speaker;
@@ -58,14 +55,6 @@ public class BasicTalk implements Talk {
     @Override
     public Date getDate() {
         return date;
-    }
-
-    /**
-     * @see com.hironytic.moltonf.model.Talk#getMessageLines()
-     */
-    @Override
-    public List<String> getMessageLines() {
-        return messageLines;
     }
 
     /**
@@ -101,14 +90,6 @@ public class BasicTalk implements Talk {
     }
 
     /**
-     * messageLines をセットします。
-     * @param messageLines セットしたい messageLines の値
-     */
-    public void setMessageLines(List<String> messageLines) {
-        this.messageLines = messageLines;
-    }
-
-    /**
      * speaker をセットします。
      * @param speaker セットしたい speaker の値
      */
@@ -130,5 +111,27 @@ public class BasicTalk implements Talk {
      */
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final int maxLen = 3;
+        StringBuilder builder = new StringBuilder();
+        builder.append("BasicTalk [");
+        if (speaker != null) {
+            builder.append("speaker=");
+            builder.append(speaker);
+            builder.append(", ");
+        }
+        if (getMessageLines() != null) {
+            builder.append("getMessageLines()=");
+            builder.append(getMessageLines().subList(0,
+                    Math.min(getMessageLines().size(), maxLen)));
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }

@@ -31,7 +31,7 @@ import com.hironytic.moltonf.model.StoryEvent;
 /**
  * 基本的な StoryEvent 実装
  */
-public class BasicStoryEvent implements StoryEvent {
+public class BasicStoryEvent extends BasicStoryElement implements StoryEvent {
 
     /** イベントの種別 */
     private EventFamily eventFamily;
@@ -56,5 +56,27 @@ public class BasicStoryEvent implements StoryEvent {
      */
     public void setEventFamily(EventFamily eventFamily) {
         this.eventFamily = eventFamily;
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final int maxLen = 3;
+        StringBuilder builder = new StringBuilder();
+        builder.append("BasicStoryEvent [");
+        if (eventFamily != null) {
+            builder.append("eventFamily=");
+            builder.append(eventFamily);
+            builder.append(", ");
+        }
+        if (getMessageLines() != null) {
+            builder.append("getMessageLines()=");
+            builder.append(getMessageLines().subList(0,
+                    Math.min(getMessageLines().size(), maxLen)));
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }
