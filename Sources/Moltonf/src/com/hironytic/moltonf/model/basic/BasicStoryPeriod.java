@@ -23,32 +23,41 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf.util;
+package com.hironytic.moltonf.model.basic;
 
-import org.w3c.dom.Node;
+import java.util.List;
+
+import com.hironytic.moltonf.model.StoryElement;
+import com.hironytic.moltonf.model.StoryPeriod;
 
 /**
- * DOM 関連のユーティリティ
+ * 基本的な StoryPeriod 実装。
  */
-public class DomUtils {
-    private DomUtils() {
+public class BasicStoryPeriod implements StoryPeriod {
+
+    /** このストーリーを構成する要素の一覧 */
+    private List<StoryElement> storyElements;
+    
+    /**
+     * コンストラクタ
+     */
+    public BasicStoryPeriod() {
+        
+    }
+    
+    /**
+     * @see com.hironytic.moltonf.model.StoryPeriod#getStoryElements()
+     */
+    @Override
+    public List<StoryElement> getStoryElements() {
+        return storyElements;
     }
 
     /**
-     * 指定した名前空間 URI、ローカル名に一致する兄弟ノードを前方方向へ探します。
-     * @param node 探し始める開始点となるノード。条件を満たせばこのノードが返ることもあります。
-     * @param namespaceUri 名前空間 URI
-     * @param localName ローカル名
-     * @return 見つかったノード。見つからなければ null。
+     * storyElements をセットします。
+     * @param storyElements セットしたい storyElements の値
      */
-    public static Node searchSiblingForward(Node node, String namespaceUri, String localName) {
-        while (node != null) {
-            if (SmartUtils.equals(node.getNamespaceURI(), namespaceUri) &&
-                    SmartUtils.equals(node.getLocalName(), localName)) {
-                break;
-            }
-            node = node.getNextSibling();
-        }
-        return node;
+    public void setStoryElements(List<StoryElement> storyElements) {
+        this.storyElements = storyElements;
     }
 }

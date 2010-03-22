@@ -34,15 +34,12 @@ import com.hironytic.moltonf.model.StoryPeriod;
 import com.hironytic.moltonf.model.VillageState;
 
 /**
- * Story を実装した基本的なクラス。
+ * 基本的な Story 実装。
  */
 public class BasicStory implements Story {
 
     /** 登場人物のリスト */
     private List<Avatar> avatarList;
-    
-    /** ベース URI */
-    private URI baseUri;
     
     /** この Story に含まれる StoryPeriod のリスト */
     private List<StoryPeriod> periods;
@@ -65,14 +62,6 @@ public class BasicStory implements Story {
     @Override
     public List<Avatar> getAvatarList() {
         return avatarList;
-    }
-
-    /**
-     * @see com.hironytic.moltonf.model.Story#getBaseUri()
-     */
-    @Override
-    public URI getBaseUri() {
-        return baseUri;
     }
 
     /**
@@ -105,14 +94,6 @@ public class BasicStory implements Story {
      */
     public void setAvatarList(List<Avatar> avatarList) {
         this.avatarList = avatarList;
-    }
-
-    /**
-     * baseUri をセットします。
-     * @param baseUri セットしたい baseUri の値
-     */
-    public void setBaseUri(URI baseUri) {
-        this.baseUri = baseUri;
     }
 
     /**

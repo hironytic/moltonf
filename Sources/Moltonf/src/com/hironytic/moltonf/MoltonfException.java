@@ -23,32 +23,39 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf.util;
-
-import org.w3c.dom.Node;
+package com.hironytic.moltonf;
 
 /**
- * DOM 関連のユーティリティ
+ * Moltonf アプリケーション固有の例外クラス
  */
-public class DomUtils {
-    private DomUtils() {
+@SuppressWarnings("serial")
+public class MoltonfException extends Exception {
+
+    /**
+     * 
+     */
+    public MoltonfException() {
     }
 
     /**
-     * 指定した名前空間 URI、ローカル名に一致する兄弟ノードを前方方向へ探します。
-     * @param node 探し始める開始点となるノード。条件を満たせばこのノードが返ることもあります。
-     * @param namespaceUri 名前空間 URI
-     * @param localName ローカル名
-     * @return 見つかったノード。見つからなければ null。
+     * @param message
      */
-    public static Node searchSiblingForward(Node node, String namespaceUri, String localName) {
-        while (node != null) {
-            if (SmartUtils.equals(node.getNamespaceURI(), namespaceUri) &&
-                    SmartUtils.equals(node.getLocalName(), localName)) {
-                break;
-            }
-            node = node.getNextSibling();
-        }
-        return node;
+    public MoltonfException(String message) {
+        super(message);
+    }
+
+    /**
+     * @param cause
+     */
+    public MoltonfException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public MoltonfException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

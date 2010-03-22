@@ -47,12 +47,6 @@ public interface Story {
     public List<Avatar> getAvatarList();
 
     /**
-     * ストーリー中で扱う相対 URI のベース URI を返します。
-     * @return ベース URI
-     */
-    public URI getBaseUri();
-
-    /**
      * 村のフルネームを返します。
      * @return 村のフルネーム
      */

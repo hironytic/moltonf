@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.model;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,13 +45,21 @@ public interface Talk extends StoryElement {
      */
     public List<String> getMessageLines();
 
-    /* TODO: 発言した人 */
+    /**
+     * 発言を行った人物を返します。
+     * @return 発言を行った人物。
+     */
+    public Avatar getSpeaker();
 
-    /* TODO: 発言時刻 */
+    /**
+     * 発言時刻を返します。
+     * @return 発言時刻。
+     */
+    public Date getDate();
 
-    /* TODO: 発言回数 */
+    /**
+     * 発言回数を返します。
+     * 発言回数は、発言を行った人物ごと、1 つの StoryPeriod ごとに存在します。
+     */
     public int getTalkCount();
-
-
-
 }

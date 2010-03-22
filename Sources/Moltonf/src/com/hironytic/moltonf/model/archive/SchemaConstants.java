@@ -36,6 +36,15 @@ public class SchemaConstants {
     /** 共通アーカイブ基盤用スキーマの名前空間URI */
     public static final String NS_TNS = "http://jindolf.sourceforge.jp/xml/ns/401";
 
+    /* 
+     * --------------------------------------------------
+     * tns:village
+     * --------------------------------------------------
+     */
+    
+    /** tns:village 要素のローカル名 */
+    public static final String LN_VILLAGE = "village";
+    
     /** xml:base 属性のローカル名 */
     public static final String LN_BASE = "base";
 
@@ -57,9 +66,33 @@ public class SchemaConstants {
     /** 村の進行状態: ゲーム終了 */
     public static final String VAL_VILLAGE_STATE_GAMEOVER = "gameover";
 
+    /* 
+     * --------------------------------------------------
+     * tns:avatarList
+     * --------------------------------------------------
+     */
+    
     /** tns:avatarList 要素のローカル名 */
     public static final String LN_AVATAR_LIST = "avatarList";
 
+    /* 
+     * --------------------------------------------------
+     * tns:avatar
+     * --------------------------------------------------
+     */
+    
     /** tns:avatar 要素のローカル名 */
     public static final String LN_AVATAR = "avatar";
+    
+    /** avatarId 属性のローカル名 */
+    public static final String LN_AVATAR_ID = "avatarId";
+    
+    /** fullName 属性のローカル名 */
+    public static final String LN_FULL_NAME = "fullName";
+    
+    /** shortName 属性のローカル名 */
+    public static final String LN_SHORT_NAME = "shortName";
+    
+    /** faceIconURI 属性のローカル名 */
+    public static final String LN_FACE_ICON_URI = "faceIconURI";
 }

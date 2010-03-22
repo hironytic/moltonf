@@ -25,10 +25,17 @@
 
 package com.hironytic.moltonf.model;
 
+import java.util.List;
+
 /**
  * ストーリー中の1単位期間のデータを保持するインタフェースです。
  * 通常1日（夜明け～夜明け）分の期間を表します。
  */
 public interface StoryPeriod {
 
+    /**
+     * ストーリーを構成する要素のリストを取得します。
+     * @return ストーリーを構成している要素たち
+     */
+    public List<StoryElement> getStoryElements();
 }
