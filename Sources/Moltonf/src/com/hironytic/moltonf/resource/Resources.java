@@ -23,39 +23,27 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf;
+package com.hironytic.moltonf.resource;
+
+import java.util.ListResourceBundle;
 
 /**
- * Moltonf アプリケーション固有の例外クラス
+ * Moltonf のローカライズ向けリソース。
+ * 
+ * 今のところ Moltonf のローカライズ対応は考えていません。
+ * 将来、対応しようと思ったときのために ResourceBundle を
+ * 使うようにだけする目的でこのクラスを用意しています。
  */
-@SuppressWarnings("serial")
-public class MoltonfException extends RuntimeException {
+public class Resources extends ListResourceBundle {
 
     /**
-     * 
+     * @see java.util.ListResourceBundle#getContents()
      */
-    public MoltonfException() {
+    @Override
+    protected Object[][] getContents() {
+        return new Object[][] {
+            {"app.title", "Moltonf"},
+        };
     }
 
-    /**
-     * @param message
-     */
-    public MoltonfException(String message) {
-        super(message);
-    }
-
-    /**
-     * @param cause
-     */
-    public MoltonfException(Throwable cause) {
-        super(cause);
-    }
-
-    /**
-     * @param message
-     * @param cause
-     */
-    public MoltonfException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

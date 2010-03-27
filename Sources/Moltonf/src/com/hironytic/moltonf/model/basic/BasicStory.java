@@ -25,7 +25,6 @@
 
 package com.hironytic.moltonf.model.basic;
 
-import java.net.URI;
 import java.util.List;
 
 import com.hironytic.moltonf.model.Avatar;

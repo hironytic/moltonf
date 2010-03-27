@@ -201,6 +201,27 @@ public class SchemaConstants {
     /** talk 要素のローカル名 */
     public static final String LN_TALK = "talk";
     
+    /** type 属性のローカル名 */
+    public static final String LN_TYPE = "type";
+
+    /** 発言種別：白発言 */
+    public static final String VAL_TALK_TYPE_PUBLIC = "public";
+    
+    /** 発言種別：赤発言 */
+    public static final String VAL_TALK_TYPE_WOLF = "wolf";
+    
+    /** 発言種別：灰発言 */
+    public static final String VAL_TALK_TYPE_PRIVATE = "private";
+    
+    /** 発言種別：青発言 */
+    public static final String VAL_TALK_TYPE_GRAVE = "grave";
+    
+    /** avatarId 属性のローカル名 */
+    //public static final String LN_AVATAR_ID = "avatarId";     // 既に定義されているので省略
+    
+    /** time 属性のローカル名 */
+    public static final String LN_TIME = "time";
+    
     /* 
      * --------------------------------------------------
      * li

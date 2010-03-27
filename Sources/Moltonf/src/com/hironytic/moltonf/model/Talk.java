@@ -25,8 +25,7 @@
 
 package com.hironytic.moltonf.model;
 
-import java.util.Date;
-import java.util.List;
+import com.hironytic.moltonf.util.TimePart;
 
 /**
  * 発言を表すインタフェースです。
@@ -49,7 +48,7 @@ public interface Talk extends StoryElement {
      * 発言時刻を返します。
      * @return 発言時刻。
      */
-    public Date getDate();
+    public TimePart getTime();
 
     /**
      * 発言回数を返します。

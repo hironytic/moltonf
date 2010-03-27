@@ -26,14 +26,21 @@
 package com.hironytic.moltonf;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ResourceBundle;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
+import com.hironytic.moltonf.view.MainFrame;
 
 /**
  * Moltonf アプリケーションのスタートアップクラス
@@ -54,9 +61,31 @@ public class Moltonf {
             String path = args[0];
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
             docBuilderFactory.setNamespaceAware(true);
+            docBuilderFactory.setValidating(false);
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+            docBuilder.setEntityResolver(new EntityResolver() {
+                @Override
+                public InputSource resolveEntity(String publicId, String systemId)
+                        throws SAXException, IOException {
+                    if ("http://jindolf.sourceforge.jp/xml/dtd/bbsArchive-091001.dtd".equals(systemId)) {
+                        InputSource source = new InputSource(new FileInputStream("/home/hiron/develop/Moltonf/EclipseWorkspace/資料/共通アーカイブ基盤整備計画/bbsArchive-091001.dtd"));
+                        source.setPublicId(publicId);
+                        source.setSystemId(systemId);
+                        return source;
+                    }
+                    return null;
+                }
+            });
             Document doc = docBuilder.parse(new File(path));
             Story story = ArchivedStoryLoader.load(doc);
+            
+            //test
+            ResourceBundle res = ResourceBundle.getBundle("com.hironytic.moltonf.resource.Resources");
+            String title = res.getString("app.title");
+            //test
+            
+            MainFrame mainFrame = new MainFrame();
+            mainFrame.setVisible(true);
             
             return;
         } catch (Exception e) {

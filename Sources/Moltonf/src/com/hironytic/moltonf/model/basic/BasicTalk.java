@@ -25,12 +25,10 @@
 
 package com.hironytic.moltonf.model.basic;
 
-import java.util.Date;
-import java.util.List;
-
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
+import com.hironytic.moltonf.util.TimePart;
 
 /**
  * 基本的な Talk 実装
@@ -38,25 +36,17 @@ import com.hironytic.moltonf.model.TalkType;
 public class BasicTalk extends BasicStoryElement  implements Talk {
 
     /** 発言種別 */
-    public TalkType talkType;
+    private TalkType talkType;
     
     /** 発言を行った人物 */
-    public Avatar speaker;
+    private Avatar speaker;
     
     /** 発言回数 */
-    public int talkCount;
+    private int talkCount;
     
     /** 発言時刻 */
-    public Date date;
+    private TimePart time;
     
-    /**
-     * @see com.hironytic.moltonf.model.Talk#getDate()
-     */
-    @Override
-    public Date getDate() {
-        return date;
-    }
-
     /**
      * @see com.hironytic.moltonf.model.Talk#getSpeaker()
      */
@@ -82,6 +72,14 @@ public class BasicTalk extends BasicStoryElement  implements Talk {
     }
 
     /**
+     * @see com.hironytic.moltonf.model.Talk#getTime()
+     */
+    @Override
+    public TimePart getTime() {
+        return time;
+    }
+
+    /**
      * talkType をセットします。
      * @param talkType セットしたい talkType の値
      */
@@ -104,13 +102,13 @@ public class BasicTalk extends BasicStoryElement  implements Talk {
     public void setTalkCount(int talkCount) {
         this.talkCount = talkCount;
     }
-
+    
     /**
-     * date をセットします。
-     * @param date セットしたい date の値
+     * time をセットします。
+     * @param time セットしたい time の値
      */
-    public void setDate(Date date) {
-        this.date = date;
+    public void setTime(TimePart time) {
+        this.time = time;
     }
 
     /**
@@ -124,6 +122,11 @@ public class BasicTalk extends BasicStoryElement  implements Talk {
         if (speaker != null) {
             builder.append("speaker=");
             builder.append(speaker);
+            builder.append(", ");
+        }
+        if (time != null) {
+            builder.append("time=");
+            builder.append(time);
             builder.append(", ");
         }
         if (getMessageLines() != null) {

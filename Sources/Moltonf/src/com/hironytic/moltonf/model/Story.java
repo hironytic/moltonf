@@ -25,7 +25,6 @@
 
 package com.hironytic.moltonf.model;
 
-import java.net.URI;
 import java.util.List;
 
 /**

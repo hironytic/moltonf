@@ -32,7 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.validation.Schema;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,14 +47,16 @@ import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.StoryElement;
 import com.hironytic.moltonf.model.StoryPeriod;
+import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.model.VillageState;
-import com.hironytic.moltonf.model.basic.BasicStoryElement;
 import com.hironytic.moltonf.model.basic.BasicAvatar;
 import com.hironytic.moltonf.model.basic.BasicStory;
+import com.hironytic.moltonf.model.basic.BasicStoryElement;
 import com.hironytic.moltonf.model.basic.BasicStoryEvent;
 import com.hironytic.moltonf.model.basic.BasicStoryPeriod;
 import com.hironytic.moltonf.model.basic.BasicTalk;
 import com.hironytic.moltonf.util.DomUtils;
+import com.hironytic.moltonf.util.TimePart;
 
 /**
  * 共通アーカイブ基盤のプレイデータアーカイブ用スキーマの XML を読み込んで Story を得るためのクラス
@@ -85,6 +90,9 @@ public class ArchivedStoryLoader {
     /** 登場人物の識別子から Avatar オブジェクトを得るマップ */
     private Map<String, Avatar> avatarMap;
     
+    /** DatatypeFactory インスタンス */
+    private DatatypeFactory datatypeFactory = null;
+    
     /**
      * コンストラクタ
      * 外部からはインスタンスを生成できません。
@@ -95,9 +103,8 @@ public class ArchivedStoryLoader {
     
     /**
      * 実際に読み込みを行うメイン処理です。
-     * @throws MoltonfException 読み込みに失敗した場合
      */
-    private void doLoad() throws MoltonfException {
+    private void doLoad() {
         story = new BasicStory();
         
         // ドキュメントのベース URI
@@ -330,9 +337,36 @@ public class ArchivedStoryLoader {
      */
     private StoryElement loadTalk(Element talkElement) {
         BasicTalk talk = new BasicTalk();
+        
+        // メッセージ
         loadMessageLines(talkElement, talk);
         
-        /* TODO: その他の情報も読み込む */
+        // 発言種別
+        TalkType talkType = null;
+        String talkTypeString = talkElement.getAttributeNS(null, SchemaConstants.LN_TYPE);
+        if (SchemaConstants.VAL_TALK_TYPE_PUBLIC.equals(talkTypeString)) {
+            talkType = TalkType.PUBLIC;
+        } else if (SchemaConstants.VAL_TALK_TYPE_WOLF.equals(talkTypeString)) {
+            talkType = TalkType.WOLF;
+        } else if (SchemaConstants.VAL_TALK_TYPE_PRIVATE.equals(talkTypeString)) {
+            talkType = TalkType.PRIVATE;
+        } else if (SchemaConstants.VAL_TALK_TYPE_GRAVE.equals(talkTypeString)) {
+            talkType = TalkType.GRAVE;
+        }
+        talk.setTalkType(talkType);
+        
+        // 発言人物
+        String avatarId = talkElement.getAttributeNS(null, SchemaConstants.LN_AVATAR_ID);
+        Avatar avatar = avatarMap.get(avatarId);
+        talk.setSpeaker(avatar);
+        
+        // TODO: 発言回数
+        
+        // 発言時刻
+        String timeString = talkElement.getAttributeNS(null, SchemaConstants.LN_TIME);
+        TimePart timePart = parseTime(timeString);
+        talk.setTime(timePart);
+        
         return talk;
     }
     
@@ -355,4 +389,39 @@ public class ArchivedStoryLoader {
         }
         storyElement.setMessageLines(messageLines);
     }
+
+    private TimePart parseTime(String timeString) {
+        if (datatypeFactory == null) {
+            try {
+                datatypeFactory = DatatypeFactory.newInstance();
+            } catch (DatatypeConfigurationException ex) {
+                throw new MoltonfException(ex);
+            }
+        }
+        
+        XMLGregorianCalendar xmlCalendar;
+        try {
+            xmlCalendar = datatypeFactory.newXMLGregorianCalendar(timeString);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+        
+        int hour = xmlCalendar.getHour();
+        if (hour == DatatypeConstants.FIELD_UNDEFINED) {
+            hour = 0;
+        }
+        int minute = xmlCalendar.getMinute();
+        if (minute == DatatypeConstants.FIELD_UNDEFINED) {
+            minute = 0;
+        }
+        int second = xmlCalendar.getSecond();
+        if (second == DatatypeConstants.FIELD_UNDEFINED) {
+            second = 0;
+        }
+        int millisecond = xmlCalendar.getMillisecond();
+        if (millisecond == DatatypeConstants.FIELD_UNDEFINED) {
+            millisecond = 0;
+        }
+        return new TimePart(hour, minute, second, millisecond);
+    }    
 }
