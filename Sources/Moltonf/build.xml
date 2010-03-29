@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Ant Build File for Moltonf
+-->
+<project name="Moltonf" default="compile">
+    <description>
+            description
+    </description>
+
+    <!-- ================================= 
+          target: compile              
+         ================================= -->
+    <target name="compile" description="compile">
+        
+    </target>
+
+</project>
