@@ -25,25 +25,21 @@
 
 package com.hironytic.moltonf;
 
+import java.awt.BorderLayout;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ResourceBundle;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.hironytic.moltonf.model.Story;
+import com.hironytic.moltonf.model.StoryElement;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
-import com.hironytic.moltonf.resource.Resources;
 import com.hironytic.moltonf.view.MainFrame;
+import com.hironytic.moltonf.view.MessagePanel;
 
 /**
  * Moltonf アプリケーションのスタートアップクラス
@@ -75,7 +71,14 @@ public class Moltonf {
             String title = res.getString("app.title");
             //test
             
+            StoryElement storyElement = story.getPeriods().get(0).getStoryElements().get(20);
+            MessagePanel panel = new MessagePanel(storyElement);
+            panel.setSize(200, 400);
+            
             MainFrame mainFrame = new MainFrame();
+            mainFrame.add(panel, BorderLayout.CENTER);
+            //mainFrame.pack();
+            mainFrame.setBounds(100, 100, 300, 200);
             mainFrame.setVisible(true);
             
             return;
