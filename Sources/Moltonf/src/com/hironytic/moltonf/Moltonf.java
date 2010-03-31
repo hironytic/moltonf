@@ -66,22 +66,21 @@ public class Moltonf {
             Document doc = docBuilder.parse(new File(path));
             Story story = ArchivedStoryLoader.load(doc);
             
-            //test
             ResourceBundle res = ResourceBundle.getBundle("com.hironytic.moltonf.resource.Resources");
             String title = res.getString("app.title");
-            //test
-            
+
             StoryElement storyElement = story.getPeriods().get(0).getStoryElements().get(20);
             MessagePanel panel = new MessagePanel(storyElement);
             panel.setSize(200, 400);
             
             MainFrame mainFrame = new MainFrame();
+            mainFrame.setTitle(title);
+            mainFrame.setLocationByPlatform(true);
             mainFrame.add(panel, BorderLayout.CENTER);
-            //mainFrame.pack();
+            mainFrame.pack();
             mainFrame.setBounds(100, 100, 300, 200);
             mainFrame.setVisible(true);
             
-            return;
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

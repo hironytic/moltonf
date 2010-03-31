@@ -88,7 +88,7 @@ public class MessagePanel extends JPanel {
             return;
         
         textLayouts = new ArrayList<TextLayout>();
-        Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+        Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 12);
         for (String line : storyElement.getMessageLines()) {
             AttributedString attributedString = new AttributedString(line);
             attributedString.addAttribute(TextAttribute.FONT, font);
