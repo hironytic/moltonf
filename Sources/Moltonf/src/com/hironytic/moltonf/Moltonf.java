@@ -76,9 +76,12 @@ public class Moltonf {
             MainFrame mainFrame = new MainFrame();
             mainFrame.setTitle(title);
             mainFrame.setLocationByPlatform(true);
+            
             mainFrame.add(panel, BorderLayout.CENTER);
             mainFrame.pack();
+            panel.updateLayout();
             mainFrame.setBounds(100, 100, 300, 200);
+            
             mainFrame.setVisible(true);
             
         } catch (Exception e) {

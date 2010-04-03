@@ -61,30 +61,11 @@ public class MessagePanel extends JPanel {
     }
 
     /**
-     * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+     * レイアウトの更新を行います。
      */
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        Graphics2D g2 = (Graphics2D)g;
-        
-        readyTextLayouts(g2);
-
-        float top = 0;
-        for (TextLayout lineLayout : textLayouts) {
-            top += lineLayout.getAscent();
-            lineLayout.draw(g2, 0, top);
-            top += lineLayout.getDescent() + lineLayout.getLeading();
-        }
-    }
-    
-    /**
-     * 各行の TextLayout が作成されていなければ作成します。
-     * @param g2 Graphics2D オブジェクト
-     */
-    private void readyTextLayouts(Graphics2D g2) {
-        if (textLayouts != null)
+    public void updateLayout() {
+        Graphics2D g2 = (Graphics2D)getGraphics();
+        if (g2 == null)
             return;
         
         textLayouts = new ArrayList<TextLayout>();
@@ -102,4 +83,23 @@ public class MessagePanel extends JPanel {
             }
         }
     }
+    
+    /**
+     * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+     */
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D)g;
+        
+        if (textLayouts != null) {
+            float top = 0;
+            for (TextLayout lineLayout : textLayouts) {
+                top += lineLayout.getAscent();
+                lineLayout.draw(g2, 0, top);
+                top += lineLayout.getDescent() + lineLayout.getLeading();
+            }
+        }
+    }    
 }
