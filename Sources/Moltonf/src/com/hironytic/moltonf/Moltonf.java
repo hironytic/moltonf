@@ -26,6 +26,7 @@
 package com.hironytic.moltonf;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.io.File;
 import java.util.ResourceBundle;
 
@@ -36,10 +37,12 @@ import org.w3c.dom.Document;
 
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.StoryElement;
+import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.MessagePanel;
+import com.hironytic.moltonf.view.TalkPanel;
 
 /**
  * Moltonf アプリケーションのスタートアップクラス
@@ -70,8 +73,9 @@ public class Moltonf {
             String title = res.getString("app.title");
 
             StoryElement storyElement = story.getPeriods().get(0).getStoryElements().get(20);
-            MessagePanel panel = new MessagePanel(storyElement);
-            panel.setSize(200, 400);
+            MessagePanel panel = new TalkPanel((Talk) storyElement);
+            Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);
+            panel.setMessageFont(font);
             
             MainFrame mainFrame = new MainFrame();
             mainFrame.setTitle(title);
@@ -79,8 +83,9 @@ public class Moltonf {
             
             mainFrame.add(panel, BorderLayout.CENTER);
             mainFrame.pack();
-            panel.updateLayout();
-            mainFrame.setBounds(100, 100, 300, 200);
+            panel.setSize(200, 400);
+            panel.updateView();
+            mainFrame.setBounds(100, 100, 300, 400);
             
             mainFrame.setVisible(true);
             
