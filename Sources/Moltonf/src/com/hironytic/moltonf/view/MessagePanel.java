@@ -72,6 +72,14 @@ public abstract class MessagePanel extends JPanel {
     }
 
     /**
+     * storyElement を取得します。
+     * @return storyElement を返します。
+     */
+    public StoryElement getStoryElement() {
+        return storyElement;
+    }
+
+    /**
      * メッセージを表示するためのフォントを取得します。
      * @return messageFont を返します。
      */

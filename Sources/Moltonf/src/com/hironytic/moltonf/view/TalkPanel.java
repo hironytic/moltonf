@@ -27,14 +27,18 @@ package com.hironytic.moltonf.view;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.geom.Point2D.Float;
 
 import com.hironytic.moltonf.model.Talk;
 
 /**
- * 
+ * 会話の表示を担当するパネル
  */
+@SuppressWarnings("serial")
 public class TalkPanel extends MessagePanel {
 
     /** メッセージの左の余白 */
@@ -52,11 +56,32 @@ public class TalkPanel extends MessagePanel {
     /** メッセージ領域の左端 */
     private static float MESSAGE_LEFT = 56;
     
-    /** メッセージの背景色 */
-    private static Color MESSAGE_BACKGROUND_COLOR = Color.WHITE;
+    /** メッセージの角を描画するときの半径 */
+    private static float MESSAGE_CORNER_RADIUS = 5;
     
-    /** メッセージの文字色 */
-    private static Color MESSAGE_FORE_COLOR = Color.BLACK;
+    /** 通常メッセージの背景色 */
+    private static Color MESSAGE_BG_COLOR_PUBLIC = new Color(0xffffff);
+    
+    /** 通常メッセージの文字色 */
+    private static Color MESSAGE_TEXT_COLOR_PUBLIC = new Color(0x000000);
+
+    /** 狼メッセージの背景色 */
+    private static Color MESSAGE_BG_COLOR_WOLF = new Color(0xff7777);
+    
+    /** 狼メッセージの文字色 */
+    private static Color MESSAGE_TEXT_COLOR_WOLF = new Color(0x000000);
+
+    /** 独り言メッセージの背景色 */
+    private static Color MESSAGE_BG_COLOR_PRIVATE = new Color(0x939393);
+    
+    /** 独り言メッセージの文字色 */
+    private static Color MESSAGE_TEXT_COLOR_PRIVATE = new Color(0x000000);
+
+    /** 墓下メッセージの背景色 */
+    private static Color MESSAGE_BG_COLOR_GRAVE = new Color(0x9fb7cf);
+    
+    /** 墓下メッセージの文字色 */
+    private static Color MESSAGE_TEXT_COLOR_GRAVE = new Color(0x000000);
     
     /**
      * コンストラクタ
@@ -64,6 +89,14 @@ public class TalkPanel extends MessagePanel {
      */
     public TalkPanel(Talk talk) {
         super(talk);
+    }
+
+    /**
+     * このパネルが表示している Talk オブジェクトを返します。
+     * @return Talk オブジェクト
+     */
+    public Talk getTalk() {
+        return (Talk)getStoryElement();
     }
     
     /**
@@ -89,29 +122,77 @@ public class TalkPanel extends MessagePanel {
      */
     @Override
     protected Color getMessageTextColor() {
-        return MESSAGE_FORE_COLOR;
+        Color color = null;
+        switch (getTalk().getTalkType()) {
+        case PUBLIC:
+            color = MESSAGE_TEXT_COLOR_PUBLIC;
+            break;
+        case WOLF:
+            color = MESSAGE_TEXT_COLOR_WOLF;
+            break;
+        case PRIVATE:
+            color = MESSAGE_TEXT_COLOR_PRIVATE;
+            break;
+        case GRAVE:
+            color = MESSAGE_TEXT_COLOR_GRAVE;
+            break;
+        }
+        return color;
     }
 
-    /* (non-Javadoc)
+    /**
+     * メッセージの背景色を返します。
+     * @return メッセージの背景色
+     */
+    private Color getMessageBackgroundColor() {
+        Color color = null;
+        switch (getTalk().getTalkType()) {
+        case PUBLIC:
+            color = MESSAGE_BG_COLOR_PUBLIC;
+            break;
+        case WOLF:
+            color = MESSAGE_BG_COLOR_WOLF;
+            break;
+        case PRIVATE:
+            color = MESSAGE_BG_COLOR_PRIVATE;
+            break;
+        case GRAVE:
+            color = MESSAGE_BG_COLOR_GRAVE;
+            break;
+        }
+        return color;
+    }
+    
+    /**
      * @see com.hironytic.moltonf.view.MessagePanel#paintMessageBackground(java.awt.Graphics)
      */
     @Override
     protected void paintMessageBackground(Graphics g) {
-        Color oldColor = g.getColor();
+        Rectangle2D.Float messageAreaRect = getMessageAreaRect();
+        Rectangle2D.Float drawRect = new Rectangle2D.Float(
+                messageAreaRect.x - MESSAGE_PADDING_LEFT,
+                messageAreaRect.y - MESSAGE_PADDING_TOP,
+                messageAreaRect.width + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT,
+                messageAreaRect.height + MESSAGE_PADDING_TOP + MESSAGE_PADDING_BOTTOM);
+
+        Graphics2D g2d = (Graphics2D)g;
+        
+        Color oldColor = g2d.getColor();
+        Object oldAntialiasingHint = g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
         try {
-            g.setColor(MESSAGE_BACKGROUND_COLOR);
-            Rectangle2D.Float messageAreaRect = getMessageAreaRect();
-            g.fillRoundRect((int)(messageAreaRect.x - MESSAGE_PADDING_LEFT),
-                    (int)(messageAreaRect.y - MESSAGE_PADDING_TOP),
-                    (int)(messageAreaRect.width + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT),
-                    (int)(messageAreaRect.height + MESSAGE_PADDING_TOP + MESSAGE_PADDING_BOTTOM),
-                    16, 16);    // TODO: このあたりまだてきとー
+            g.setColor(getMessageBackgroundColor());
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+            g2d.fill(new RoundRectangle2D.Float(
+                    drawRect.x, drawRect.y,
+                    drawRect.width, drawRect.height,
+                    MESSAGE_CORNER_RADIUS * 2, MESSAGE_CORNER_RADIUS * 2));
         } finally {
-            g.setColor(oldColor);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasingHint);
+            g2d.setColor(oldColor);
         }
         
         super.paintMessageBackground(g);
     }
-    
     
 }

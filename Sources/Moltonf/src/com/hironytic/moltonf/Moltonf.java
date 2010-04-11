@@ -72,7 +72,7 @@ public class Moltonf {
             ResourceBundle res = ResourceBundle.getBundle("com.hironytic.moltonf.resource.Resources");
             String title = res.getString("app.title");
 
-            StoryElement storyElement = story.getPeriods().get(0).getStoryElements().get(20);
+            StoryElement storyElement = story.getPeriods().get(1).getStoryElements().get(22);
             MessagePanel panel = new TalkPanel((Talk) storyElement);
             Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);
             panel.setMessageFont(font);
@@ -83,7 +83,7 @@ public class Moltonf {
             
             mainFrame.add(panel, BorderLayout.CENTER);
             mainFrame.pack();
-            panel.setSize(200, 400);
+            panel.setSize(468, 400);
             panel.updateView();
             mainFrame.setBounds(100, 100, 300, 400);
             
