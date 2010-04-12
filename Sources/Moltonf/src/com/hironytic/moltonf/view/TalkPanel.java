@@ -26,9 +26,11 @@
 package com.hironytic.moltonf.view;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.geom.Point2D.Float;
@@ -193,6 +195,19 @@ public class TalkPanel extends MessagePanel {
         }
         
         super.paintMessageBackground(g);
+    }
+
+    /**
+     * @see com.hironytic.moltonf.view.MessagePanel#updateView()
+     */
+    @Override
+    public void updateView() {
+        super.updateView();
+        
+        Rectangle2D.Float messageAreaRect = getMessageAreaRect();
+        Dimension size = new Dimension((int)(messageAreaRect.width + MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT),
+                                       (int)(messageAreaRect.height + MESSAGE_PADDING_TOP + MESSAGE_PADDING_BOTTOM));
+        setPreferredSize(size);
     }
     
 }

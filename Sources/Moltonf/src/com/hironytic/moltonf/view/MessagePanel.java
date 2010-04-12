@@ -121,6 +121,9 @@ public abstract class MessagePanel extends JPanel {
         
         textLayouts = new ArrayList<TextLayout>();
         for (String line : storyElement.getMessageLines()) {
+            if (line.isEmpty()) {   // TODO:
+                line = "\n";
+            }
             AttributedString attributedString = new AttributedString(line);
             attributedString.addAttribute(TextAttribute.FONT, messageFont);
             attributedString.addAttribute(TextAttribute.BACKGROUND, Paint.TRANSLUCENT);
@@ -135,6 +138,8 @@ public abstract class MessagePanel extends JPanel {
                 messageAreaRect.height += getLineHeight(oneLineLayout);
             }
         }
+        
+        revalidate();
     }
     
     private float getLineHeight(TextLayout lineLayout) {

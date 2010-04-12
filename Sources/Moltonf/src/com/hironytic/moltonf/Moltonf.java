@@ -30,6 +30,7 @@ import java.awt.Font;
 import java.io.File;
 import java.util.ResourceBundle;
 
+import javax.swing.JScrollPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -42,6 +43,7 @@ import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.MessagePanel;
+import com.hironytic.moltonf.view.PeriodContentPanel;
 import com.hironytic.moltonf.view.TalkPanel;
 
 /**
@@ -72,20 +74,33 @@ public class Moltonf {
             ResourceBundle res = ResourceBundle.getBundle("com.hironytic.moltonf.resource.Resources");
             String title = res.getString("app.title");
 
-            StoryElement storyElement = story.getPeriods().get(1).getStoryElements().get(22);
-            MessagePanel panel = new TalkPanel((Talk) storyElement);
+//            StoryElement storyElement = story.getPeriods().get(1).getStoryElements().get(22);
+//            MessagePanel panel = new TalkPanel((Talk) storyElement);
             Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);
-            panel.setMessageFont(font);
+//            panel.setMessageFont(font);
             
             MainFrame mainFrame = new MainFrame();
             mainFrame.setTitle(title);
             mainFrame.setLocationByPlatform(true);
             
-            mainFrame.add(panel, BorderLayout.CENTER);
+            JScrollPane scrollPane = new JScrollPane();
+            mainFrame.add(scrollPane, BorderLayout.CENTER);
+            
             mainFrame.pack();
-            panel.setSize(468, 400);
-            panel.updateView();
-            mainFrame.setBounds(100, 100, 300, 400);
+            mainFrame.setBounds(100, 100, 500, 400);
+
+            PeriodContentPanel periodContent = new PeriodContentPanel();
+            periodContent.setFont(font);
+            scrollPane.setViewportView(periodContent);
+            
+            periodContent.setModel(story.getPeriods().get(1));
+            periodContent.updateView();
+
+//            mainFrame.add(panel, BorderLayout.CENTER);
+//            mainFrame.pack();
+//            panel.setSize(468, 400);
+//            panel.updateView();
+//            mainFrame.setBounds(100, 100, 500, 400);
             
             mainFrame.setVisible(true);
             
