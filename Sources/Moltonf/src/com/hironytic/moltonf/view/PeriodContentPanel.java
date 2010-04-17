@@ -149,10 +149,11 @@ public class PeriodContentPanel extends JPanel {
                 Talk talk = (Talk)element;
                 TalkType talkType = talk.getTalkType();
                 if (isMatchFilterOfTalk(talkType, displayFilters)) {
-                    TalkPanel talkPanel = new TalkPanel(talk);
-                    talkPanel.setSize(480, 200);    // TODO:
-                    talkPanel.setMessageFont(getFont());
-                    add(talkPanel);
+                    TalkView talkView = new TalkView();
+                    add(talkView);
+                    talkView.setTalk(talk);
+                    talkView.setAreaWidth(480); //TODO:
+                    talkView.setFont(getFont());
                 }
             } else if (element instanceof StoryEvent) {
                 // TODO: システムイベント
@@ -165,8 +166,8 @@ public class PeriodContentPanel extends JPanel {
      */
     public void updateView() {
         for (Component child : getComponents()) {
-            if (child instanceof TalkPanel) {   // TODO: 共通のインタフェースとかいる
-                ((TalkPanel)child).updateView();
+            if (child instanceof TalkView) {        // TODO: 共通のインタフェースとかいる
+                ((TalkView)child).updateView();
             }
         }
     }    

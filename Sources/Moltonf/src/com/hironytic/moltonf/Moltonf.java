@@ -37,14 +37,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 
 import com.hironytic.moltonf.model.Story;
-import com.hironytic.moltonf.model.StoryElement;
-import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
-import com.hironytic.moltonf.view.MessagePanel;
 import com.hironytic.moltonf.view.PeriodContentPanel;
-import com.hironytic.moltonf.view.TalkPanel;
 
 /**
  * Moltonf アプリケーションのスタートアップクラス
