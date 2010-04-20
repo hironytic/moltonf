@@ -40,7 +40,7 @@ import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
-import com.hironytic.moltonf.view.PeriodContentPanel;
+import com.hironytic.moltonf.view.PeriodContentView;
 
 /**
  * Moltonf アプリケーションのスタートアップクラス
@@ -85,11 +85,11 @@ public class Moltonf {
             mainFrame.pack();
             mainFrame.setBounds(100, 100, 500, 400);
 
-            PeriodContentPanel periodContent = new PeriodContentPanel();
+            PeriodContentView periodContent = new PeriodContentView();
             periodContent.setFont(font);
             scrollPane.setViewportView(periodContent);
             
-            periodContent.setModel(story.getPeriods().get(1));
+            periodContent.setStoryPeriod(story.getPeriods().get(1));
             periodContent.updateView();
 
 //            mainFrame.add(panel, BorderLayout.CENTER);

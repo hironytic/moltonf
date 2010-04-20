@@ -25,11 +25,15 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 
 import javax.swing.BoxLayout;
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 
 import com.hironytic.moltonf.model.StoryElement;
 import com.hironytic.moltonf.model.StoryEvent;
@@ -41,8 +45,11 @@ import com.hironytic.moltonf.model.TalkType;
  * 1単位期間分のストーリーの内容を表示するパネル
  */
 @SuppressWarnings("serial")
-public class PeriodContentPanel extends JPanel {
+public class PeriodContentView extends JComponent {
 
+    /** 背景色 */
+    private static Color BG_COLOR = new Color(0x000000);
+    
     /** フィルタリング定数：アナウンスイベント */
     public static int FILTER_EVENT_ANNOUNCE = 0x0001;
     
@@ -81,7 +88,7 @@ public class PeriodContentPanel extends JPanel {
      * コンストラクタ
      * @param storyPeriod パネルに表示する StoryPeriod オブジェクト
      */
-    public PeriodContentPanel() {
+    public PeriodContentView() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
 
@@ -89,8 +96,8 @@ public class PeriodContentPanel extends JPanel {
      * このパネルに表示する StoryPeriod オブジェクトをセットします。
      * @param storyPeriod パネルに表示する StoryPeriod オブジェクト
      */
-    public void setModel(StoryPeriod storyPeriod) {
-        setModel(storyPeriod, FILTER_ALL);
+    public void setStoryPeriod(StoryPeriod storyPeriod) {
+        setStoryPeriod(storyPeriod, FILTER_ALL);
     }
     
     /**
@@ -99,7 +106,7 @@ public class PeriodContentPanel extends JPanel {
      * @param displayFilters フィルタリング定数の組み合わせ。
      *                       指定したものが表示され、指定しなかったものが非表示になります。
      */
-    public void setModel(StoryPeriod storyPeriod, int displayFilter) {
+    public void setStoryPeriod(StoryPeriod storyPeriod, int displayFilter) {
         this.storyPeriod = storyPeriod;
         filterContent(displayFilter);
     }
@@ -152,7 +159,7 @@ public class PeriodContentPanel extends JPanel {
                     TalkView talkView = new TalkView();
                     add(talkView);
                     talkView.setTalk(talk);
-                    talkView.setAreaWidth(480); //TODO:
+                    talkView.setAreaWidth(500); //TODO:
                     talkView.setFont(getFont());
                 }
             } else if (element instanceof StoryEvent) {
@@ -170,5 +177,23 @@ public class PeriodContentPanel extends JPanel {
                 ((TalkView)child).updateView();
             }
         }
-    }    
+    }
+
+    /**
+     * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+     */
+    @Override
+    protected void paintComponent(Graphics g) {
+
+        Graphics2D g2d = (Graphics2D)g;
+        
+        Rectangle2D bounds = getBounds();
+        Rectangle2D paintRect = new Rectangle2D.Float();
+        Rectangle2D.intersect(bounds, g2d.getClipBounds(), paintRect);
+        
+        Color oldColor = g2d.getColor();
+        g2d.setColor(BG_COLOR);
+        g2d.fill(paintRect);
+        g2d.setColor(oldColor);
+    }
 }

@@ -46,6 +46,18 @@ import com.hironytic.moltonf.model.Talk;
 @SuppressWarnings("serial")
 public class TalkView extends JComponent {
 
+    /** ビューの左の余白 */
+    private static float VIEW_PADDING_LEFT = 16;
+    
+    /** ビューの右の余白 */
+    private static float VIEW_PADDING_RIGHT = 16;
+
+    /** ビューの上の余白 */
+    private static float VIEW_PADDING_TOP = 8;
+    
+    /** ビューの下の余白 */
+    private static float VIEW_PADDING_BOTTOM = 16;
+    
     /** メッセージの左の余白 */
     private static float MESSAGE_PADDING_LEFT = 12;
     
@@ -62,7 +74,7 @@ public class TalkView extends JComponent {
     private static float MESSAGE_LEFT = 56;
     
     /** メッセージの角を描画するときの半径 */
-    private static float MESSAGE_CORNER_RADIUS = 5;
+    private static float MESSAGE_CORNER_RADIUS = 8;
     
     /** 通常メッセージの背景色 */
     private static Color MESSAGE_BG_COLOR_PUBLIC = new Color(0xffffff);
@@ -94,6 +106,9 @@ public class TalkView extends JComponent {
     /** コンポーネントに必要な領域のサイズ */
     private Dimension2DFloat areaSize = new Dimension2DFloat();
     
+    /** 会話情報（発言者、発言時刻など）を表示する子コンポーネント */
+    private MessageComponent talkInfoComponent = new MessageComponent();
+    
     /** メッセージ領域を表示する子コンポーネント */
     private MessageComponent talkMessageComponent = new MessageComponent();
     
@@ -102,6 +117,7 @@ public class TalkView extends JComponent {
      * @param talk このパネルで表示する Talk オブジェクト
      */
     public TalkView() {
+        this.add(talkInfoComponent);
         this.add(talkMessageComponent);
     }
 
@@ -243,18 +259,22 @@ public class TalkView extends JComponent {
         
         // 発言
         talkMessageComponent.setMessage(talk.getMessageLines());
-        talkMessageComponent.updateLayout(areaSize.width - (MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT));
+        talkMessageComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT + VIEW_PADDING_RIGHT));
         Dimension2D messageAreaSize = talkMessageComponent.getAreaSize();
         Rectangle2D messageAreaRect = new Rectangle2D.Float(
-                MESSAGE_LEFT + MESSAGE_PADDING_LEFT,
-                MESSAGE_PADDING_TOP,   // TODO: 本当は発言者、発言時刻部分があるはず。
+                VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT,
+                VIEW_PADDING_TOP + MESSAGE_PADDING_TOP,   // TODO: 本当は発言者、発言時刻部分があるはず。
                 (float)messageAreaSize.getWidth(),
                 (float)messageAreaSize.getHeight());
         Rectangle messageAreaRectInt = new Rectangle();
         messageAreaRectInt.setRect(messageAreaRect);
         talkMessageComponent.setBounds(messageAreaRectInt);
         
-        areaSize.height += (float)messageAreaSize.getHeight() + MESSAGE_PADDING_TOP + MESSAGE_PADDING_BOTTOM;
+        areaSize.height += VIEW_PADDING_TOP +
+                           MESSAGE_PADDING_TOP +
+                           (float)messageAreaSize.getHeight() +
+                           MESSAGE_PADDING_BOTTOM +
+                           VIEW_PADDING_BOTTOM;
         
         Dimension size = new Dimension();
         size.setSize(areaSize);

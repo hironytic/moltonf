@@ -151,7 +151,7 @@ public class MessageComponent extends JComponent {
         float lineHeight = lineLayout.getAscent() +
         lineLayout.getDescent() +
         lineLayout.getLeading();
-        return lineHeight;  /* TODO: G国なら lineHeight * 1.5 */
+        return lineHeight * 1.3f;  /* TODO: G国なら lineHeight * 1.5 */
     }
     
     /**
