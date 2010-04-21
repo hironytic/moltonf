@@ -25,9 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -56,9 +54,6 @@ public class MessageComponent extends JComponent {
     /** 各行の TextLayout */
     private List<TextLayout> textLayouts = null;
     
-    /** メッセージを表示するためのフォント */
-    private Font messageFont = null;
-    
     /** メッセージ表示領域の矩形 */
     private Rectangle2D.Float messageAreaRect = new Rectangle2D.Float(0, 0, 0, 0);
 
@@ -79,23 +74,7 @@ public class MessageComponent extends JComponent {
         this.messageLines = messageLines;
     }
     
-    /**
-     * メッセージを表示するためのフォントを取得します。
-     * @return messageFont を返します。
-     */
-    public Font getMessageFont() {
-        return messageFont;
-    }
-
-    /**
-     * メッセージを表示するためのフォントをセットします。
-     * @param messageFont セットしたい messageFont の値
-     */
-    public void setMessageFont(Font messageFont) {
-        this.messageFont = messageFont;
-    }
-
-    /**
+   /**
      * コンポーネントに必要な領域のサイズを取得します。
      * @return コンポーネントに必要な領域のサイズを返します。
      */
@@ -122,7 +101,7 @@ public class MessageComponent extends JComponent {
                 AttributedString attributedString = new AttributedString(line);
                 attributedString.addAttribute(TextAttribute.FONT, getFont());
                 attributedString.addAttribute(TextAttribute.BACKGROUND, Paint.TRANSLUCENT);
-                attributedString.addAttribute(TextAttribute.FOREGROUND, Color.BLACK);   // TODO: 色
+                attributedString.addAttribute(TextAttribute.FOREGROUND, getForeground());
                 
                 AttributedCharacterIterator charItr = attributedString.getIterator();
                 FontRenderContext frContext = g2.getFontRenderContext();

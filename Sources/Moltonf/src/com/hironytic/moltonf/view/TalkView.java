@@ -35,6 +35,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.Collections;
 
 import javax.swing.JComponent;
 
@@ -75,6 +76,9 @@ public class TalkView extends JComponent {
     
     /** メッセージの角を描画するときの半径 */
     private static float MESSAGE_CORNER_RADIUS = 8;
+    
+    /** 情報テキスト (発言者、発言時刻など) の文字色 */
+    private static Color INFO_TEXT_COLOR = new Color(0xffffff);
     
     /** 通常メッセージの背景色 */
     private static Color MESSAGE_BG_COLOR_PUBLIC = new Color(0xffffff);
@@ -255,15 +259,30 @@ public class TalkView extends JComponent {
         
         areaSize.height = 0f;
         
-        // TODO: 発言者名など
+        String speakerName = talk.getSpeaker().getFullName();
+        talkInfoComponent.setMessage(Collections.singletonList(speakerName));  // TODO: 発言時刻や回数なども
+        talkInfoComponent.setForeground(INFO_TEXT_COLOR);
+        talkInfoComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + VIEW_PADDING_RIGHT));
+        Dimension2D infoAreaSize = talkInfoComponent.getAreaSize();
+        Rectangle2D infoAreaRect = new Rectangle2D.Float(
+                VIEW_PADDING_LEFT,
+                VIEW_PADDING_TOP,
+                (float)infoAreaSize.getWidth(),
+                (float)infoAreaSize.getHeight());
+        Rectangle infoAreaRectInt = new Rectangle();
+        infoAreaRectInt.setRect(infoAreaRect);
+        talkInfoComponent.setBounds(infoAreaRectInt);
+        
+        areaSize.height += (float)infoAreaSize.getHeight();
         
         // 発言
         talkMessageComponent.setMessage(talk.getMessageLines());
+        talkMessageComponent.setForeground(getMessageTextColor());
         talkMessageComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT + VIEW_PADDING_RIGHT));
         Dimension2D messageAreaSize = talkMessageComponent.getAreaSize();
         Rectangle2D messageAreaRect = new Rectangle2D.Float(
                 VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT,
-                VIEW_PADDING_TOP + MESSAGE_PADDING_TOP,   // TODO: 本当は発言者、発言時刻部分があるはず。
+                VIEW_PADDING_TOP + (float)infoAreaSize.getHeight() + MESSAGE_PADDING_TOP,
                 (float)messageAreaSize.getWidth(),
                 (float)messageAreaSize.getHeight());
         Rectangle messageAreaRectInt = new Rectangle();
