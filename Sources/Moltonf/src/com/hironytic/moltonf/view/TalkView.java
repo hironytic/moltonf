@@ -59,6 +59,9 @@ public class TalkView extends JComponent {
     /** ビューの下の余白 */
     private static float VIEW_PADDING_BOTTOM = 16;
     
+    /** メッセージの上のマージン */
+    private static float MESSAGE_MARGIN_TOP = 4;
+    
     /** メッセージの左の余白 */
     private static float MESSAGE_PADDING_LEFT = 12;
     
@@ -151,24 +154,6 @@ public class TalkView extends JComponent {
         areaSize.width = width;
     }
     
-//    /**
-//     * @see com.hironytic.moltonf.view.MessagePanel#getMessageAreaWidth()
-//     */
-//    @Override
-//    protected float getMessageAreaWidth() {
-//        return getWidth() - (MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT);
-//    }
-//
-//    /**
-//     * @see com.hironytic.moltonf.view.MessagePanel#getMessageAreaTopLeft(java.awt.geom.Point2D.Float)
-//     */
-//    @Override
-//    protected Float getMessageAreaTopLeft(Float pt) {
-//        pt.x = MESSAGE_LEFT + MESSAGE_PADDING_LEFT;
-//        pt.y = MESSAGE_PADDING_TOP;   // TODO: 本当は発言者、発言時刻部分があるはず。
-//        return pt;
-//    }
-
     /**
      * メッセージの文字色を返します。
      * @return 文字色
@@ -282,7 +267,7 @@ public class TalkView extends JComponent {
         Dimension2D messageAreaSize = talkMessageComponent.getAreaSize();
         Rectangle2D messageAreaRect = new Rectangle2D.Float(
                 VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT,
-                VIEW_PADDING_TOP + (float)infoAreaSize.getHeight() + MESSAGE_PADDING_TOP,
+                VIEW_PADDING_TOP + (float)infoAreaSize.getHeight() + MESSAGE_MARGIN_TOP + MESSAGE_PADDING_TOP,
                 (float)messageAreaSize.getWidth(),
                 (float)messageAreaSize.getHeight());
         Rectangle messageAreaRectInt = new Rectangle();
