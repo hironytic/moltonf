@@ -30,6 +30,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.BoxLayout;
@@ -184,12 +185,14 @@ public class PeriodContentView extends JComponent {
      */
     @Override
     protected void paintComponent(Graphics g) {
-
         Graphics2D g2d = (Graphics2D)g;
         
-        Rectangle2D bounds = getBounds();
+        Dimension2D componentSize = getSize();
+        Rectangle2D componentRect = new Rectangle2D.Float(
+                0, 0,
+                (float)componentSize.getWidth(), (float)componentSize.getHeight());
         Rectangle2D paintRect = new Rectangle2D.Float();
-        Rectangle2D.intersect(bounds, g2d.getClipBounds(), paintRect);
+        Rectangle2D.intersect(componentRect, g2d.getClipBounds(), paintRect);
         
         Color oldColor = g2d.getColor();
         g2d.setColor(BG_COLOR);

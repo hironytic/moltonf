@@ -40,6 +40,7 @@ import java.util.Collections;
 import javax.swing.JComponent;
 
 import com.hironytic.moltonf.model.Talk;
+import com.hironytic.moltonf.util.TimePart;
 
 /**
  * 会話の表示を担当するビュー
@@ -244,8 +245,14 @@ public class TalkView extends JComponent {
         
         areaSize.height = 0f;
         
+        StringBuilder infoTextBuilder = new StringBuilder();
         String speakerName = talk.getSpeaker().getFullName();
-        talkInfoComponent.setMessage(Collections.singletonList(speakerName));  // TODO: 発言時刻や回数なども
+        infoTextBuilder.append(speakerName);
+        TimePart time = talk.getTime();
+        String timeString = String.format("%02d:%02d", time.getHourPart(), time.getMinutePart());
+        infoTextBuilder.append(" ");
+        infoTextBuilder.append(timeString);
+        talkInfoComponent.setMessage(Collections.singletonList(infoTextBuilder.toString()));  // TODO: 発言回数なども
         talkInfoComponent.setForeground(INFO_TEXT_COLOR);
         talkInfoComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + VIEW_PADDING_RIGHT));
         Dimension2D infoAreaSize = talkInfoComponent.getAreaSize();
