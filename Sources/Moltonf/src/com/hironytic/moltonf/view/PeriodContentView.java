@@ -164,7 +164,14 @@ public class PeriodContentView extends JComponent {
                     talkView.setFont(getFont());
                 }
             } else if (element instanceof StoryEvent) {
-                // TODO: システムイベント
+                StoryEvent storyEvent = (StoryEvent)element;
+                // if (isMatchFilterOfEvent(....)) { // TODO:
+                    StoryEventView storyEventView = new StoryEventView();
+                    add(storyEventView);
+                    storyEventView.setStoryEvent(storyEvent);
+                    storyEventView.setAreaWidth(500); // TODO:
+                    storyEventView.setFont(getFont());
+                // }
             }
         }
     }
@@ -176,6 +183,8 @@ public class PeriodContentView extends JComponent {
         for (Component child : getComponents()) {
             if (child instanceof TalkView) {        // TODO: 共通のインタフェースとかいる
                 ((TalkView)child).updateView();
+            } else if (child instanceof StoryEventView) {
+                ((StoryEventView)child).updateView();
             }
         }
     }

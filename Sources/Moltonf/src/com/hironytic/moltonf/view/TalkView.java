@@ -43,7 +43,7 @@ import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.util.TimePart;
 
 /**
- * 会話の表示を担当するビュー
+ * 発言の表示を担当するビュー
  */
 @SuppressWarnings("serial")
 public class TalkView extends JComponent {
@@ -58,7 +58,7 @@ public class TalkView extends JComponent {
     private static float VIEW_PADDING_TOP = 8;
     
     /** ビューの下の余白 */
-    private static float VIEW_PADDING_BOTTOM = 16;
+    private static float VIEW_PADDING_BOTTOM = 8;
     
     /** メッセージの上のマージン */
     private static float MESSAGE_MARGIN_TOP = 4;
@@ -122,7 +122,6 @@ public class TalkView extends JComponent {
     
     /**
      * コンストラクタ
-     * @param talk このパネルで表示する Talk オブジェクト
      */
     public TalkView() {
         this.add(talkInfoComponent);
@@ -160,7 +159,7 @@ public class TalkView extends JComponent {
      * @return 文字色
      */
     private Color getMessageTextColor() {
-        Color color = null;
+        Color color;
         switch (getTalk().getTalkType()) {
         case PUBLIC:
             color = MESSAGE_TEXT_COLOR_PUBLIC;
@@ -174,6 +173,9 @@ public class TalkView extends JComponent {
         case GRAVE:
             color = MESSAGE_TEXT_COLOR_GRAVE;
             break;
+        default:
+            color = MESSAGE_TEXT_COLOR_PUBLIC;
+            break;
         }
         return color;
     }
@@ -183,7 +185,7 @@ public class TalkView extends JComponent {
      * @return メッセージの背景色
      */
     private Color getMessageBackgroundColor() {
-        Color color = null;
+        Color color;
         switch (getTalk().getTalkType()) {
         case PUBLIC:
             color = MESSAGE_BG_COLOR_PUBLIC;
@@ -196,6 +198,9 @@ public class TalkView extends JComponent {
             break;
         case GRAVE:
             color = MESSAGE_BG_COLOR_GRAVE;
+            break;
+        default:
+            color = MESSAGE_BG_COLOR_PUBLIC;
             break;
         }
         return color;
@@ -245,6 +250,7 @@ public class TalkView extends JComponent {
         
         areaSize.height = 0f;
         
+        // 発言情報 (発言者名、発言時刻など)
         StringBuilder infoTextBuilder = new StringBuilder();
         String speakerName = talk.getSpeaker().getFullName();
         infoTextBuilder.append(speakerName);
@@ -301,6 +307,7 @@ public class TalkView extends JComponent {
     public void setFont(Font font) {
         super.setFont(font);
         
+        talkInfoComponent.setFont(font);
         talkMessageComponent.setFont(font);
     }
 }

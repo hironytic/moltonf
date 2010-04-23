@@ -133,8 +133,6 @@ public class MessageComponent extends JComponent {
 
         Graphics2D g2 = (Graphics2D)getGraphics();
         if (g2 != null && width > 0f) {
-            float lastAscent = 0.0f, lastDescent = 0.0f, lastLeading = 0.0f;
-            
             List<String> lineList = messageLines;
             // 最終行が空行の場合、その空行は無視する
             if (lineList.size() > 0 && lineList.get(lineList.size() - 1).isEmpty()) {
@@ -143,12 +141,11 @@ public class MessageComponent extends JComponent {
             lineLayouts = new ArrayList<LineLayout>();
             for (String line : lineList) {
                 if (line.isEmpty()) {
-                    areaSize.height += getLineHeight(lastAscent, lastDescent, lastLeading, false);
                     FontMetrics fontMetrics = getFontMetrics(getFont());
-                    lineLayouts.add(new LineLayout(areaSize.height, null));
-                    lastAscent = fontMetrics.getAscent();
-                    lastDescent = fontMetrics.getDescent();
-                    lastLeading = fontMetrics.getLeading();
+                    addLineLayout(null,
+                            fontMetrics.getAscent(),
+                            fontMetrics.getDescent(),
+                            fontMetrics.getLeading());
                 } else {
                     AttributedString attributedString = new AttributedString(line);
                     attributedString.addAttribute(TextAttribute.FONT, getFont());
@@ -159,16 +156,14 @@ public class MessageComponent extends JComponent {
                     FontRenderContext frContext = g2.getFontRenderContext();
                     LineBreakMeasurer measurer = new LineBreakMeasurer(charItr, frContext);
                     while (measurer.getPosition() < line.length()) {
-                        areaSize.height += getLineHeight(lastAscent, lastDescent, lastLeading, false);
                         TextLayout oneLineLayout = measurer.nextLayout(width);
-                        lineLayouts.add(new LineLayout(areaSize.height, oneLineLayout));
-                        lastAscent = oneLineLayout.getAscent();
-                        lastDescent = oneLineLayout.getDescent();
-                        lastLeading = oneLineLayout.getLeading();
+                        addLineLayout(oneLineLayout,
+                                oneLineLayout.getAscent(),
+                                oneLineLayout.getDescent(),
+                                oneLineLayout.getLeading());
                     }
                 }
             }
-            areaSize.height += getLineHeight(lastAscent, lastDescent, lastLeading, true);
         }
 
         Dimension preferredSize = new Dimension();
@@ -179,16 +174,25 @@ public class MessageComponent extends JComponent {
     }
     
     /**
-     * 指定された 1 行の幅を計算します。
-     * @param lineLayout 計算したい TextLayout オブジェクト
-     * @return 1行の幅
+     * 1行分のレイアウトを追加します。
+     * updateLayoutから呼び出されるヘルパメソッドです。
+     * @param textLayout 1行の TextLayout。空行なら null。
+     * @param ascent 行の ascent
+     * @param descent 行の descent
+     * @param leading 行の leading
      */
-    private float getLineHeight(float ascent, float descent, float leading, boolean isLastLine) {
-        float lineHeight = ascent + descent + leading;
-        if (!isLastLine) {
-            lineHeight *= lineHeightFactor;
+    private void addLineLayout(TextLayout textLayout, float ascent, float descent, float leading) {
+        float fontHeight = ascent + descent + leading;
+        float lineHeight = fontHeight * lineHeightFactor;
+        fontHeight = Math.round(fontHeight);
+        lineHeight = Math.round(lineHeight);
+        float lineTop = 0.0f;
+        if (fontHeight < lineHeight) {
+            lineTop += Math.round((lineHeight - fontHeight) / 2);
         }
-        return Math.round(lineHeight);
+        
+        lineLayouts.add(new LineLayout(areaSize.height + lineTop, textLayout));
+        areaSize.height += lineHeight;
     }
     
     /**
