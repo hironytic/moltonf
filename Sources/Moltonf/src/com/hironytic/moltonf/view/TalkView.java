@@ -160,7 +160,7 @@ public class TalkView extends JComponent {
      */
     private Color getMessageTextColor() {
         Color color;
-        switch (getTalk().getTalkType()) {
+        switch (talk.getTalkType()) {
         case PUBLIC:
             color = MESSAGE_TEXT_COLOR_PUBLIC;
             break;
@@ -186,7 +186,7 @@ public class TalkView extends JComponent {
      */
     private Color getMessageBackgroundColor() {
         Color color;
-        switch (getTalk().getTalkType()) {
+        switch (talk.getTalkType()) {
         case PUBLIC:
             color = MESSAGE_BG_COLOR_PUBLIC;
             break;
@@ -212,31 +212,33 @@ public class TalkView extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        if (talk == null) {
+            return;
+        }
         
-        if (talkMessageComponent != null) {
-            Rectangle2D messageAreaRect = talkMessageComponent.getBounds();
-            Rectangle2D.Float drawRect = new Rectangle2D.Float(
-                    (float)(messageAreaRect.getX() - MESSAGE_PADDING_LEFT),
-                    (float)(messageAreaRect.getY() - MESSAGE_PADDING_TOP),
-                    (float)(messageAreaRect.getWidth() + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT),
-                    (float)(messageAreaRect.getHeight() + MESSAGE_PADDING_TOP + MESSAGE_PADDING_BOTTOM));
-    
-            Graphics2D g2d = (Graphics2D)g;
-            
-            Color oldColor = g2d.getColor();
-            Object oldAntialiasingHint = g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-            try {
-                g.setColor(getMessageBackgroundColor());
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    
-                g2d.fill(new RoundRectangle2D.Float(
-                        drawRect.x, drawRect.y,
-                        drawRect.width, drawRect.height,
-                        MESSAGE_CORNER_RADIUS * 2, MESSAGE_CORNER_RADIUS * 2));
-            } finally {
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasingHint);
-                g2d.setColor(oldColor);
-            }
+        Rectangle2D messageAreaRect = talkMessageComponent.getBounds();
+        Rectangle2D.Float drawRect = new Rectangle2D.Float(
+                (float)(messageAreaRect.getX() - MESSAGE_PADDING_LEFT),
+                (float)(messageAreaRect.getY() - MESSAGE_PADDING_TOP),
+                (float)(messageAreaRect.getWidth() + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT),
+                (float)(messageAreaRect.getHeight() + MESSAGE_PADDING_TOP + MESSAGE_PADDING_BOTTOM));
+
+        Graphics2D g2d = (Graphics2D)g;
+        
+        Color oldColor = g2d.getColor();
+        Object oldAntialiasingHint = g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        try {
+            g.setColor(getMessageBackgroundColor());
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+            g2d.fill(new RoundRectangle2D.Float(
+                    drawRect.x, drawRect.y,
+                    drawRect.width, drawRect.height,
+                    MESSAGE_CORNER_RADIUS * 2, MESSAGE_CORNER_RADIUS * 2));
+        } finally {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasingHint);
+            g2d.setColor(oldColor);
         }
     }
 

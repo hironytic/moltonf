@@ -25,10 +25,15 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 
@@ -54,17 +59,29 @@ public class StoryEventView extends JComponent {
     /** ビューの下の余白 */
     private static float VIEW_PADDING_BOTTOM = 8;
     
+    /** メッセージの枠線の幅 */
+    private static float MESSAGE_BORDER_WIDTH = 1;
+
     /** メッセージの左の余白 */
-    private static float MESSAGE_PADDING_LEFT = 9;
+    private static float MESSAGE_PADDING_LEFT = MESSAGE_BORDER_WIDTH + 8;
     
     /** メッセージの右の余白 */
-    private static float MESSAGE_PADDING_RIGHT = 9;
+    private static float MESSAGE_PADDING_RIGHT = MESSAGE_BORDER_WIDTH + 8;
     
     /** メッセージの上の余白 */
-    private static float MESSAGE_PADDING_TOP = 9;
+    private static float MESSAGE_PADDING_TOP = MESSAGE_BORDER_WIDTH + 8;
     
     /** メッセージの下の余白 */
-    private static float MESSAGE_PADDING_BOTTOM = 9;
+    private static float MESSAGE_PADDING_BOTTOM = MESSAGE_BORDER_WIDTH + 8;
+    
+    /** アナウンスメッセージの文字色 */
+    private static Color MESSAGE_TEXT_COLOR_ANNOUNCE = new Color(0xdddddd);
+
+    /** 操作系メッセージの文字色 */
+    private static Color MESSAGE_TEXT_COLOR_ORDER = new Color(0xff4444);
+
+    /** 能力系メッセージの文字色 */
+    private static Color MESSAGE_TEXT_COLOR_EXTRA = new Color(0x888888);
 
     /** このビューが扱う発言 */
     private StoryEvent storyEvent;
@@ -113,9 +130,64 @@ public class StoryEventView extends JComponent {
      * @return 文字色
      */
     private Color getMessageTextColor() {
-        return Color.WHITE; // TODO:
+        Color color;
+        switch (getStoryEvent().getEventFamily()) {
+        case ANNOUNCE:
+            color = MESSAGE_TEXT_COLOR_ANNOUNCE;
+            break;
+        case ORDER:
+            color = MESSAGE_TEXT_COLOR_ORDER;
+            break;
+        case EXTRA:
+            color = MESSAGE_TEXT_COLOR_EXTRA;
+            break;
+        default:
+            color = MESSAGE_TEXT_COLOR_ANNOUNCE;
+            break;
+        }
+        return color;
     }
 
+    private Color getBorderColor() {
+        return getMessageTextColor();
+    }
+    
+    /**
+     * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+     */
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (storyEvent == null) {
+            return;
+        }
+        
+        Rectangle2D messageAreaRect = eventMessageComponent.getBounds();
+        Rectangle2D.Float drawRect = new Rectangle2D.Float(
+                (float)(messageAreaRect.getX() - MESSAGE_PADDING_LEFT),
+                (float)(messageAreaRect.getY() - MESSAGE_PADDING_TOP),
+                (float)(messageAreaRect.getWidth() + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT),
+                (float)(messageAreaRect.getHeight() + MESSAGE_PADDING_TOP + MESSAGE_PADDING_BOTTOM));
+
+        Graphics2D g2d = (Graphics2D)g;
+        
+        Color oldColor = g2d.getColor();
+        Object oldAntialiasingHint = g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        Stroke oldStroke = g2d.getStroke();
+        try {
+            g.setColor(getBorderColor());
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setStroke(new BasicStroke(1));
+
+            g2d.draw(drawRect);
+        } finally {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasingHint);
+            g2d.setColor(oldColor);
+            g2d.setStroke(oldStroke);
+        }
+    }
+    
     /**
      * ビューの更新を行います。
      */
