@@ -37,15 +37,13 @@ import java.awt.Stroke;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 
-import javax.swing.JComponent;
-
 import com.hironytic.moltonf.model.StoryEvent;
 
 /**
  * ストーリー中のイベントの表示を担当するビュー
  */
 @SuppressWarnings("serial")
-public class StoryEventView extends JComponent {
+public class StoryEventView extends MoltonfView {
     
     /** ビューの左の余白 */
     private static float VIEW_PADDING_LEFT = 16;
@@ -191,7 +189,10 @@ public class StoryEventView extends JComponent {
     /**
      * ビューの更新を行います。
      */
+    @Override
     public void updateView() {
+        super.updateView();
+        
         if (storyEvent == null) {
             return;
         }

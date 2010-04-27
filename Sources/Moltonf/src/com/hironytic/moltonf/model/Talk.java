@@ -52,7 +52,7 @@ public interface Talk extends StoryElement {
 
     /**
      * 発言回数を返します。
-     * 発言回数は、発言を行った人物ごと、1 つの StoryPeriod ごとに存在します。
+     * 発言回数は、発言種別毎、発言を行った人物毎、1 つの StoryPeriod 毎に存在します。
      */
     public int getTalkCount();
 }

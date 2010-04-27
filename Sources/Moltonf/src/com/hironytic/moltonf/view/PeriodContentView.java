@@ -34,8 +34,8 @@ import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.BoxLayout;
-import javax.swing.JComponent;
 
+import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.StoryElement;
 import com.hironytic.moltonf.model.StoryEvent;
 import com.hironytic.moltonf.model.StoryPeriod;
@@ -46,7 +46,7 @@ import com.hironytic.moltonf.model.TalkType;
  * 1単位期間分のストーリーの内容を表示するパネル
  */
 @SuppressWarnings("serial")
-public class PeriodContentView extends JComponent {
+public class PeriodContentView extends MoltonfView {
 
     /** 背景色 */
     private static Color BG_COLOR = new Color(0x000000);
@@ -118,7 +118,12 @@ public class PeriodContentView extends JComponent {
     @Override
     public void setFont(Font font) {
         super.setFont(font);
-        // TODO: 全MessagePanelにもフォントをセット
+        
+        for (Component child : getComponents()) {
+            if (child instanceof MoltonfView) {
+                ((MoltonfView)child).setFont(font);
+            }
+        }
     }
 
     /**
@@ -136,6 +141,24 @@ public class PeriodContentView extends JComponent {
         } else if (talkType == TalkType.PRIVATE && (displayFilters & FILTER_TALK_PRIVATE) != 0) {
             isMatch = true;
         } else if (talkType == TalkType.GRAVE && (displayFilters & FILTER_TALK_GRAVE) != 0) {
+            isMatch = true;
+        }
+        return isMatch;
+    }
+    
+    /**
+     * イベント種別がイベント系のフィルタにマッチするかどうか調べます。
+     * @param eventFamily イベント種別
+     * @param displayFilters イベントフィルタ (フィルタリング定数の組み合わせ)
+     * @return マッチするなら true を返します。
+     */
+    private boolean isMatchFilterOfEvent(EventFamily eventFamily, int displayFilters) {
+        boolean isMatch = false;
+        if (eventFamily == EventFamily.ANNOUNCE && (displayFilters & FILTER_EVENT_ANNOUNCE) != 0) {
+            isMatch = true;
+        } else if (eventFamily == EventFamily.ORDER && (displayFilters & FILTER_EVENT_ORDER) != 0) {
+            isMatch = true;
+        } else if (eventFamily == EventFamily.EXTRA && (displayFilters & FILTER_EVENT_EXTRA) != 0) {
             isMatch = true;
         }
         return isMatch;
@@ -165,30 +188,17 @@ public class PeriodContentView extends JComponent {
                 }
             } else if (element instanceof StoryEvent) {
                 StoryEvent storyEvent = (StoryEvent)element;
-                // if (isMatchFilterOfEvent(....)) { // TODO:
+                if (isMatchFilterOfEvent(storyEvent.getEventFamily(), displayFilters)) {
                     StoryEventView storyEventView = new StoryEventView();
                     add(storyEventView);
                     storyEventView.setStoryEvent(storyEvent);
                     storyEventView.setAreaWidth(500); // TODO:
                     storyEventView.setFont(getFont());
-                // }
+                }
             }
         }
     }
     
-    /**
-     * ビューの更新を行います。
-     */
-    public void updateView() {
-        for (Component child : getComponents()) {
-            if (child instanceof TalkView) {        // TODO: 共通のインタフェースとかいる
-                ((TalkView)child).updateView();
-            } else if (child instanceof StoryEventView) {
-                ((StoryEventView)child).updateView();
-            }
-        }
-    }
-
     /**
      * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
      */

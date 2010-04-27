@@ -37,8 +37,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Collections;
 
-import javax.swing.JComponent;
-
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.util.TimePart;
 
@@ -46,7 +44,7 @@ import com.hironytic.moltonf.util.TimePart;
  * 発言の表示を担当するビュー
  */
 @SuppressWarnings("serial")
-public class TalkView extends JComponent {
+public class TalkView extends MoltonfView {
 
     /** ビューの左の余白 */
     private static float VIEW_PADDING_LEFT = 16;
@@ -245,7 +243,10 @@ public class TalkView extends JComponent {
     /**
      * ビューの更新を行います。
      */
+    @Override
     public void updateView() {
+        super.updateView();
+        
         if (talk == null) {
             return;
         }

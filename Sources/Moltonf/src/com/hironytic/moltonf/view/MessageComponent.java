@@ -107,6 +107,22 @@ public class MessageComponent extends JComponent {
     }
 
     /**
+     * lineHeightFactor を取得します。
+     * @return lineHeightFactor を返します。
+     */
+    public float getLineHeightFactor() {
+        return lineHeightFactor;
+    }
+
+    /**
+     * lineHeightFactor をセットします。
+     * @param lineHeightFactor セットしたい lineHeightFactor の値
+     */
+    public void setLineHeightFactor(float lineHeightFactor) {
+        this.lineHeightFactor = lineHeightFactor;
+    }
+
+    /**
      * このコンポーネントで表示するメッセージをセットします。
      * @param message メッセージ行のリスト
      */
