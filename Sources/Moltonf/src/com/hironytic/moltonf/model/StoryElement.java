@@ -28,13 +28,33 @@ package com.hironytic.moltonf.model;
 import java.util.List;
 
 /**
- * ストーリーを構成する要素のインタフェースです。
+ * ストーリーを構成する要素の基底クラスです。
  */
-public interface StoryElement {
+public abstract class StoryElement {
 
+    /** メッセージ */
+    private List<String> messageLines;
+
+    /**
+     * protected コンストラクタ
+     */
+    protected StoryElement() {
+        
+    }
+    
     /**
      * メッセージを返します。
      * @return メッセージの行のリスト。
      */
-    public List<String> getMessageLines();
+    public List<String> getMessageLines() {
+        return messageLines;
+    }
+    
+    /**
+     * メッセージをセットします。
+     * @param messageLines メッセージの行のリスト
+     */
+    public void setMessageLines(List<String> messageLines) {
+        this.messageLines = messageLines;
+    }
 }

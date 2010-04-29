@@ -28,32 +28,99 @@ package com.hironytic.moltonf.model;
 import java.util.List;
 
 /**
- * ストーリーを表すインタフェースです。
+ * ストーリーの情報を保持するクラスです。
  * 通常、ストーリーは1回のプレイデータ全体に相当します。
  */
-public interface Story {
+public class Story {
 
+    /** この Story に含まれる StoryPeriod のリスト */
+    private List<StoryPeriod> periods;
+    
+    /** 登場人物のリスト */
+    private List<Avatar> avatarList;
+    
+    /** 村の完全名 */
+    private String villageFullName;
+    
+    /** 村の状態 */
+    private VillageState villageState;
+    
+    /**
+     * コンストラクタ
+     */
+    public Story() {
+        
+    }
+    
     /**
      * このストーリーに含まれる StoryPeriod を返します。
      * @return StoryPeriod のリスト
      */
-    public List<StoryPeriod> getPeriods();
+    public List<StoryPeriod> getPeriods() {
+        return periods;
+    }
 
     /**
      * このストーリーに登場する人物のリストを返します。
      * @return 登場人物のリスト
      */
-    public List<Avatar> getAvatarList();
+    public List<Avatar> getAvatarList() {
+        return avatarList;
+    }
 
     /**
      * 村のフルネームを返します。
      * @return 村のフルネーム
      */
-    public String getVillageFullName();
+    public String getVillageFullName() {
+        return villageFullName;
+    }
 
     /**
      * 村の状態を返します。
      * @return 村の状態
      */
-    public VillageState getVillageState();
+    public VillageState getVillageState() {
+        return villageState;
+    }
+    
+    /**
+     * このストーリーに含まれる StoryPeriod をセットします。
+     * @param periods セットしたい StoryPeriod のリスト
+     */
+    public void setPeriods(List<StoryPeriod> periods) {
+        this.periods = periods;
+    }
+
+    /**
+     * 登場人物のリストをセットします。
+     * @param avatarList セットしたい Avatar のリスト
+     */
+    public void setAvatarList(List<Avatar> avatarList) {
+        this.avatarList = avatarList;
+    }
+
+    /**
+     * 村のフルネームをセットします。
+     * @param villageFullName セットしたいフルネーム
+     */
+    public void setVillageFullName(String villageFullName) {
+        this.villageFullName = villageFullName;
+    }
+
+    /**
+     * 村の状態をセットします。
+     * @param villageState セットしたい村の状態
+     */
+    public void setVillageState(VillageState villageState) {
+        this.villageState = villageState;
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "Story [villageFullName=" + villageFullName + "]";
+    }
 }

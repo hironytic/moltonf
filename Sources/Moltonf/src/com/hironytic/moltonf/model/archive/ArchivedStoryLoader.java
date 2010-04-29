@@ -46,15 +46,11 @@ import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.StoryElement;
+import com.hironytic.moltonf.model.StoryEvent;
 import com.hironytic.moltonf.model.StoryPeriod;
+import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.model.VillageState;
-import com.hironytic.moltonf.model.basic.BasicAvatar;
-import com.hironytic.moltonf.model.basic.BasicStory;
-import com.hironytic.moltonf.model.basic.BasicStoryElement;
-import com.hironytic.moltonf.model.basic.BasicStoryEvent;
-import com.hironytic.moltonf.model.basic.BasicStoryPeriod;
-import com.hironytic.moltonf.model.basic.BasicTalk;
 import com.hironytic.moltonf.util.DomUtils;
 import com.hironytic.moltonf.util.TimePart;
 
@@ -82,7 +78,7 @@ public class ArchivedStoryLoader {
     private Document archiveDoc;
     
     /** 読み込んだ結果のストーリー */
-    private BasicStory story;
+    private Story story;
     
     /** ドキュメントのベース URI */
     private URI baseUri;
@@ -105,7 +101,7 @@ public class ArchivedStoryLoader {
      * 実際に読み込みを行うメイン処理です。
      */
     private void doLoad() {
-        story = new BasicStory();
+        story = new Story();
         
         // ドキュメントのベース URI
         loadBaseUri();
@@ -179,7 +175,7 @@ public class ArchivedStoryLoader {
             Element avatarElem = DomUtils.searchSiblingElementForward(avatarListElem.getFirstChild(),
                     SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR);
             while (avatarElem != null) {
-                BasicAvatar avatar = new BasicAvatar();
+                Avatar avatar = new Avatar();
                 String avatarId =  avatarElem.getAttributeNS(null, SchemaConstants.LN_AVATAR_ID);
                 avatar.setAvatarId(avatarId);
                 avatar.setFullName(avatarElem.getAttributeNS(null, SchemaConstants.LN_FULL_NAME));
@@ -236,7 +232,7 @@ public class ArchivedStoryLoader {
      * @return 読み込んだ結果の StoryPeriod オブジェクト
      */
     private StoryPeriod loadOnePeriod(Element periodElem) {
-        BasicStoryPeriod period = new BasicStoryPeriod();
+        StoryPeriod period = new StoryPeriod();
         List<StoryElement> elementList = new ArrayList<StoryElement>();
         
         Node child = periodElem.getFirstChild();
@@ -321,7 +317,7 @@ public class ArchivedStoryLoader {
     private StoryElement loadEventIfMatches(Element elem, String[] eventLocalNames, EventFamily eventFamily) {
         for (String localName : eventLocalNames) {
             if (DomUtils.isMatchNode(elem, SchemaConstants.NS_ARCHIVE, localName)) {
-                BasicStoryEvent storyEvent = new BasicStoryEvent();
+                StoryEvent storyEvent = new StoryEvent();
                 storyEvent.setEventFamily(eventFamily);
                 loadMessageLines(elem, storyEvent);
                 return storyEvent;
@@ -336,7 +332,7 @@ public class ArchivedStoryLoader {
      * @return
      */
     private StoryElement loadTalk(Element talkElement) {
-        BasicTalk talk = new BasicTalk();
+        Talk talk = new Talk();
         
         // メッセージ
         loadMessageLines(talkElement, talk);
@@ -375,7 +371,7 @@ public class ArchivedStoryLoader {
      * @param elem メッセージを含む要素
      * @param storyElement ここに読み込んだメッセージがセットされます。
      */
-    private void loadMessageLines(Element elem, BasicStoryElement storyElement) {
+    private void loadMessageLines(Element elem, StoryElement storyElement) {
         List<String> messageLines = new ArrayList<String>();
         Element liElem = DomUtils.searchSiblingElementForward(elem.getFirstChild(),
                 SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_LI);

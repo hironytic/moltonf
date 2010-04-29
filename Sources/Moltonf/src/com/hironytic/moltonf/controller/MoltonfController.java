@@ -43,9 +43,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 
+import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
-import com.hironytic.moltonf.model.basic.BasicAvatar;
 import com.hironytic.moltonf.profile.ExternalDataRetriever;
 import com.hironytic.moltonf.profile.ProfileManager;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
@@ -113,7 +113,7 @@ public class MoltonfController {
         }        
     }
 
-    private void fillUpAvatar(BasicAvatar avatar) {
+    private void fillUpAvatar(Avatar avatar) {
         // 顔画像
         Image faceIconImage = loadFaceIconImage(avatar.getFaceIconUri());
         avatar.setFaceIconImage(faceIconImage);

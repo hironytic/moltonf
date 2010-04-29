@@ -28,14 +28,34 @@ package com.hironytic.moltonf.model;
 import java.util.List;
 
 /**
- * ストーリー中の1単位期間のデータを保持するインタフェースです。
+ * ストーリー中の1単位期間のデータを保持するクラスです。
  * 通常1日（夜明け～夜明け）分の期間を表します。
  */
-public interface StoryPeriod {
+public class StoryPeriod {
 
+    /** このストーリーを構成する要素の一覧 */
+    private List<StoryElement> storyElements;
+    
+    /**
+     * コンストラクタ
+     */
+    public StoryPeriod() {
+        
+    }
+    
     /**
      * ストーリーを構成する要素のリストを取得します。
      * @return ストーリーを構成している要素たち
      */
-    public List<StoryElement> getStoryElements();
+    public List<StoryElement> getStoryElements() {
+        return storyElements;
+    }
+    
+    /**
+     * ストーリーを構成する要素のリストをセットします。
+     * @param storyElements StoryElement のリスト
+     */
+    public void setStoryElements(List<StoryElement> storyElements) {
+        this.storyElements = storyElements;
+    }
 }
