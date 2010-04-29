@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.model.basic;
 
+import java.awt.Image;
 import java.net.URI;
 
 import com.hironytic.moltonf.model.Avatar;
@@ -42,6 +43,9 @@ public class BasicAvatar implements Avatar {
     
     /** 顔アイコン画像への URI */
     private URI faceIconUri;
+    
+    /** 顔アイコン画像 */
+    private Image faceIconImage;
     
     /** フルネーム */
     private String fullName;
@@ -71,6 +75,14 @@ public class BasicAvatar implements Avatar {
     @Override
     public URI getFaceIconUri() {
         return faceIconUri;
+    }
+
+    /**
+     * @see com.hironytic.moltonf.model.Avatar#getFaceIconImage()
+     */
+    @Override
+    public Image getFaceIconImage() {
+        return faceIconImage;
     }
 
     /**
@@ -111,6 +123,14 @@ public class BasicAvatar implements Avatar {
      */
     public void setFaceIconUri(URI faceIconUri) {
         this.faceIconUri = faceIconUri;
+    }
+
+    /**
+     * faceIconImage をセットします。
+     * @param faceIconImage セットしたい faceIconImage の値
+     */
+    public void setFaceIconImage(Image faceIconImage) {
+        this.faceIconImage = faceIconImage;
     }
 
     /**

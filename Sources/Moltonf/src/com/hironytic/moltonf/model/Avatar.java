@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.model;
 
+import java.awt.Image;
 import java.net.URI;
 
 /**
@@ -67,4 +68,10 @@ public interface Avatar {
      * @return 顔アイコンへの URI
      */
     public URI getFaceIconUri();
+    
+    /**
+     * 顔アイコン画像を返します。
+     * @return 顔アイコン画像
+     */
+    public Image getFaceIconImage();
 }
