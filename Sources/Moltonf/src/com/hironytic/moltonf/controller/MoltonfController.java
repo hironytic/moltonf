@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
@@ -46,7 +47,6 @@ import org.w3c.dom.Document;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
-import com.hironytic.moltonf.profile.ExternalDataRetriever;
 import com.hironytic.moltonf.profile.ProfileManager;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
@@ -82,6 +82,13 @@ public class MoltonfController {
             docBuilder.setEntityResolver(new ResourceEntityResolver());
             Document doc = docBuilder.parse(new File(path));
             Story story = ArchivedStoryLoader.load(doc);
+            
+            // 補完
+            List<Avatar> avatarList = story.getAvatarList();
+            for (Avatar avatar : avatarList) {
+                fillUpAvatar(avatar);
+            }
+            getProfileManager().save();
             
             ResourceBundle res = ResourceBundle.getBundle("com.hironytic.moltonf.resource.Resources");
             String title = res.getString("app.title");
@@ -128,8 +135,7 @@ public class MoltonfController {
         Image faceIconImage = null;
         try {
             URL faceIconUrl = faceIconUri.toURL();
-            ExternalDataRetriever dataRetriever = getProfileManager().getExternalDataRetriever();
-            InputStream inStream = dataRetriever.retrieve(faceIconUrl);
+            InputStream inStream = getProfileManager().getExternalData(faceIconUrl);
             try {
                 faceIconImage = ImageIO.read(inStream);
             } finally {
@@ -161,6 +167,7 @@ public class MoltonfController {
         }
         
         profileManager = new ProfileManager(profileFolder);
+        profileManager.load();
     }
     
     /**
