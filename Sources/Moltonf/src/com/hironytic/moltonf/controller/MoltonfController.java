@@ -47,7 +47,6 @@ import org.w3c.dom.Document;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
-import com.hironytic.moltonf.profile.ProfileManager;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.PeriodContentView;

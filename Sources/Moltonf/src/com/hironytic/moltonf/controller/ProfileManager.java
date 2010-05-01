@@ -23,7 +23,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf.profile;
+package com.hironytic.moltonf.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
