@@ -39,6 +39,7 @@ import java.net.URL;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.UIManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -93,6 +94,10 @@ public class MoltonfController {
             getProfileManager().save();
             
             Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);
+            
+            // TODO:
+            // システムのルックアンドフィールにしておく
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             
             mainFrame = new MainFrame();
             mainFrame.getCommandActionExit().addCommandListener(new ActionListener() {

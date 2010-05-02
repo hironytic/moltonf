@@ -42,11 +42,20 @@ import com.hironytic.moltonf.Moltonf;
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
+    /** [新規ワークスペース] コマンドの Action */
+    private final CommandAction commandActionNew = new CommandAction("mainFrame.command.new", KeyEvent.VK_N);
+    
     /** [開く] コマンドの Action */
     private final CommandAction commandActionOpen = new CommandAction("mainFrame.command.open", KeyEvent.VK_O);
     
+    /** [閉じる] コマンドの Action */
+    private final CommandAction commandActionClose = new CommandAction("mainFrame.command.close", KeyEvent.VK_C);
+    
     /** [終了] コマンドの Action */
     private final CommandAction commandActionExit = new CommandAction("mainFrame.command.exit", KeyEvent.VK_X);
+    
+    /** [バージョン情報] コマンドの Action */
+    private final CommandAction commandActionAbout = new CommandAction("mainFrame.command.about", KeyEvent.VK_A);
     
     /**
      * コンストラクタ
@@ -82,10 +91,27 @@ public class MainFrame extends JFrame {
         menu = new JMenu(res.getString("mainFrame.menu.file"));
         menu.setMnemonic(KeyEvent.VK_F);
         menuBar.add(menu);
+        menu.add(commandActionNew);
         menu.add(commandActionOpen);
+        menu.add(commandActionClose);
+        menu.addSeparator();
         menu.add(commandActionExit);
 
+        // [ヘルプ]
+        menu = new JMenu(res.getString("mainFrame.menu.help"));
+        menu.setMnemonic(KeyEvent.VK_H);
+        menuBar.add(menu);
+        menu.add(commandActionAbout);
+        
         return menuBar;
+    }
+
+    /**
+     * [新規] コマンドの CommandAction を取得します。
+     * @return CommandAction オブジェクト
+     */
+    public CommandAction getCommandActionNew() {
+        return commandActionNew;
     }
 
     /**
@@ -97,10 +123,27 @@ public class MainFrame extends JFrame {
     }
 
     /**
+     * [閉じる] コマンドの CommandAction を取得します。
+     * @return CommandAction オブジェクト
+     */
+    public CommandAction getCommandActionClose() {
+        return commandActionClose;
+    }
+
+    /**
      * [終了] コマンドの CommandAction を取得します。
      * @return CommandAction オブジェクト
      */
     public CommandAction getCommandActionExit() {
         return commandActionExit;
     }
+
+    /**
+     * [バージョン情報] コマンドの CommandAction を取得します。
+     * @return CommandAction オブジェクト
+     */
+    public CommandAction getCommandActionAbout() {
+        return commandActionAbout;
+    }
+    
 }

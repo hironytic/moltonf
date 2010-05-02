@@ -299,6 +299,8 @@ public class ArchivedStoryLoader {
      *          一致しなければ null を返します。
      */
     private StoryElement loadEventExtraGroupIfMathces(Element elem) {
+        // TODO: assault は Talk として扱ってやらないとマズいかも。
+        // でも発言カウントに入れるわけにはいかず。
         final String[] eventLocalNames = {
             SchemaConstants.LN_JUDGE, SchemaConstants.LN_GUARD,
             SchemaConstants.LN_ASSAULT,
