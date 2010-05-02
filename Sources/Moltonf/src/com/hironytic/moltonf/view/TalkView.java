@@ -33,7 +33,11 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.geom.Area;
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.ImageObserver;
@@ -243,6 +247,40 @@ public class TalkView extends MoltonfView {
     }
     
     /**
+     * メッセージの吹き出しの「しっぽ」の形を返します。
+     * @return
+     */
+    private Shape getMessageBaloonShippoShape(Rectangle2D.Float baloonRect) {
+        Path2D.Float path = new Path2D.Float();
+        if (talk.getTalkType() == TalkType.PUBLIC) {
+            float x1 = baloonRect.x;
+            float y1 = baloonRect.y + (baloonRect.height - 8) / 2;
+            path.moveTo(x1, y1);
+            float y2 = y1 + 8;
+            path.lineTo(x1, y2);
+            float x2 = x1 - 8;
+            path.lineTo(x2, y2);
+            path.lineTo(x1, y1);
+            return new Area(path);
+        } else {
+            float y1 = baloonRect.y + (baloonRect.height - 6) / 2;
+            Ellipse2D.Float bigBubble = new Ellipse2D.Float(
+                    baloonRect.x - 8,
+                    y1,
+                    6,
+                    6);
+            Ellipse2D.Float smallBubble = new Ellipse2D.Float(
+                    baloonRect.x - 14,
+                    y1 + 2,
+                    4,
+                    4);
+            Area area = new Area(bigBubble);
+            area.add(new Area(smallBubble));
+            return area;
+        }
+    }
+    
+    /**
      * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
      */
     @Override
@@ -269,11 +307,11 @@ public class TalkView extends MoltonfView {
             // 吹き出しの描画
             g.setColor(getMessageBackgroundColor());
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
             g2d.fill(new RoundRectangle2D.Float(
                     drawRect.x, drawRect.y,
                     drawRect.width, drawRect.height,
                     MESSAGE_CORNER_RADIUS * 2, MESSAGE_CORNER_RADIUS * 2));
+            g2d.fill(getMessageBaloonShippoShape(drawRect));
             
             // 顔アイコン画像の描画
             Image faceIconImage = getFaceIconImage();
