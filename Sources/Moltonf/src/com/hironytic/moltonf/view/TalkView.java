@@ -30,14 +30,17 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.ImageObserver;
 import java.util.Collections;
 
 import com.hironytic.moltonf.model.Talk;
+import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.util.TimePart;
 
 /**
@@ -79,6 +82,9 @@ public class TalkView extends MoltonfView {
     /** メッセージの角を描画するときの半径 */
     private static float MESSAGE_CORNER_RADIUS = 8;
     
+    /** 顔アイコン画像の左端 */
+    private static float FACE_ICON_IMAGE_LEFT = 0;
+    
     /** 情報テキスト (発言者、発言時刻など) の文字色 */
     private static Color INFO_TEXT_COLOR = new Color(0xffffff);
     
@@ -117,6 +123,14 @@ public class TalkView extends MoltonfView {
     
     /** メッセージ領域を表示する子コンポーネント */
     private MessageComponent talkMessageComponent = new MessageComponent();
+    
+    /** 何も行わない ImageObserver */
+    private static final ImageObserver nullObserver = new ImageObserver() {
+        @Override
+        public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+            return false;
+        }
+    };
     
     /**
      * コンストラクタ
@@ -205,6 +219,30 @@ public class TalkView extends MoltonfView {
     }
     
     /**
+     * 発言者の顔アイコン画像を得ます
+     * @return 顔アイコン画像
+     */
+    private Image getFaceIconImage() {
+        if (talk.getTalkType() == TalkType.GRAVE) {
+            // TODO: 墓下アイコン
+            return null;
+        } else {
+            return talk.getSpeaker().getFaceIconImage();
+        }
+    }
+    
+    /**
+     * 画像の幅と高さを取得します。
+     * @param image 画像
+     * @return 幅と高さ
+     */
+    private Dimension2D getImageDimension(Image image) {
+        float width = image.getWidth(nullObserver);
+        float height = image.getHeight(nullObserver);
+        return new Dimension2DFloat(width, height);
+    }
+    
+    /**
      * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
      */
     @Override
@@ -215,6 +253,7 @@ public class TalkView extends MoltonfView {
             return;
         }
         
+        // メッセージの吹き出しの領域を計算
         Rectangle2D messageAreaRect = talkMessageComponent.getBounds();
         Rectangle2D.Float drawRect = new Rectangle2D.Float(
                 (float)(messageAreaRect.getX() - MESSAGE_PADDING_LEFT),
@@ -227,6 +266,7 @@ public class TalkView extends MoltonfView {
         Color oldColor = g2d.getColor();
         Object oldAntialiasingHint = g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
         try {
+            // 吹き出しの描画
             g.setColor(getMessageBackgroundColor());
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
@@ -234,6 +274,24 @@ public class TalkView extends MoltonfView {
                     drawRect.x, drawRect.y,
                     drawRect.width, drawRect.height,
                     MESSAGE_CORNER_RADIUS * 2, MESSAGE_CORNER_RADIUS * 2));
+            
+            // 顔アイコン画像の描画
+            Image faceIconImage = getFaceIconImage();
+            if (faceIconImage != null) {
+                Dimension2D faceIconSize = getImageDimension(faceIconImage);
+                float faceIconHeight = (float)faceIconSize.getHeight();
+                float faceIconTop;
+                if (faceIconHeight > drawRect.height) {
+                    faceIconTop = drawRect.y;
+                } else {
+                    faceIconTop = drawRect.y + (drawRect.height - faceIconHeight) / 2;
+                }
+                g2d.drawImage(faceIconImage,
+                        (int)(VIEW_PADDING_LEFT + FACE_ICON_IMAGE_LEFT),
+                        (int)faceIconTop,
+                        nullObserver);
+            }
+            
         } finally {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAntialiasingHint);
             g2d.setColor(oldColor);
@@ -275,6 +333,15 @@ public class TalkView extends MoltonfView {
         talkInfoComponent.setBounds(infoAreaRectInt);
         
         areaSize.height += (float)infoAreaSize.getHeight();
+
+        // 顔アイコン
+        Dimension2D faceIconSize;
+        Image faceIconImage = getFaceIconImage();
+        if (faceIconImage != null) {
+            faceIconSize = getImageDimension(faceIconImage);
+        } else {
+            faceIconSize = new Dimension2DFloat(0f, 0f);
+        }
         
         // 発言
         talkMessageComponent.setMessage(talk.getMessageLines());
@@ -290,10 +357,12 @@ public class TalkView extends MoltonfView {
         messageAreaRectInt.setRect(messageAreaRect);
         talkMessageComponent.setBounds(messageAreaRectInt);
         
+        float talkMessageHeight = MESSAGE_PADDING_TOP +
+                                  (float)messageAreaSize.getHeight() +
+                                  MESSAGE_PADDING_BOTTOM;
+
         areaSize.height += VIEW_PADDING_TOP +
-                           MESSAGE_PADDING_TOP +
-                           (float)messageAreaSize.getHeight() +
-                           MESSAGE_PADDING_BOTTOM +
+                           Math.max(talkMessageHeight, faceIconSize.getHeight()) +
                            VIEW_PADDING_BOTTOM;
         
         Dimension size = new Dimension();
