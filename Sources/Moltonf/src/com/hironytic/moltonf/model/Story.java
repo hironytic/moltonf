@@ -25,6 +25,8 @@
 
 package com.hironytic.moltonf.model;
 
+import java.awt.Image;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -44,6 +46,12 @@ public class Story {
     
     /** 村の状態 */
     private VillageState villageState;
+    
+    /** 墓アイコン画像への URI */
+    private URI graveIconUri;
+    
+    /** 墓アイコン画像 */
+    private Image graveIconImage;
     
     /**
      * コンストラクタ
@@ -85,6 +93,22 @@ public class Story {
     }
     
     /**
+     * 墓アイコン画像の URI を取得します。
+     * @return 墓アイコン画像の URI
+     */
+    public URI getGraveIconUri() {
+        return graveIconUri;
+    }
+
+    /**
+     * 墓アイコン画像を取得します。
+     * @return 墓アイコン画像
+     */
+    public Image getGraveIconImage() {
+        return graveIconImage;
+    }
+
+    /**
      * このストーリーに含まれる StoryPeriod をセットします。
      * @param periods セットしたい StoryPeriod のリスト
      */
@@ -116,6 +140,22 @@ public class Story {
         this.villageState = villageState;
     }
 
+    /**
+     * 墓アイコン画像の URIをセットします。
+     * @param graveIconUri 墓アイコン画像の URI
+     */
+    public void setGraveIconUri(URI graveIconUri) {
+        this.graveIconUri = graveIconUri;
+    }
+
+    /**
+     * 墓アイコン画像をセットします。
+     * @param graveIconImage 墓アイコン画像
+     */
+    public void setGraveIconImage(Image graveIconImage) {
+        this.graveIconImage = graveIconImage;
+    }
+    
     /**
      * @see java.lang.Object#toString()
      */

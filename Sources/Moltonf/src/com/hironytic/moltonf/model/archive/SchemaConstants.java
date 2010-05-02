@@ -65,6 +65,9 @@ public class SchemaConstants {
 
     /** 村の進行状態: ゲーム終了 */
     public static final String VAL_VILLAGE_STATE_GAMEOVER = "gameover";
+    
+    /** graveIconURI 属性のローカル名 */
+    public static final String LN_GRAVE_ICON_URI = "graveIconURI";
 
     /* 
      * --------------------------------------------------

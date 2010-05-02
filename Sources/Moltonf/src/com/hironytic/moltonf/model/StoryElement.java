@@ -32,6 +32,9 @@ import java.util.List;
  */
 public abstract class StoryElement {
 
+    /** このオブジェクトが属する StoryPeriod */
+    private StoryPeriod storyPeriod;
+    
     /** メッセージ */
     private List<String> messageLines;
 
@@ -43,11 +46,39 @@ public abstract class StoryElement {
     }
     
     /**
+     * このオブジェクトが属する StoryPeriod を取得します。
+     * @return このオブジェクトが属する StoryPeriod
+     */
+    public StoryPeriod getStoryPeriod() {
+        return storyPeriod;
+    }
+
+    /**
+     * このオブジェクトが属する Story を取得します。
+     * @return このオブジェクトが属する Story
+     */
+    public Story getStory() {
+        if (storyPeriod == null) {
+            return null;
+        } else {
+            return storyPeriod.getStory();
+        }
+    }
+    
+    /**
      * メッセージを返します。
      * @return メッセージの行のリスト。
      */
     public List<String> getMessageLines() {
         return messageLines;
+    }
+    
+    /**
+     * このオブジェクトが属する StoryPeriod をセットします。
+     * @param storyPeriod このオブジェクトが属する StoryPeriod
+     */
+    public void setStoryPeriod(StoryPeriod storyPeriod) {
+        this.storyPeriod = storyPeriod;
     }
     
     /**

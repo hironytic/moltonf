@@ -109,6 +109,7 @@ public class ArchivedStoryLoader {
         // 村の情報
         loadVillageState();
         loadVillageFullName();
+        loadGraveIconUri();
         
         // 登場人物
         loadAvatarList();
@@ -162,6 +163,25 @@ public class ArchivedStoryLoader {
     }
     
     /**
+     * 墓画像のURIを読み込みます。
+     */
+    private void loadGraveIconUri() {
+        Element villageElem = archiveDoc.getDocumentElement();
+        String graveIconUriString = villageElem.getAttributeNS(null, SchemaConstants.LN_GRAVE_ICON_URI);
+        URI graveIconUri;
+        try {
+            if (baseUri != null) {
+                graveIconUri = baseUri.resolve(new URI(graveIconUriString));
+            } else {
+                graveIconUri = new URI(graveIconUriString);
+            }
+        } catch (URISyntaxException e) {
+            graveIconUri = null;
+        }
+        story.setGraveIconUri(graveIconUri);
+    }
+    
+    /**
      * 登場人物のリストを読み込みます。
      */
     private void loadAvatarList() {
@@ -176,6 +196,7 @@ public class ArchivedStoryLoader {
                     SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR);
             while (avatarElem != null) {
                 Avatar avatar = new Avatar();
+                avatar.setStory(story);
                 String avatarId =  avatarElem.getAttributeNS(null, SchemaConstants.LN_AVATAR_ID);
                 avatar.setAvatarId(avatarId);
                 avatar.setFullName(avatarElem.getAttributeNS(null, SchemaConstants.LN_FULL_NAME));
@@ -233,6 +254,7 @@ public class ArchivedStoryLoader {
      */
     private StoryPeriod loadOnePeriod(Element periodElem) {
         StoryPeriod period = new StoryPeriod();
+        period.setStory(story);
         List<StoryElement> elementList = new ArrayList<StoryElement>();
         
         Node child = periodElem.getFirstChild();
@@ -248,6 +270,7 @@ public class ArchivedStoryLoader {
                 storyElement = (storyElement != null) ? storyElement : loadEventExtraGroupIfMathces(childElem);
                 
                 if (storyElement != null) {
+                    storyElement.setStoryPeriod(period);
                     elementList.add(storyElement);
                 }
             }

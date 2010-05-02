@@ -33,6 +33,9 @@ import java.util.List;
  */
 public class StoryPeriod {
 
+    /** このオブジェクトが属する Story */    
+    private Story story;
+    
     /** このストーリーを構成する要素の一覧 */
     private List<StoryElement> storyElements;
     
@@ -44,11 +47,27 @@ public class StoryPeriod {
     }
     
     /**
+     * このオブジェクトが属する Story を取得します。
+     * @return このオブジェクトが属する Story
+     */
+    public Story getStory() {
+        return story;
+    }
+
+    /**
      * ストーリーを構成する要素のリストを取得します。
      * @return ストーリーを構成している要素たち
      */
     public List<StoryElement> getStoryElements() {
         return storyElements;
+    }
+    
+    /**
+     * このオブジェクトが属する Story をセットします。
+     * @param story このオブジェクトが属する Story
+     */
+    public void setStory(Story story) {
+        this.story = story;
     }
     
     /**

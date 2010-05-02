@@ -33,6 +33,9 @@ import java.net.URI;
  */
 public class Avatar {
 
+    /** このオブジェクトが属する Story */    
+    private Story story;
+    
     /** 省略名 */
     private String abbreviatedName;
  
@@ -58,6 +61,14 @@ public class Avatar {
         
     }
     
+    /**
+     * このオブジェクトが属する Story を取得します。
+     * @return このオブジェクトが属する Story
+     */
+    public Story getStory() {
+        return story;
+    }
+
     /**
      * 登場人物の識別子を返します。 
      * @return 識別子
@@ -110,6 +121,14 @@ public class Avatar {
      */
     public Image getFaceIconImage() {
         return faceIconImage;
+    }
+    
+    /**
+     * このオブジェクトが属する Story をセットします。
+     * @param story このオブジェクトが属する Story
+     */
+    public void setStory(Story story) {
+        this.story = story;
     }
     
     /**

@@ -230,8 +230,7 @@ public class TalkView extends JComponent implements MoltonfView {
      */
     private Image getFaceIconImage() {
         if (talk.getTalkType() == TalkType.GRAVE) {
-            // TODO: 墓下アイコン
-            return null;
+            return talk.getStory().getGraveIconImage();
         } else {
             return talk.getSpeaker().getFaceIconImage();
         }

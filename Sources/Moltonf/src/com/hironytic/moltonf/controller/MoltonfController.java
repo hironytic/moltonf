@@ -87,6 +87,7 @@ public class MoltonfController {
             Story story = ArchivedStoryLoader.load(doc);
             
             // 補完
+            story.setGraveIconImage(loadFaceIconImage(story.getGraveIconUri()));
             List<Avatar> avatarList = story.getAvatarList();
             for (Avatar avatar : avatarList) {
                 fillUpAvatar(avatar);
