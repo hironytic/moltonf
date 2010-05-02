@@ -34,6 +34,7 @@ import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 
 import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.StoryElement;
@@ -43,34 +44,34 @@ import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 
 /**
- * 1単位期間分のストーリーの内容を表示するパネル
+ * 1単位期間分のストーリーの内容を表示するクラス。 (スクロールする内容)
  */
 @SuppressWarnings("serial")
-public class PeriodContentView extends MoltonfView {
+public class PeriodContentView extends JComponent implements MoltonfView {
 
     /** 背景色 */
-    private static Color BG_COLOR = new Color(0x000000);
+    private static final Color BG_COLOR = new Color(0x000000);
     
     /** フィルタリング定数：アナウンスイベント */
-    public static int FILTER_EVENT_ANNOUNCE = 0x0001;
+    public static final int FILTER_EVENT_ANNOUNCE = 0x0001;
     
     /** フィルタリング定数：操作系イベント */
-    public static int FILTER_EVENT_ORDER = 0x0002;
+    public static final int FILTER_EVENT_ORDER = 0x0002;
     
     /** フィルタリング定数：能力系イベント */
-    public static int FILTER_EVENT_EXTRA = 0x0004;
+    public static final int FILTER_EVENT_EXTRA = 0x0004;
     
     /** フィルタリング定数：通常発言 */
-    public static int FILTER_TALK_PUBLIC = 0x0100;
+    public static final int FILTER_TALK_PUBLIC = 0x0100;
     
     /** フィルタリング定数：狼発言 */
-    public static int FILTER_TALK_WOLF = 0x0200;
+    public static final int FILTER_TALK_WOLF = 0x0200;
     
     /** フィルタリング定数：独り言 */
-    public static int FILTER_TALK_PRIVATE = 0x0400;
+    public static final int FILTER_TALK_PRIVATE = 0x0400;
     
     /** フィルタリング定数：墓下発言 */
-    public static int FILTER_TALK_GRAVE = 0x0800;
+    public static final int FILTER_TALK_GRAVE = 0x0800;
     
     /** フィルタリング定数：すべて */
     public static int FILTER_ALL =
@@ -217,5 +218,17 @@ public class PeriodContentView extends MoltonfView {
         g2d.setColor(BG_COLOR);
         g2d.fill(paintRect);
         g2d.setColor(oldColor);
+    }
+
+    /**
+     * @see com.hironytic.moltonf.view.MoltonfView#updateView()
+     */
+    @Override
+    public void updateView() {
+        for (Component child : getComponents()) {
+            if (child instanceof MoltonfView) {
+                ((MoltonfView)child).updateView();
+            }
+        }
     }
 }

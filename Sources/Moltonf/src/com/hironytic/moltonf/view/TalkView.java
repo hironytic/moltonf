@@ -43,6 +43,8 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.ImageObserver;
 import java.util.Collections;
 
+import javax.swing.JComponent;
+
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.util.TimePart;
@@ -51,70 +53,70 @@ import com.hironytic.moltonf.util.TimePart;
  * 発言の表示を担当するビュー
  */
 @SuppressWarnings("serial")
-public class TalkView extends MoltonfView {
+public class TalkView extends JComponent implements MoltonfView {
 
     /** ビューの左の余白 */
-    private static float VIEW_PADDING_LEFT = 16;
+    private static final float VIEW_PADDING_LEFT = 16;
     
     /** ビューの右の余白 */
-    private static float VIEW_PADDING_RIGHT = 16;
+    private static final float VIEW_PADDING_RIGHT = 16;
 
     /** ビューの上の余白 */
-    private static float VIEW_PADDING_TOP = 8;
+    private static final float VIEW_PADDING_TOP = 8;
     
     /** ビューの下の余白 */
-    private static float VIEW_PADDING_BOTTOM = 8;
+    private static final float VIEW_PADDING_BOTTOM = 8;
     
     /** メッセージの上のマージン */
-    private static float MESSAGE_MARGIN_TOP = 4;
+    private static final float MESSAGE_MARGIN_TOP = 4;
     
     /** メッセージの左の余白 */
-    private static float MESSAGE_PADDING_LEFT = 12;
+    private static final float MESSAGE_PADDING_LEFT = 12;
     
     /** メッセージの右の余白 */
-    private static float MESSAGE_PADDING_RIGHT = 12;
+    private static final float MESSAGE_PADDING_RIGHT = 12;
     
     /** メッセージの上の余白 */
-    private static float MESSAGE_PADDING_TOP = 8;
+    private static final float MESSAGE_PADDING_TOP = 8;
     
     /** メッセージの下の余白 */
-    private static float MESSAGE_PADDING_BOTTOM = 8;
+    private static final float MESSAGE_PADDING_BOTTOM = 8;
     
     /** メッセージ領域の左端 */
-    private static float MESSAGE_LEFT = 56;
+    private static final float MESSAGE_LEFT = 56;
     
     /** メッセージの角を描画するときの半径 */
-    private static float MESSAGE_CORNER_RADIUS = 8;
+    private static final float MESSAGE_CORNER_RADIUS = 8;
     
     /** 顔アイコン画像の左端 */
-    private static float FACE_ICON_IMAGE_LEFT = 0;
+    private static final float FACE_ICON_IMAGE_LEFT = 0;
     
     /** 情報テキスト (発言者、発言時刻など) の文字色 */
-    private static Color INFO_TEXT_COLOR = new Color(0xffffff);
+    private static final Color INFO_TEXT_COLOR = new Color(0xffffff);
     
     /** 通常メッセージの背景色 */
-    private static Color MESSAGE_BG_COLOR_PUBLIC = new Color(0xffffff);
+    private static final Color MESSAGE_BG_COLOR_PUBLIC = new Color(0xffffff);
     
     /** 通常メッセージの文字色 */
-    private static Color MESSAGE_TEXT_COLOR_PUBLIC = new Color(0x000000);
+    private static final Color MESSAGE_TEXT_COLOR_PUBLIC = new Color(0x000000);
 
     /** 狼メッセージの背景色 */
-    private static Color MESSAGE_BG_COLOR_WOLF = new Color(0xff7777);
+    private static final Color MESSAGE_BG_COLOR_WOLF = new Color(0xff7777);
     
     /** 狼メッセージの文字色 */
-    private static Color MESSAGE_TEXT_COLOR_WOLF = new Color(0x000000);
+    private static final Color MESSAGE_TEXT_COLOR_WOLF = new Color(0x000000);
 
     /** 独り言メッセージの背景色 */
-    private static Color MESSAGE_BG_COLOR_PRIVATE = new Color(0x939393);
+    private static final Color MESSAGE_BG_COLOR_PRIVATE = new Color(0x939393);
     
     /** 独り言メッセージの文字色 */
-    private static Color MESSAGE_TEXT_COLOR_PRIVATE = new Color(0x000000);
+    private static final Color MESSAGE_TEXT_COLOR_PRIVATE = new Color(0x000000);
 
     /** 墓下メッセージの背景色 */
-    private static Color MESSAGE_BG_COLOR_GRAVE = new Color(0x9fb7cf);
+    private static final Color MESSAGE_BG_COLOR_GRAVE = new Color(0x9fb7cf);
     
     /** 墓下メッセージの文字色 */
-    private static Color MESSAGE_TEXT_COLOR_GRAVE = new Color(0x000000);
+    private static final Color MESSAGE_TEXT_COLOR_GRAVE = new Color(0x000000);
     
     /** このビューが扱う発言 */
     private Talk talk;
@@ -341,8 +343,6 @@ public class TalkView extends MoltonfView {
      */
     @Override
     public void updateView() {
-        super.updateView();
-        
         if (talk == null) {
             return;
         }

@@ -26,6 +26,7 @@
 package com.hironytic.moltonf.controller;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
 import java.io.File;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,6 +52,7 @@ import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.PeriodContentView;
+import com.hironytic.moltonf.view.PeriodView;
 
 /**
  * Moltonf アプリケーションのコントローラ
@@ -98,18 +101,16 @@ public class MoltonfController {
             mainFrame.setTitle(title);
             mainFrame.setLocationByPlatform(true);
             
-            JScrollPane scrollPane = new JScrollPane();
-            mainFrame.add(scrollPane, BorderLayout.CENTER);
+            PeriodView periodView = new PeriodView();
+            mainFrame.add(periodView, BorderLayout.CENTER);
             
             mainFrame.pack();
-            mainFrame.setBounds(100, 100, 500, 400);
+            mainFrame.setBounds(100, 100, 600, 400);
 
-            PeriodContentView periodContent = new PeriodContentView();
-            periodContent.setFont(font);
-            scrollPane.setViewportView(periodContent);
+            periodView.setFont(font);
             
-            periodContent.setStoryPeriod(story.getPeriods().get(2));
-            periodContent.updateView();
+            periodView.getContentView().setStoryPeriod(story.getPeriods().get(2));
+            periodView.updateView();
 
             mainFrame.setVisible(true);
             

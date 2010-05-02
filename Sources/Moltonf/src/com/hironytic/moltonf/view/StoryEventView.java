@@ -37,49 +37,51 @@ import java.awt.Stroke;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.JComponent;
+
 import com.hironytic.moltonf.model.StoryEvent;
 
 /**
  * ストーリー中のイベントの表示を担当するビュー
  */
 @SuppressWarnings("serial")
-public class StoryEventView extends MoltonfView {
+public class StoryEventView extends JComponent implements MoltonfView {
     
     /** ビューの左の余白 */
-    private static float VIEW_PADDING_LEFT = 16;
+    private static final float VIEW_PADDING_LEFT = 16;
     
     /** ビューの右の余白 */
-    private static float VIEW_PADDING_RIGHT = 16;
+    private static final float VIEW_PADDING_RIGHT = 16;
 
     /** ビューの上の余白 */
-    private static float VIEW_PADDING_TOP = 8;
+    private static final float VIEW_PADDING_TOP = 8;
     
     /** ビューの下の余白 */
-    private static float VIEW_PADDING_BOTTOM = 8;
+    private static final float VIEW_PADDING_BOTTOM = 8;
     
     /** メッセージの枠線の幅 */
-    private static float MESSAGE_BORDER_WIDTH = 1;
+    private static final float MESSAGE_BORDER_WIDTH = 1;
 
     /** メッセージの左の余白 */
-    private static float MESSAGE_PADDING_LEFT = MESSAGE_BORDER_WIDTH + 8;
+    private static final float MESSAGE_PADDING_LEFT = MESSAGE_BORDER_WIDTH + 8;
     
     /** メッセージの右の余白 */
-    private static float MESSAGE_PADDING_RIGHT = MESSAGE_BORDER_WIDTH + 8;
+    private static final float MESSAGE_PADDING_RIGHT = MESSAGE_BORDER_WIDTH + 8;
     
     /** メッセージの上の余白 */
-    private static float MESSAGE_PADDING_TOP = MESSAGE_BORDER_WIDTH + 8;
+    private static final float MESSAGE_PADDING_TOP = MESSAGE_BORDER_WIDTH + 8;
     
     /** メッセージの下の余白 */
-    private static float MESSAGE_PADDING_BOTTOM = MESSAGE_BORDER_WIDTH + 8;
+    private static final float MESSAGE_PADDING_BOTTOM = MESSAGE_BORDER_WIDTH + 8;
     
     /** アナウンスメッセージの文字色 */
-    private static Color MESSAGE_TEXT_COLOR_ANNOUNCE = new Color(0xdddddd);
+    private static final Color MESSAGE_TEXT_COLOR_ANNOUNCE = new Color(0xdddddd);
 
     /** 操作系メッセージの文字色 */
-    private static Color MESSAGE_TEXT_COLOR_ORDER = new Color(0xff4444);
+    private static final Color MESSAGE_TEXT_COLOR_ORDER = new Color(0xff4444);
 
     /** 能力系メッセージの文字色 */
-    private static Color MESSAGE_TEXT_COLOR_EXTRA = new Color(0x888888);
+    private static final Color MESSAGE_TEXT_COLOR_EXTRA = new Color(0x888888);
 
     /** このビューが扱う発言 */
     private StoryEvent storyEvent;
@@ -191,8 +193,6 @@ public class StoryEventView extends MoltonfView {
      */
     @Override
     public void updateView() {
-        super.updateView();
-        
         if (storyEvent == null) {
             return;
         }

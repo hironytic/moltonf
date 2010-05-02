@@ -25,30 +25,22 @@
 
 package com.hironytic.moltonf.view;
 
-import java.awt.Component;
+import java.awt.Font;
 
-import javax.swing.JComponent;
 
 /**
  * 各ビューコンポーネントの基底クラス
  */
-@SuppressWarnings("serial")
-public abstract class MoltonfView extends JComponent {
-
-    /**
-     * コンストラクタ
-     */
-    public MoltonfView() {
-    }
+public interface MoltonfView {
 
     /**
      * ビューの更新を行います。
      */
-    public void updateView() {
-        for (Component child : getComponents()) {
-            if (child instanceof MoltonfView) {
-                ((MoltonfView)child).updateView();
-            }
-        }
-    }
+    public void updateView();
+
+    /**
+     * ビューのフォントを設定します。
+     * @param font フォント
+     */
+    public void setFont(Font font);
 }
