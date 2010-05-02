@@ -45,6 +45,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.error.YAMLException;
 
+import com.hironytic.moltonf.Moltonf;
+
 /**
  * ユーザーの設定等を管理するクラス
  */
@@ -169,12 +171,18 @@ public class ProfileManager {
         try {
             return new FileInputStream(storedFile);
         } catch (FileNotFoundException ex) {
+            Moltonf.getLogger().warning("failed to load saved external data:" + urlString, ex);
             throw new IOException(ex);
         } catch (SecurityException ex) {
+            Moltonf.getLogger().warning("failed to load saved external data:" + urlString, ex);
             throw new IOException(ex);
         }
     }
 
+    /**
+     * 設定を読み込みます。
+     */
+    @SuppressWarnings("unchecked")
     public void load() {
         if (profileFolder == null) {
             return;
@@ -182,18 +190,25 @@ public class ProfileManager {
         
         try {
             File extMapFile = new File(profileFolder, EXTERNAL_DATA_MAP_FILE_NAME);
-            Yaml yamlLoader = new Yaml();
-            Object loaded = yamlLoader.load(new FileReader(extMapFile));
-            if (loaded instanceof Map) {
-                externalDataMap = (Map<String, String>)loaded;
+            if (extMapFile.exists()) {
+                Yaml yamlLoader = new Yaml();
+                externalDataMap = (Map<String, String>)yamlLoader.load(new FileReader(extMapFile));
                 externalDataMapModified = false;
             }
         } catch (FileNotFoundException ex) {
+            Moltonf.getLogger().warning("failed to load external data map file", ex);
         } catch (SecurityException ex) {
+            Moltonf.getLogger().warning("failed to load external data map file", ex);
         } catch (YAMLException ex) {
+            Moltonf.getLogger().warning("failed to load external data map file", ex);
+        } catch (ClassCastException ex) {
+            Moltonf.getLogger().warning("failed to load external data map file", ex);
         }
     }
     
+    /**
+     * 設定を必要に応じて書き出します。
+     */
     public void save() {
         if (profileFolder == null) {
             return;
@@ -211,9 +226,13 @@ public class ProfileManager {
                 yamlDumper.dump(externalDataMap, outStreamWriter);
                 outStreamWriter.close();
             } catch (FileNotFoundException ex) {
+                Moltonf.getLogger().warning("failed to save external data map file", ex);
             } catch (SecurityException ex) {
+                Moltonf.getLogger().warning("failed to save external data map file", ex);
             } catch (IOException ex) {
+                Moltonf.getLogger().warning("failed to save external data map file", ex);
             } catch (YAMLException ex) {
+                Moltonf.getLogger().warning("failed to save external data map file", ex);
             }
             externalDataMapModified = false;
         }

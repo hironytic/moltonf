@@ -26,12 +26,16 @@
 package com.hironytic.moltonf;
 
 import com.hironytic.moltonf.controller.MoltonfController;
+import com.hironytic.moltonf.util.Logger;
 
 /**
  * Moltonf アプリケーションのスタートアップクラス
  */
 public class Moltonf {
 
+    /** ロガー */
+    private static Logger logger = new Logger("com.hironytic.moltonf");
+    
     /** 唯一のコントローラーインスタンス */
     private static MoltonfController controler;
     
@@ -53,5 +57,13 @@ public class Moltonf {
      */
     public static MoltonfController getController() {
         return controler;
+    }
+    
+    /**
+     * Moltonf アプリケーション用のログ出力用オブジェクトを返します。
+     * @return Logger オブジェクト
+     */
+    public static Logger getLogger() {
+        return logger;
     }
 }
