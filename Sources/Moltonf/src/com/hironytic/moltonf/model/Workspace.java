@@ -26,13 +26,33 @@
 package com.hironytic.moltonf.model;
 
 /**
- * Moltonf ワークスペースを表すインタフェース
+ * Moltonf ワークスペースの情報を保持するクラス
  */
-public interface Workspace {
+public class Workspace {
 
+    /** このワークスペースが扱うストーリー */
+    private Story story;
+    
+    /**
+     * コンストラクタ
+     */
+    public Workspace() {
+        
+    }
+    
     /**
      * このワークスペースが扱うストーリーを返します。
      * @return ストーリー
      */
-    public Story getStory();
+    public Story getStory() {
+        return story;
+    }
+    
+    /**
+     * このワークスペースが扱うストーリーをセットします。
+     * @param story ストーリー
+     */
+    public void setStory(Story story) {
+        this.story = story;
+    }
 }

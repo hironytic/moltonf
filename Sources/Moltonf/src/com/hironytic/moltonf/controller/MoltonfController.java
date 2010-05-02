@@ -26,9 +26,10 @@
 package com.hironytic.moltonf.controller;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,11 +37,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -51,7 +49,6 @@ import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
-import com.hironytic.moltonf.view.PeriodContentView;
 import com.hironytic.moltonf.view.PeriodView;
 
 /**
@@ -63,6 +60,9 @@ public class MoltonfController {
     
     /** ユーザー設定等の管理を行うオブジェクト */
     private ProfileManager profileManager;
+    
+    /** メインウィンドウ */
+    private MainFrame mainFrame;
     
     /**
      * Moltonf アプリケーションを実行します。
@@ -92,13 +92,16 @@ public class MoltonfController {
             }
             getProfileManager().save();
             
-            ResourceBundle res = ResourceBundle.getBundle("com.hironytic.moltonf.resource.Resources");
-            String title = res.getString("app.title");
-
             Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);
             
-            MainFrame mainFrame = new MainFrame();
-            mainFrame.setTitle(title);
+            mainFrame = new MainFrame();
+            mainFrame.getCommandActionExit().addCommandListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    performExit();
+                }
+            });
+            
             mainFrame.setLocationByPlatform(true);
             
             PeriodView periodView = new PeriodView();
@@ -109,7 +112,7 @@ public class MoltonfController {
 
             periodView.setFont(font);
             
-            periodView.getContentView().setStoryPeriod(story.getPeriods().get(2));
+            periodView.getContentView().setStoryPeriod(story.getPeriods().get(3));
             periodView.updateView();
 
             mainFrame.setVisible(true);
@@ -178,4 +181,11 @@ public class MoltonfController {
         return profileManager;
     }
     
+    /**
+     * ユーザーが終了を選択したときの処理
+     */
+    private void performExit() {
+        mainFrame.dispose();
+        System.exit(0);
+    }
 }

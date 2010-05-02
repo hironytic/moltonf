@@ -25,7 +25,16 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ResourceBundle;
+
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+
+import com.hironytic.moltonf.Moltonf;
 
 /**
  * Moltonf のメインウィンドウ
@@ -33,7 +42,65 @@ import javax.swing.JFrame;
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
+    /** [開く] コマンドの Action */
+    private final CommandAction commandActionOpen = new CommandAction("mainMenu.open", KeyEvent.VK_O);
+    
+    /** [終了] コマンドの Action */
+    private final CommandAction commandActionExit = new CommandAction("mainMenu.exit", KeyEvent.VK_X);
+    
+    /**
+     * コンストラクタ
+     */
     public MainFrame() {
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                commandActionExit.fireCommand(e.getSource());
+            }
+        });
+        
+        // タイトル
+        ResourceBundle res = Moltonf.getResource();
+        setTitle(res.getString("app.title"));
+        
+        // メニュー
+        setJMenuBar(createJMenuBar());
+    }
+    
+    /**
+     * メニューバーを作成します。
+     * @return メニューバー
+     */
+    private JMenuBar createJMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu;
+
+        ResourceBundle res = Moltonf.getResource();
+
+        // [ファイル]
+        menu = new JMenu(res.getString("mainMenu.file"));
+        menu.setMnemonic(KeyEvent.VK_F);
+        menuBar.add(menu);
+        menu.add(commandActionOpen);
+        menu.add(commandActionExit);
+
+        return menuBar;
+    }
+
+    /**
+     * [開く] コマンドの CommandAction を取得します。
+     * @return CommandAction オブジェクト
+     */
+    public CommandAction getCommandActionOpen() {
+        return commandActionOpen;
+    }
+
+    /**
+     * [終了] コマンドの CommandAction を取得します。
+     * @return CommandAction オブジェクト
+     */
+    public CommandAction getCommandActionExit() {
+        return commandActionExit;
     }
 }

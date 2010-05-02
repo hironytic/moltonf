@@ -43,6 +43,11 @@ public class Resources extends ListResourceBundle {
     protected Object[][] getContents() {
         return new Object[][] {
             {"app.title", "Moltonf"},
+            
+            // メインメニュー
+            {"mainMenu.file", "ファイル(F)"},
+            {"mainMenu.open", "開く(O)"},
+            {"mainMenu.exit", "終了(X)"},
         };
     }
 

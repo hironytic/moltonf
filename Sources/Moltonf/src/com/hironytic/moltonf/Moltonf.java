@@ -25,6 +25,8 @@
 
 package com.hironytic.moltonf;
 
+import java.util.ResourceBundle;
+
 import com.hironytic.moltonf.controller.MoltonfController;
 import com.hironytic.moltonf.util.Logger;
 
@@ -65,5 +67,13 @@ public class Moltonf {
      */
     public static Logger getLogger() {
         return logger;
+    }
+
+    /**
+     * Moltonf アプリケーションのローカライズ用リソースを返します。
+     * @return リソースオブジェクト
+     */
+    public static ResourceBundle getResource() {
+        return ResourceBundle.getBundle("com.hironytic.moltonf.resource.Resources");
     }
 }
