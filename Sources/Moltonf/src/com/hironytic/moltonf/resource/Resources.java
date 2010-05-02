@@ -42,12 +42,16 @@ public class Resources extends ListResourceBundle {
     @Override
     protected Object[][] getContents() {
         return new Object[][] {
+            // アプリケーション全体
             {"app.title", "Moltonf"},
             
-            // メインメニュー
-            {"mainMenu.file", "ファイル(F)"},
-            {"mainMenu.open", "開く(O)"},
-            {"mainMenu.exit", "終了(X)"},
+            // メインフレーム
+            //   メニュー
+            {"mainFrame.menu.file", "ファイル(F)"},
+            
+            //   コマンド
+            {"mainFrame.command.open", "開く(O)"},
+            {"mainFrame.command.exit", "終了(X)"},
         };
     }
 

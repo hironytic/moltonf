@@ -43,10 +43,10 @@ import com.hironytic.moltonf.Moltonf;
 public class MainFrame extends JFrame {
 
     /** [開く] コマンドの Action */
-    private final CommandAction commandActionOpen = new CommandAction("mainMenu.open", KeyEvent.VK_O);
+    private final CommandAction commandActionOpen = new CommandAction("mainFrame.command.open", KeyEvent.VK_O);
     
     /** [終了] コマンドの Action */
-    private final CommandAction commandActionExit = new CommandAction("mainMenu.exit", KeyEvent.VK_X);
+    private final CommandAction commandActionExit = new CommandAction("mainFrame.command.exit", KeyEvent.VK_X);
     
     /**
      * コンストラクタ
@@ -79,7 +79,7 @@ public class MainFrame extends JFrame {
         ResourceBundle res = Moltonf.getResource();
 
         // [ファイル]
-        menu = new JMenu(res.getString("mainMenu.file"));
+        menu = new JMenu(res.getString("mainFrame.menu.file"));
         menu.setMnemonic(KeyEvent.VK_F);
         menuBar.add(menu);
         menu.add(commandActionOpen);
