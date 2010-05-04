@@ -54,6 +54,7 @@ import com.hironytic.moltonf.model.StoryPeriod;
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.model.VillageState;
+import com.hironytic.moltonf.model.WolfAttackTalk;
 import com.hironytic.moltonf.util.TimePart;
 
 /**
@@ -324,7 +325,6 @@ public class ArchivedStoryLoader {
         });
         final List<QName> eventExtraGroup = Arrays.asList(new QName[] {
             SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD,
-            SchemaConstants.NAME_ASSAULT,
         });
         
         // 子ノード
@@ -342,6 +342,8 @@ public class ArchivedStoryLoader {
                     elementList.add(loadStoryEvent(period, EventFamily.ORDER));
                 } else if (eventExtraGroup.contains(elemName)) {
                     elementList.add(loadStoryEvent(period, EventFamily.EXTRA));
+                } else if (SchemaConstants.NAME_ASSAULT.equals(elemName)) {
+                    elementList.add(loadAssault(period));
                 } else {
                     skipElement();
                 }
@@ -456,6 +458,55 @@ public class ArchivedStoryLoader {
         
         storyEvent.setMessageLines(messageLines);
         return storyEvent;
+    }
+    
+    /**
+     * assault 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は assault 要素の START_ELEMENT にいることが前提です。
+     * @param period 読み込んだ WolfAttackTalk が所属する StoryPeriod。
+     * @return 読み込んだ結果の WolfAttackTalk
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
+     */
+    private Talk loadAssault(StoryPeriod period) throws XMLStreamException {
+        Talk talk = new WolfAttackTalk();
+        talk.setStoryPeriod(period);
+        talk.setTalkType(TalkType.WOLF);
+        
+        // 属性
+        for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
+            QName attrName = staxReader.getAttributeName(ix);
+            if (SchemaConstants.NAME_BY_WHOM.equals(attrName)) {
+                // スキーマとして avatarList が先に登場することが保証されているので
+                // 正しいデータならこの時点で avatarMap は作成済み。
+                String avatarId = staxReader.getAttributeValue(ix);
+                Avatar avatar = avatarMap.get(avatarId);
+                talk.setSpeaker(avatar);
+            } else if (SchemaConstants.NAME_TIME.equals(attrName)) {
+                String timeString = staxReader.getAttributeValue(ix);
+                TimePart timePart = parseTime(timeString);
+                talk.setTime(timePart);
+            }
+        }
+        
+        List<String> messageLines = new ArrayList<String>();        
+        
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                QName elemName = staxReader.getName();
+                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                    messageLines.add(loadLi());
+                } else {
+                    skipElement();
+                }
+            }
+        }
+        
+        talk.setMessageLines(messageLines);
+        return talk;
     }
     
     /**

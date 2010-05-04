@@ -82,6 +82,14 @@ public class Talk extends StoryElement {
     public int getTalkCount() {
         return talkCount;
     }
+    
+    /**
+     * この発言が狼の襲撃発言 (○○ ！ 今日がお前の命日だ！) かどうかを返します。
+     * @return 襲撃発言なら true、そうでなければ false が返ります。
+     */
+    public boolean isWolfAttack() {
+        return false;
+    }
 
     /**
      * 発言の種別をセットします。

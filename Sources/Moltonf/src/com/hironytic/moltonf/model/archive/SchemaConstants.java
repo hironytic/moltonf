@@ -197,14 +197,25 @@ public class SchemaConstants {
     /** guard 要素の QName */
     public static final QName NAME_GUARD = new QName(NS_ARCHIVE, "guard");
     
+    
+    /* 
+     * --------------------------------------------------
+     * assault
+     * --------------------------------------------------
+     */
+    
     /** assault 要素の QName */
     public static final QName NAME_ASSAULT = new QName(NS_ARCHIVE, "assault");
+
+    /** byWhom 属性の QName */
+    public static final QName NAME_BY_WHOM = new QName("byWhom");
     
     /* 
      * --------------------------------------------------
      * talk
      * --------------------------------------------------
      */
+    
     /** talk 要素の QName */
     public static final QName NAME_TALK = new QName(NS_ARCHIVE, "talk");
     
