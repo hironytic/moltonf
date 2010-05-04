@@ -30,7 +30,9 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -40,15 +42,10 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.UIManager;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
 
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
-import com.hironytic.moltonf.resource.ResourceEntityResolver;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.PeriodView;
 
@@ -78,13 +75,16 @@ public class MoltonfController {
                 return;
             }
             String path = args[0];
-            DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-            docBuilderFactory.setNamespaceAware(true);
-            docBuilderFactory.setValidating(false);
-            DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-            docBuilder.setEntityResolver(new ResourceEntityResolver());
-            Document doc = docBuilder.parse(new File(path));
-            Story story = ArchivedStoryLoader.load(doc);
+//            DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+//            docBuilderFactory.setNamespaceAware(true);
+//            docBuilderFactory.setValidating(false);
+//            DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+//            docBuilder.setEntityResolver(new ResourceEntityResolver());
+//            Document doc = docBuilder.parse(new File(path));
+//            Story story = ArchivedStoryLoader.load(doc);
+            InputStream inStream = new BufferedInputStream(
+                    new FileInputStream(new File(path)));
+            Story story = ArchivedStoryLoader.load(inStream);
             
             // 補完
             story.setGraveIconImage(loadFaceIconImage(story.getGraveIconUri()));

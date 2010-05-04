@@ -25,9 +25,11 @@
 
 package com.hironytic.moltonf.model.archive;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +38,12 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
+import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.EventFamily;
@@ -51,7 +54,6 @@ import com.hironytic.moltonf.model.StoryPeriod;
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.model.VillageState;
-import com.hironytic.moltonf.util.DomUtils;
 import com.hironytic.moltonf.util.TimePart;
 
 /**
@@ -61,24 +63,8 @@ import com.hironytic.moltonf.util.TimePart;
  */
 public class ArchivedStoryLoader {
 
-    /**
-     * 共通アーカイブ基盤用スキーマの XML から Story を得ます。
-     * @param archiveDoc 共通アーカイブ基盤用スキーマで記述された XML の DOM Document オブジェクト
-     * @return Story オブジェクト
-     * @throws MoltonfException 読み込みに失敗した場合
-     */
-    public static Story load(Document archiveDoc) throws MoltonfException {
-        ArchivedStoryLoader loader = new ArchivedStoryLoader();
-        loader.archiveDoc = archiveDoc;
-        loader.doLoad();
-        return loader.story;
-    }
-
-    /** 共通アーカイブ基盤用スキーマで記述された XML の DOM Document オブジェクト */
-    private Document archiveDoc;
-    
-    /** 読み込んだ結果のストーリー */
-    private Story story;
+    /** 読み込みに用いる StAX リーダー */
+    private XMLStreamReader staxReader;
     
     /** ドキュメントのベース URI */
     private URI baseUri;
@@ -90,57 +76,129 @@ public class ArchivedStoryLoader {
     private DatatypeFactory datatypeFactory = null;
     
     /**
+     * 共通アーカイブ基盤用スキーマの XML を読み込む入力ストリームから Story を得ます。
+     * @param inStream 共通アーカイブ基盤用スキーマで記述された XML の入力ストリーム
+     * @return Story オブジェクト
+     * @return MoltonfException 読み込みに失敗した場合
+     */
+    public static Story load(InputStream inStream) throws MoltonfException {
+        return new ArchivedStoryLoader().doload(inStream);
+    }
+    /**
      * コンストラクタ
-     * 外部からはインスタンスを生成できません。
-     * static メソッド load() を使ってください。
      */
     private ArchivedStoryLoader() {
+        
+    }
+
+    /**
+     * 共通アーカイブ基盤用スキーマの XML を読み込む入力ストリームから Story を得ます。(内部メソッド)
+     * @param inStream 共通アーカイブ基盤用スキーマで記述された XML の入力ストリーム
+     * @return Story オブジェクト
+     * @return MoltonfException 読み込みに失敗した場合
+     */
+    private Story doload(InputStream inStream) throws MoltonfException {
+        Story story = null;
+        
+        try {
+            XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+            xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            xmlInputFactory.setProperty(XMLInputFactory.IS_VALIDATING, false);
+            xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+            staxReader = xmlInputFactory.createXMLStreamReader(inStream);
+            
+            while (staxReader.hasNext()) {
+                int eventType = staxReader.next();
+                if (eventType == XMLStreamReader.START_ELEMENT) {
+                    QName elemName = staxReader.getName();
+                    if (SchemaConstants.NAME_VILLAGE.equals(elemName)) {
+                        story = loadVillageElement();
+                    } else {
+                        throw new MoltonfException("Not a bbs play-data archive.");
+                    }
+                }
+            }
+        } catch (XMLStreamException ex) {
+            throw new MoltonfException(ex);
+        }
+        
+        return story;
     }
     
     /**
-     * 実際に読み込みを行うメイン処理です。
+     * village 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は village 要素の START_ELEMENT にいることが前提です。
+     * @return 読み込んだ結果の Story
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
-    private void doLoad() {
-        story = new Story();
+    private Story loadVillageElement() throws XMLStreamException {
+        Story story = new Story();
         
-        // ドキュメントのベース URI
-        loadBaseUri();
-        
-        // 村の情報
-        loadVillageState();
-        loadVillageFullName();
-        loadGraveIconUri();
-        
-        // 登場人物
-        loadAvatarList();
-        
-        // 日
-        loadPeriods();
-    }
-    
-    /**
-     * ドキュメントのベース URI を読み込みます。
-     */
-    private void loadBaseUri() {
-        baseUri = null;
-        Element villageElem = archiveDoc.getDocumentElement();
-        String baseUriString = villageElem.getAttributeNS(SchemaConstants.NS_XML, SchemaConstants.LN_BASE);
-        if (!baseUriString.isEmpty()) {
-            try {
-                baseUri = new URI(baseUriString);
-            } catch (URISyntaxException ex) {
-                baseUri = null;
+        // 属性
+        for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
+            QName attrName = staxReader.getAttributeName(ix);
+            if (SchemaConstants.NAME_BASE.equals(attrName)) {
+                String baseUriString = staxReader.getAttributeValue(ix);
+                if (!baseUriString.isEmpty()) {
+                    try {
+                        baseUri = new URI(baseUriString);
+                    } catch (URISyntaxException ex) {
+                        baseUri = null;
+                    }
+                }
+            } else if (SchemaConstants.NAME_STATE.equals(attrName)) {
+                String villageStateString = staxReader.getAttributeValue(ix);
+                story.setVillageState(toVillageState(villageStateString));
+            } else if (SchemaConstants.NAME_FULL_NAME.equals(attrName)) {
+                String villageFullName = staxReader.getAttributeValue(ix);
+                story.setVillageFullName(villageFullName);
+            } else if (SchemaConstants.NAME_GRAVE_ICON_URI.equals(attrName)) {
+                String graveIconUriString = staxReader.getAttributeValue(ix);
+                URI graveIconUri;
+                try {
+                    if (baseUri != null) {
+                        graveIconUri = baseUri.resolve(new URI(graveIconUriString));
+                    } else {
+                        graveIconUri = new URI(graveIconUriString);
+                    }
+                } catch (URISyntaxException ex) {
+                    Moltonf.getLogger().warning("graveIconUri is not valid : " + graveIconUriString, ex);
+                    graveIconUri = null;
+                }
+                story.setGraveIconUri(graveIconUri);
             }
         }
+        
+        List<StoryPeriod> periodList = new ArrayList<StoryPeriod>();
+        
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                QName elemName = staxReader.getName();
+                if (SchemaConstants.NAME_AVATAR_LIST.equals(elemName)) {
+                    story.setAvatarList(loadAvatarList(story));
+                } else if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
+                    periodList.add(loadPeriod(story));
+                } else {
+                    skipElement();
+                }
+            }
+        }
+        
+        story.setPeriods(periodList);
+        return story;
     }
     
     /**
-     * 村の状態を読み込みます。
+     * 村の状態の値文字列を VillageState に変換します。
+     * @param villageStateString 村の状態の値文字列 (state属性の値)
+     * @return VillageState。該当するものがなければ null。
      */
-    private void loadVillageState() {
-        Element villageElem = archiveDoc.getDocumentElement();
+    private VillageState toVillageState(String villageStateString) {
         VillageState state = null;
-        String villageStateString = villageElem.getAttributeNS(null, SchemaConstants.LN_STATE);
         if (SchemaConstants.VAL_VILLAGE_STATE_GAMEOVER.equals(villageStateString)) {
             state = VillageState.GAMEOVER;
         } else if (SchemaConstants.VAL_VILLAGE_STATE_EPILOGUE.equals(villageStateString)) {
@@ -149,61 +207,62 @@ public class ArchivedStoryLoader {
             state = VillageState.PROGRESS;
         } else if (SchemaConstants.VAL_VILLAGE_STATE_PROLOGUE.equals(villageStateString)) {
             state = VillageState.PROLOGUE;
+        } else {
+            Moltonf.getLogger().warning("invalid village state : <village state=\"" + villageStateString + "\">");
         }
-        story.setVillageState(state);
+        return state;
     }
     
     /**
-     * 村のフルネームを読み込みます。
+     * avatarList 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は avatarList 要素の START_ELEMENT にいることが前提です。
+     * @param story 読み込む Avatar たちが所属する Story
+     * @return 読み込んだ結果の Avatar のリスト
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
-    private void loadVillageFullName() {
-        Element villageElem = archiveDoc.getDocumentElement();
-        String fullName = villageElem.getAttributeNS(null, SchemaConstants.LN_FULL_NAME);
-        story.setVillageFullName(fullName);
-    }
-    
-    /**
-     * 墓画像のURIを読み込みます。
-     */
-    private void loadGraveIconUri() {
-        Element villageElem = archiveDoc.getDocumentElement();
-        String graveIconUriString = villageElem.getAttributeNS(null, SchemaConstants.LN_GRAVE_ICON_URI);
-        URI graveIconUri;
-        try {
-            if (baseUri != null) {
-                graveIconUri = baseUri.resolve(new URI(graveIconUriString));
-            } else {
-                graveIconUri = new URI(graveIconUriString);
-            }
-        } catch (URISyntaxException e) {
-            graveIconUri = null;
-        }
-        story.setGraveIconUri(graveIconUri);
-    }
-    
-    /**
-     * 登場人物のリストを読み込みます。
-     */
-    private void loadAvatarList() {
-        Element villageElem = archiveDoc.getDocumentElement();
-        
+    private List<Avatar> loadAvatarList(Story story) throws XMLStreamException {
         avatarMap = new HashMap<String, Avatar>();
-        List<Avatar> list = new ArrayList<Avatar>();
-        Node avatarListElem = DomUtils.searchSiblingElementForward(villageElem.getFirstChild(),
-                SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR_LIST);
-        if (avatarListElem != null) {
-            Element avatarElem = DomUtils.searchSiblingElementForward(avatarListElem.getFirstChild(),
-                    SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR);
-            while (avatarElem != null) {
-                Avatar avatar = new Avatar();
-                avatar.setStory(story);
-                String avatarId =  avatarElem.getAttributeNS(null, SchemaConstants.LN_AVATAR_ID);
-                avatar.setAvatarId(avatarId);
-                avatar.setFullName(avatarElem.getAttributeNS(null, SchemaConstants.LN_FULL_NAME));
-                avatar.setShortName(avatarElem.getAttributeNS(null, SchemaConstants.LN_SHORT_NAME));
-                
-                // 顔アイコン
-                String faceIconUriString = avatarElem.getAttributeNS(null, SchemaConstants.LN_FACE_ICON_URI);
+        List<Avatar> avatarList = new ArrayList<Avatar>();
+
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                QName elemName = staxReader.getName();
+                if (SchemaConstants.NAME_AVATAR.equals(elemName)) {
+                    avatarList.add(loadAvatar(story));
+                } else {
+                    skipElement();
+                }
+            }
+        }
+        return avatarList;
+    }
+    
+    /**
+     * avatar 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は avatar 要素の START_ELEMENT にいることが前提です。
+     * @param story 読み込む Avatar が所属する Story
+     * @return 読み込んだ結果の Avatar
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
+     */
+    private Avatar loadAvatar(Story story) throws XMLStreamException {
+        Avatar avatar = new Avatar();
+        avatar.setStory(story);
+        
+        // 属性
+        for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
+            QName attrName = staxReader.getAttributeName(ix);
+            if (SchemaConstants.NAME_AVATAR_ID.equals(attrName)) {
+                avatar.setAvatarId(staxReader.getAttributeValue(ix));
+            } else if (SchemaConstants.NAME_FULL_NAME.equals(attrName)) {
+                avatar.setFullName(staxReader.getAttributeValue(ix));
+            } else if (SchemaConstants.NAME_SHORT_NAME.equals(attrName)) {
+                avatar.setShortName(staxReader.getAttributeValue(ix));
+            } else if (SchemaConstants.NAME_FACE_ICON_URI.equals(attrName)) {
+                String faceIconUriString = staxReader.getAttributeValue(ix);
                 URI faceIconUri;
                 try {
                     if (baseUri != null) {
@@ -211,160 +270,146 @@ public class ArchivedStoryLoader {
                     } else {
                         faceIconUri = new URI(faceIconUriString);
                     }
-                } catch (URISyntaxException e) {
+                } catch (URISyntaxException ex) {
+                    Moltonf.getLogger().warning("faceIconUri is not valid : " + faceIconUriString, ex);
                     faceIconUri = null;
                 }
                 avatar.setFaceIconUri(faceIconUri);
-                
-                /* TODO: 短縮名をどうにかしてセット */
-                
-                list.add(avatar);                
-                avatarMap.put(avatarId, avatar);
-
-                avatarElem = DomUtils.searchSiblingElementForward(avatarElem.getNextSibling(),
-                        SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_AVATAR);
             }
         }
-        story.setAvatarList(list);
-    }
-    
-    /**
-     * それぞれの日の情報を読み込みます。
-     */
-    private void loadPeriods() {
-        Element villageElem = archiveDoc.getDocumentElement();
-        
-        List<StoryPeriod> periodList = new ArrayList<StoryPeriod>();
-        Element periodElem = DomUtils.searchSiblingElementForward(villageElem.getFirstChild(),
-                SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_PERIOD);
-        while (periodElem != null) {
-            StoryPeriod period = loadOnePeriod(periodElem);
-            periodList.add(period);
-            
-            periodElem = DomUtils.searchSiblingElementForward(periodElem.getNextSibling(),
-                    SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_PERIOD);
+
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                skipElement();
+            }
         }
-        story.setPeriods(periodList);
+        
+        avatarMap.put(avatar.getAvatarId(), avatar);
+        return avatar;
     }
     
     /**
-     * 1 日分の情報を読み込みます。
-     * @param periodElem period 要素
-     * @return 読み込んだ結果の StoryPeriod オブジェクト
+     * period 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は period 要素の START_ELEMENT にいることが前提です。
+     * @param story 読み込んだ StoryPeriod が所属する Story
+     * @return 読み込んだ結果の StoryPeriod
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
-    private StoryPeriod loadOnePeriod(Element periodElem) {
+    private StoryPeriod loadPeriod(Story story) throws XMLStreamException {
         StoryPeriod period = new StoryPeriod();
         period.setStory(story);
         List<StoryElement> elementList = new ArrayList<StoryElement>();
         
-        Node child = periodElem.getFirstChild();
-        while (child != null) {
-            if (child.getNodeType() == Node.ELEMENT_NODE) {
-                Element childElem = (Element)child;
-                StoryElement storyElement = null;
-                if (DomUtils.isMatchNode(childElem, SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_TALK)) {
-                    storyElement = loadTalk(childElem);
-                }
-                storyElement = (storyElement != null) ? storyElement : loadEventAnnounceGroupIfMaches(childElem);
-                storyElement = (storyElement != null) ? storyElement : loadEventOrderGroupIfMatches(childElem);
-                storyElement = (storyElement != null) ? storyElement : loadEventExtraGroupIfMathces(childElem);
-                
-                if (storyElement != null) {
-                    storyElement.setStoryPeriod(period);
-                    elementList.add(storyElement);
+        // 属性
+        // TODO:
+        
+        final List<QName> eventAnnounceGroup = Arrays.asList(new QName[] {
+            SchemaConstants.NAME_START_ENTRY, SchemaConstants.NAME_ON_STAGE,
+            SchemaConstants.NAME_START_MIRROR, SchemaConstants.NAME_OPEN_ROLE,
+            SchemaConstants.NAME_MURDERED, SchemaConstants.NAME_START_ASSAULT,
+            SchemaConstants.NAME_SURVIVOR, SchemaConstants.NAME_COUNTING,
+            SchemaConstants.NAME_SUDDEN_DEATH, SchemaConstants.NAME_NO_MURDER,
+            SchemaConstants.NAME_WIN_VILLAGE, SchemaConstants.NAME_WIN_WOLF,
+            SchemaConstants.NAME_WIN_HAMSTER, SchemaConstants.NAME_PLAYER_LIST,
+            SchemaConstants.NAME_PANIC,
+        });
+        final List<QName> eventOrderGroup = Arrays.asList(new QName[] {
+            SchemaConstants.NAME_ASK_ENTRY, SchemaConstants.NAME_ASK_COMMIT,
+            SchemaConstants.NAME_NO_COMMENT, SchemaConstants.NAME_STAY_EPILOGUE,
+            SchemaConstants.NAME_GAME_OVER,
+        });
+        final List<QName> eventExtraGroup = Arrays.asList(new QName[] {
+            SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD,
+            SchemaConstants.NAME_ASSAULT,
+        });
+        
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                QName elemName = staxReader.getName();
+                if (SchemaConstants.NAME_TALK.equals(elemName)) {
+                    elementList.add(loadTalk(period));
+                } else if (eventAnnounceGroup.contains(elemName)) {
+                    elementList.add(loadStoryEvent(period, EventFamily.ANNOUNCE));
+                } else if (eventOrderGroup.contains(elemName)) {
+                    elementList.add(loadStoryEvent(period, EventFamily.ORDER));
+                } else if (eventExtraGroup.contains(elemName)) {
+                    elementList.add(loadStoryEvent(period, EventFamily.EXTRA));
+                } else {
+                    skipElement();
                 }
             }
-            child = child.getNextSibling();
         }
+        
         period.setStoryElements(elementList);
         return period;
     }
     
     /**
-     * 指定された要素が EventAnounceGroup に一致するなら読み込みます。
-     * @param elem 要素
-     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
-     *          一致しなければ null を返します。
+     * talk 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は talk 要素の START_ELEMENT にいることが前提です。
+     * @param period 読み込んだ Talk が所属する StoryPeriod。
+     * @return 読み込んだ結果の Talk
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
-    private StoryElement loadEventAnnounceGroupIfMaches(Element elem) {
-        final String[] eventLocalNames = {
-            SchemaConstants.LN_START_ENTRY, SchemaConstants.LN_ON_STAGE,
-            SchemaConstants.LN_START_MIRROR, SchemaConstants.LN_OPEN_ROLE,
-            SchemaConstants.LN_MURDERED, SchemaConstants.LN_START_ASSAULT,
-            SchemaConstants.LN_SURVIVOR, SchemaConstants.LN_COUNTING,
-            SchemaConstants.LN_SUDDEN_DEATH, SchemaConstants.LN_NO_MURDER,
-            SchemaConstants.LN_WIN_VILLAGE, SchemaConstants.LN_WIN_WOLF,
-            SchemaConstants.LN_WIN_HAMSTER, SchemaConstants.LN_PLAYER_LIST,
-            SchemaConstants.LN_PANIC,
-        };
-        return loadEventIfMatches(elem, eventLocalNames, EventFamily.ANNOUNCE);
-    }
-    
-    /**
-     * 指定された要素が EventOrderGroup に一致するなら読み込みます。
-     * @param elem 要素
-     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
-     *          一致しなければ null を返します。
-     */
-    private StoryElement loadEventOrderGroupIfMatches(Element elem) {
-        final String[] eventLocalNames = {
-            SchemaConstants.LN_ASK_ENTRY, SchemaConstants.LN_ASK_COMMIT,
-            SchemaConstants.LN_NO_COMMENT, SchemaConstants.LN_STAY_EPILOGUE,
-            SchemaConstants.LN_GAME_OVER,
-        };
-        return loadEventIfMatches(elem, eventLocalNames, EventFamily.ORDER);        
-    }
-    
-    /**
-     * 指定された要素が EventExtraGroup に一致するなら読み込みます。
-     * @param elem 要素
-     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
-     *          一致しなければ null を返します。
-     */
-    private StoryElement loadEventExtraGroupIfMathces(Element elem) {
-        // TODO: assault は Talk として扱ってやらないとマズいかも。
-        // でも発言カウントに入れるわけにはいかず。
-        final String[] eventLocalNames = {
-            SchemaConstants.LN_JUDGE, SchemaConstants.LN_GUARD,
-            SchemaConstants.LN_ASSAULT,
-        };
-        return loadEventIfMatches(elem, eventLocalNames, EventFamily.EXTRA);        
-    }
-
-    /**
-     * 指定された要素がイベント要素に一致するなら読み込みます。
-     * @param elem 要素
-     * @param eventLocalNames 一致するイベントのローカル名の配列
-     * @param eventFamily 一致した場合に StoryElement にセットする EventFamily
-     * @return 一致したら読み込んだ結果の StoryElement オブジェクトを返します。
-     *          一致しなければ null を返します。
-     */
-    private StoryElement loadEventIfMatches(Element elem, String[] eventLocalNames, EventFamily eventFamily) {
-        for (String localName : eventLocalNames) {
-            if (DomUtils.isMatchNode(elem, SchemaConstants.NS_ARCHIVE, localName)) {
-                StoryEvent storyEvent = new StoryEvent();
-                storyEvent.setEventFamily(eventFamily);
-                loadMessageLines(elem, storyEvent);
-                return storyEvent;
+    private Talk loadTalk(StoryPeriod period) throws XMLStreamException {
+        Talk talk = new Talk();
+        talk.setStoryPeriod(period);
+        
+        // 属性
+        for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
+            QName attrName = staxReader.getAttributeName(ix);
+            if (SchemaConstants.NAME_TYPE.equals(attrName)) {
+                String talkTypeString = staxReader.getAttributeValue(ix);
+                talk.setTalkType(toTalkType(talkTypeString));
+            } else if (SchemaConstants.NAME_AVATAR_ID.equals(attrName)) {
+                // スキーマとして avatarList が先に登場することが保証されているので
+                // 正しいデータならこの時点で avatarMap は作成済み。
+                String avatarId = staxReader.getAttributeValue(ix);
+                Avatar avatar = avatarMap.get(avatarId);
+                talk.setSpeaker(avatar);
+            } else if (SchemaConstants.NAME_TIME.equals(attrName)) {
+                String timeString = staxReader.getAttributeValue(ix);
+                TimePart timePart = parseTime(timeString);
+                talk.setTime(timePart);
             }
         }
-        return null;
+        
+        List<String> messageLines = new ArrayList<String>();        
+        
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                QName elemName = staxReader.getName();
+                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                    messageLines.add(loadLi());
+                } else {
+                    skipElement();
+                }
+            }
+        }
+        
+        talk.setMessageLines(messageLines);
+        return talk;
     }
 
     /**
-     * talk 要素を読み込んで StoryElement を返します。
-     * @param talkElement talk 要素
-     * @return
+     * 発言種別の文字列を TalkType に変換します。
+     * @param talkTypeString 発言種別の文字列 (type属性の値)
+     * @return TalkType。該当するものがなければ null。
      */
-    private StoryElement loadTalk(Element talkElement) {
-        Talk talk = new Talk();
-        
-        // メッセージ
-        loadMessageLines(talkElement, talk);
-        
-        // 発言種別
+    private TalkType toTalkType(String talkTypeString) {
         TalkType talkType = null;
-        String talkTypeString = talkElement.getAttributeNS(null, SchemaConstants.LN_TYPE);
         if (SchemaConstants.VAL_TALK_TYPE_PUBLIC.equals(talkTypeString)) {
             talkType = TalkType.PUBLIC;
         } else if (SchemaConstants.VAL_TALK_TYPE_WOLF.equals(talkTypeString)) {
@@ -373,44 +418,81 @@ public class ArchivedStoryLoader {
             talkType = TalkType.PRIVATE;
         } else if (SchemaConstants.VAL_TALK_TYPE_GRAVE.equals(talkTypeString)) {
             talkType = TalkType.GRAVE;
+        } else {
+            Moltonf.getLogger().warning("invalid village state : <talk type=\"" + talkTypeString + "\">");
         }
-        talk.setTalkType(talkType);
-        
-        // 発言人物
-        String avatarId = talkElement.getAttributeNS(null, SchemaConstants.LN_AVATAR_ID);
-        Avatar avatar = avatarMap.get(avatarId);
-        talk.setSpeaker(avatar);
-        
-        // TODO: 発言回数
-        
-        // 発言時刻
-        String timeString = talkElement.getAttributeNS(null, SchemaConstants.LN_TIME);
-        TimePart timePart = parseTime(timeString);
-        talk.setTime(timePart);
-        
-        return talk;
+        return talkType;
     }
     
     /**
-     * メッセージ行を読み込んで指定された StoryElement オブジェクトにセットします。
-     * @param elem メッセージを含む要素
-     * @param storyElement ここに読み込んだメッセージがセットされます。
+     * イベント系の要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は対象要素の START_ELEMENT にいることが前提です。
+     * @param period 読み込んだ StoryEvent が所属する StoryPeriod。
+     * @param eventFamily イベントの種別
+     * @return 読み込んだ結果の StoryEvent
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
-    private void loadMessageLines(Element elem, StoryElement storyElement) {
-        List<String> messageLines = new ArrayList<String>();
-        Element liElem = DomUtils.searchSiblingElementForward(elem.getFirstChild(),
-                SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_LI);
-        while (liElem != null) {
-            /* TODO: これでは <rawdata> が入ったときにうまくいかない */
-            String line = liElem.getTextContent();
-            messageLines.add(line);
-            
-            liElem = DomUtils.searchSiblingElementForward(liElem.getNextSibling(),
-                    SchemaConstants.NS_ARCHIVE, SchemaConstants.LN_LI);
+    private StoryEvent loadStoryEvent(StoryPeriod period, EventFamily eventFamily) throws XMLStreamException {
+        StoryEvent storyEvent = new StoryEvent();
+        storyEvent.setStoryPeriod(period);
+        storyEvent.setEventFamily(eventFamily);
+
+        List<String> messageLines = new ArrayList<String>();        
+        
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                QName elemName = staxReader.getName();
+                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                    messageLines.add(loadLi());
+                } else {
+                    skipElement();
+                }
+            }
         }
-        storyElement.setMessageLines(messageLines);
+        
+        storyEvent.setMessageLines(messageLines);
+        return storyEvent;
+    }
+    
+    /**
+     * li 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は li 要素の START_ELEMENT にいることが前提です。
+     * @return 読み込んだ結果の 1 行分の文字列
+     * @throws XMLStreamException
+     */
+    private String loadLi() throws XMLStreamException {
+        StringBuilder buf = new StringBuilder();
+        
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+// TODO: rawData 対応
+//                QName elemName = staxReader.getName();
+//                if (SchemaConstants.NAME_RAW_DATA.equals(elemName)) {
+//                    
+//                } else {
+                    skipElement();
+//                }
+            } else if (eventType == XMLStreamReader.CHARACTERS) {
+                buf.append(staxReader.getText());
+            }
+        }
+        
+        return buf.toString();
     }
 
+    /**
+     * 時刻文字列を解析します。
+     * @param timeString 時刻文字列
+     * @return 解析結果を格納した TimePart オブジェクト
+     */
     private TimePart parseTime(String timeString) {
         if (datatypeFactory == null) {
             try {
@@ -445,4 +527,19 @@ public class ArchivedStoryLoader {
         }
         return new TimePart(hour, minute, second, millisecond);
     }    
+    
+    /**
+     * 現在の要素以下をスキップします
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
+     */
+    private void skipElement() throws XMLStreamException {
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                skipElement();
+            }
+        }
+    }
 }
