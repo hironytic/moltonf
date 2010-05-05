@@ -25,11 +25,16 @@
 
 package com.hironytic.moltonf.model;
 
+import java.io.File;
+
 /**
  * Moltonf ワークスペースの情報を保持するクラス
  */
 public class Workspace {
 
+    /** このワークスペースが扱うストーリーが記述されたプレイデータアーカイブの XML ファイル */
+    private File archivedStoryFile;
+    
     /** このワークスペースが扱うストーリー */
     private Story story;
     
@@ -41,6 +46,14 @@ public class Workspace {
     }
     
     /**
+     * このワークスペースが扱うストーリーが記述されたプレイデータアーカイブの XML ファイルを取得します。
+     * @return プレイデータアーカイブのファイル
+     */
+    public File getArchivedStoryFile() {
+        return archivedStoryFile;
+    }
+
+    /**
      * このワークスペースが扱うストーリーを返します。
      * @return ストーリー
      */
@@ -48,6 +61,14 @@ public class Workspace {
         return story;
     }
     
+    /**
+     * このワークスペースが扱うストーリーが記述されたプレイデータアーカイブの XML ファイルをセットします。
+     * @param archivedStoryFile プレイデータアーカイブのファイル
+     */
+    public void setArchivedStoryFile(File archivedStoryFile) {
+        this.archivedStoryFile = archivedStoryFile;
+    }
+
     /**
      * このワークスペースが扱うストーリーをセットします。
      * @param story ストーリー

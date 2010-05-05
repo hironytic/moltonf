@@ -51,9 +51,9 @@ public class Resources extends ListResourceBundle {
             {"mainFrame.menu.help", "ヘルプ(H)"},
             
             //   コマンド
-            {"mainFrame.command.new", "新規(N)..."},
-            {"mainFrame.command.open", "開く(O)..."},
-            {"mainFrame.command.close", "閉じる(C)"},
+            {"mainFrame.command.new", "新規ワークスペース(N)..."},
+            {"mainFrame.command.open", "ワークスペースを開く(O)..."},
+            {"mainFrame.command.close", "ワークスペースを閉じる(C)"},
             {"mainFrame.command.exit", "終了(X)"},
             {"mainFrame.command.about", "バージョン情報(A)"},
         };

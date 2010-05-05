@@ -46,6 +46,7 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import com.hironytic.moltonf.Moltonf;
+import com.hironytic.moltonf.MoltonfException;
 
 /**
  * ユーザーの設定等を管理するクラス
@@ -53,13 +54,13 @@ import com.hironytic.moltonf.Moltonf;
 public class ProfileManager {
 
     /** 取得した外部データを保存するフォルダの名前 */
-    private static String EXTERNAL_DATA_FOLDER_NAME = "extdata";
+    private static final String EXTERNAL_DATA_FOLDER_NAME = "extdata";
     
     /** 取得済み外部データの URL とファイル名の対応を保存するファイルの名前 */
-    private static String EXTERNAL_DATA_MAP_FILE_NAME = "extdata.yaml";
+    private static final String EXTERNAL_DATA_MAP_FILE_NAME = "extdata.yaml";
     
     /** UTF-8 文字セットの名前 */
-    private static String CHARSET_UTF8 = "UTF-8";
+    private static final String CHARSET_UTF8 = "UTF-8";
     
     /** 設定等を保存するフォルダ */
     private File profileFolder;
@@ -112,70 +113,71 @@ public class ProfileManager {
      * ファイルデータを返します。
      * @param url 外部データの URL
      * @return 読み込んだ InputStream。データがない場合に null を返すことがあります。
-     * @throws IOException 入出力例外が発生した場合
      */
-    public InputStream getExternalData(URL url) throws IOException {
-        // プロファイルフォルダに取得しない場合はそのまま返す
-        if (externalDataFolder == null || externalDataMap == null) {
-            return url.openStream();
-        }
-        
-        String urlString = url.toString();
-        String fileName = externalDataMap.get(urlString);
-        if (fileName == null) {
-            // 未取得の場合。保存するファイル名を作成
-            fileName = url.getPath();
-            if (!fileName.isEmpty()) {
-                int dirSepIndex = fileName.lastIndexOf('/');
-                if (dirSepIndex > 0) {
-                    fileName = fileName.substring(dirSepIndex + 1);
-                }
-            }
-            File saveFile = new File(externalDataFolder, fileName);
-            if (saveFile.exists()) {
-                String baseName = fileName;
-                String extName = "";
-                int extSepIndex = fileName.lastIndexOf('.');
-                if (extSepIndex > 0) {
-                    baseName = fileName.substring(0, extSepIndex);
-                    extName = fileName.substring(extSepIndex + 1);
-                }
-                
-                long seqNum = new Date().getTime();
-                do {
-                    fileName = baseName + "." + String.format("%x", seqNum) + "." + extName;
-                    saveFile = new File(externalDataFolder, fileName);
-                    ++seqNum;
-                } while (saveFile.exists());
-            }
-    
-            // ファイルに保存
-            final int BUFFER_SIZE = 4096;
-            byte[] data = new byte[BUFFER_SIZE];
-            InputStream externalInStream = url.openStream();
-            OutputStream fileOutStream = new FileOutputStream(saveFile);
-            int readSize = externalInStream.read(data);
-            while (readSize > 0) {
-                fileOutStream.write(data, 0, readSize);
-                readSize = externalInStream.read(data);
-            }
-            fileOutStream.close();
-            externalInStream.close();
-            
-            // 保存したファイルを記憶
-            externalDataMap.put(urlString, fileName);
-            externalDataMapModified = true;
-        }
-        
-        File storedFile = new File(externalDataFolder, fileName);
+    public InputStream getExternalData(URL url) {
         try {
-            return new FileInputStream(storedFile);
-        } catch (FileNotFoundException ex) {
-            Moltonf.getLogger().warning("failed to load saved external data:" + urlString, ex);
-            throw new IOException(ex);
-        } catch (SecurityException ex) {
-            Moltonf.getLogger().warning("failed to load saved external data:" + urlString, ex);
-            throw new IOException(ex);
+            // プロファイルフォルダに取得しない場合はそのまま返す
+            if (externalDataFolder == null || externalDataMap == null) {
+                return url.openStream();
+            }
+            
+            String urlString = url.toString();
+            String fileName = externalDataMap.get(urlString);
+            if (fileName == null) {
+                // 未取得の場合。保存するファイル名を作成
+                fileName = url.getPath();
+                if (!fileName.isEmpty()) {
+                    int dirSepIndex = fileName.lastIndexOf('/');
+                    if (dirSepIndex > 0) {
+                        fileName = fileName.substring(dirSepIndex + 1);
+                    }
+                }
+                File saveFile = new File(externalDataFolder, fileName);
+                if (saveFile.exists()) {
+                    String baseName = fileName;
+                    String extName = "";
+                    int extSepIndex = fileName.lastIndexOf('.');
+                    if (extSepIndex > 0) {
+                        baseName = fileName.substring(0, extSepIndex);
+                        extName = fileName.substring(extSepIndex + 1);
+                    }
+                    
+                    long seqNum = new Date().getTime();
+                    do {
+                        fileName = baseName + "." + String.format("%x", seqNum) + "." + extName;
+                        saveFile = new File(externalDataFolder, fileName);
+                        ++seqNum;
+                    } while (saveFile.exists());
+                }
+        
+                // ファイルに保存
+                final int BUFFER_SIZE = 4096;
+                byte[] data = new byte[BUFFER_SIZE];
+                InputStream externalInStream = url.openStream();
+                OutputStream fileOutStream = new FileOutputStream(saveFile);
+                int readSize = externalInStream.read(data);
+                while (readSize > 0) {
+                    fileOutStream.write(data, 0, readSize);
+                    readSize = externalInStream.read(data);
+                }
+                fileOutStream.close();
+                externalInStream.close();
+                
+                // 保存したファイルを記憶
+                externalDataMap.put(urlString, fileName);
+                externalDataMapModified = true;
+            }
+            
+            File storedFile = new File(externalDataFolder, fileName);
+            try {
+                return new FileInputStream(storedFile);
+            } catch (FileNotFoundException ex) {
+                throw new MoltonfException("failed to load saved external data:" + urlString, ex);
+            } catch (SecurityException ex) {
+                throw new MoltonfException("failed to load saved external data:" + urlString, ex);
+            }
+        } catch (IOException ex) {
+            throw new MoltonfException("failed to load external data", ex);
         }
     }
 
@@ -219,12 +221,14 @@ public class ProfileManager {
                 File extMapFile = new File(profileFolder, EXTERNAL_DATA_MAP_FILE_NAME);
                 OutputStream outStream = new FileOutputStream(extMapFile);
                 OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, Charset.forName(CHARSET_UTF8));
-                
-                DumperOptions opt = new DumperOptions();
-                opt.setDefaultFlowStyle(FlowStyle.BLOCK);
-                Yaml yamlDumper = new Yaml(opt);
-                yamlDumper.dump(externalDataMap, outStreamWriter);
-                outStreamWriter.close();
+                try {
+                    DumperOptions opt = new DumperOptions();
+                    opt.setDefaultFlowStyle(FlowStyle.BLOCK);
+                    Yaml yamlDumper = new Yaml(opt);
+                    yamlDumper.dump(externalDataMap, outStreamWriter);
+                } finally {
+                    outStreamWriter.close();
+                }
             } catch (FileNotFoundException ex) {
                 Moltonf.getLogger().warning("failed to save external data map file", ex);
             } catch (SecurityException ex) {

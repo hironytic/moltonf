@@ -43,6 +43,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.UIManager;
 
+import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
@@ -153,6 +154,7 @@ public class MoltonfController {
         } catch (IllegalArgumentException ex) {
         } catch (MalformedURLException ex) {
         } catch (IOException ex) {
+        } catch (MoltonfException ex) {
         }
         
         // TODO: faceIconImage が null なら代替画像

@@ -62,6 +62,14 @@ public class Moltonf {
     }
     
     /**
+     * アプリケーションのバージョンを返します。
+     * @return バージョンを表す文字列
+     */
+    public static String getVersion() {
+        return MoltonfVersion.getVersion();
+    }
+    
+    /**
      * Moltonf アプリケーション用のログ出力用オブジェクトを返します。
      * @return Logger オブジェクト
      */

@@ -42,6 +42,7 @@ public class MoltonfException extends RuntimeException {
      */
     public MoltonfException(String message) {
         super(message);
+        Moltonf.getLogger().info("MoltonfException : " + message);
     }
 
     /**
@@ -49,6 +50,7 @@ public class MoltonfException extends RuntimeException {
      */
     public MoltonfException(Throwable cause) {
         super(cause);
+        Moltonf.getLogger().info("MoltonfException", cause);
     }
 
     /**
@@ -57,5 +59,6 @@ public class MoltonfException extends RuntimeException {
      */
     public MoltonfException(String message, Throwable cause) {
         super(message, cause);
+        Moltonf.getLogger().info("MoltonfException : " + message, cause);
     }
 }
