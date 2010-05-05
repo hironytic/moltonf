@@ -25,7 +25,6 @@
 
 package com.hironytic.moltonf.view.dialog;
 
-import java.awt.Container;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -104,9 +103,8 @@ public class NewWorkspaceDialog {
     public boolean showModally(Window owner) {
         isClosedByOk = false;
         comps.dialog = DialogHelper.createModalDialog(owner);
-        
-        Container contentPane = comps.dialog.getContentPane();
-        createContent(contentPane);
+
+        DialogHelper.setDialogContent(comps.dialog, createContent());
 
         addActionListeners();
         
@@ -118,51 +116,34 @@ public class NewWorkspaceDialog {
         return isClosedByOk;
     }
     
-    private void createContent(Container container) {
-        // アイキャッチテキスト
-        JLabel labelEyeCatch = new JLabel("プレイデータのアーカイブファイルを選択してください。");
-
+    private JComponent createContent() {
         // プレイデータファイル選択部分
-        JComponent selectPanel = createContentOfFileSelection();
+        JComponent selectPanel = createContentOfPlayData();
         
         // OK、キャンセルボタン
         JComponent buttonPanel = createContentOfButtons();
         
         // レイアウト
-        GroupLayout contentLayout = new GroupLayout(container);
-        contentLayout.setAutoCreateGaps(true);
-        contentLayout.setAutoCreateContainerGaps(true);
-        container.setLayout(contentLayout);
-        // -- 水平
-        Group hGroup = contentLayout.createSequentialGroup();
-        Group hGroup1 = contentLayout.createParallelGroup();
-        hGroup1.addComponent(labelEyeCatch);
-        hGroup1.addComponent(selectPanel);
-        hGroup1.addComponent(buttonPanel);
-        hGroup.addGroup(hGroup1);
-        contentLayout.setHorizontalGroup(hGroup);
-        // -- 垂直
-        Group vGroup = contentLayout.createSequentialGroup();
-        Group vGroup1 = contentLayout.createParallelGroup();
-        vGroup1.addComponent(labelEyeCatch);
-        vGroup.addGroup(vGroup1);
-        Group vGroup2 = contentLayout.createParallelGroup();
-        vGroup2.addComponent(selectPanel);
-        vGroup.addGroup(vGroup2);
-        Group vGroup3 = contentLayout.createParallelGroup();
-        vGroup3.addComponent(buttonPanel);
-        vGroup.addGroup(vGroup3);
-        contentLayout.setVerticalGroup(vGroup);
+        Box panel = new Box(BoxLayout.Y_AXIS);
+        panel.add(selectPanel);
+        panel.add(DialogHelper.createVertivalRigidArea(2));
+        panel.add(Box.createVerticalGlue());
+        panel.add(buttonPanel);
         
+        return panel;
     }
     
-    private JComponent createContentOfFileSelection() {
-        comps.textPlayDataFile = new JTextField();
+    private JComponent createContentOfPlayData() {
+        comps.textPlayDataFile = new JTextField(35);
         comps.buttonBrowse = new JButton("参照");
 
-        JPanel panel = new JPanel();
-        GroupLayout layout = new GroupLayout(panel);
-        panel.setLayout(layout);
+        Box eyeCatchPanel = new Box(BoxLayout.LINE_AXIS);
+        eyeCatchPanel.add(new JLabel("プレイデータのアーカイブファイルを選択してください。"));
+        eyeCatchPanel.add(Box.createHorizontalGlue());
+        
+        JPanel fileSelectPanel = new JPanel();
+        GroupLayout layout = new GroupLayout(fileSelectPanel);
+        fileSelectPanel.setLayout(layout);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(false);
         // --水平方向
@@ -181,21 +162,21 @@ public class NewWorkspaceDialog {
         vGroup1.addComponent(comps.buttonBrowse);
         vGroup.addGroup(vGroup1);
         layout.setVerticalGroup(vGroup);
+
+        Box panel = new Box(BoxLayout.Y_AXIS);
+        panel.setBorder(DialogHelper.createTitledBorder("プレイデータ"));
+        panel.add(eyeCatchPanel);
+        panel.add(DialogHelper.createVertivalRigidArea(1));
+        panel.add(fileSelectPanel);
         
         return panel;
     }
-    
+
     private JComponent createContentOfButtons() {
         comps.buttonOk = new JButton("OK");
         comps.buttonCancel = new JButton("キャンセル");
         
-        Box panel = new Box(BoxLayout.X_AXIS);
-        panel.add(Box.createHorizontalGlue());
-        panel.add(comps.buttonOk);
-        panel.add(Box.createHorizontalStrut(5));
-        panel.add(comps.buttonCancel);
-        
-        return panel;
+        return DialogHelper.createHorizontalButtons(comps.buttonOk, comps.buttonCancel);
     }
 
     /**
@@ -289,7 +270,7 @@ public class NewWorkspaceDialog {
         }
         
         NewWorkspaceDialog dialog = new NewWorkspaceDialog();
-        dialog.setPlayDataFile(new File("C:\\Hiron\\Work"));
+        //dialog.setPlayDataFile(new File("C:\\Hiron\\Work"));
         dialog.showModally(null);
         System.exit(0);
     }
