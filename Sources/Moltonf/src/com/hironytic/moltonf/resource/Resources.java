@@ -46,16 +46,30 @@ public class Resources extends ListResourceBundle {
             {"app.title", "Moltonf"},
             
             // メインフレーム
-            //   メニュー
+            // -- メニュー
             {"mainFrame.menu.file", "ファイル(F)"},
             {"mainFrame.menu.help", "ヘルプ(H)"},
             
-            //   コマンド
-            {"mainFrame.command.new", "新規ワークスペース(N)..."},
-            {"mainFrame.command.open", "ワークスペースを開く(O)..."},
-            {"mainFrame.command.close", "ワークスペースを閉じる(C)"},
+            // -- コマンド
+            {"mainFrame.command.newWorkspace", "新規ワークスペース(N)..."},
+            {"mainFrame.command.openWorkspace", "ワークスペースを開く(O)..."},
+            {"mainFrame.command.closeWorkspace", "ワークスペースを閉じる(C)"},
             {"mainFrame.command.exit", "終了(X)"},
             {"mainFrame.command.about", "バージョン情報(A)"},
+            
+            // ダイアログ共通
+            {"dialog.buttonOk", "OK"},
+            {"dialog.buttonCancel", "キャンセル"},
+            
+            // 新規ワークスペース作成ダイアログ
+            {"newWorkspaceDialog.title", "新規ワークスペースの作成"},
+            {"newWorkspaceDialog.browse", "参照(B)"},
+            {"newWorkspaceDialog.playData", "プレイデータ"},
+            {"newWorkspaceDialog.playData.eyeCatch", "観戦するプレイデータのアーカイブファイルを指定してください。"},
+            {"newWorkspaceDialog.browse.title", "アーカイブファイルの選択"},
+            {"newWorkspaceDialog.browse.btnApprove", "選択"},
+            {"newWorkspaceDialog.browser.xmlFilter", "XML ファイル"},
+            {"newWorkspaceDialog.warning.cannotReadPlayData", "指定されたアーカイブファイルが見つからないか、\n読み込むことができません。"},
         };
     }
 

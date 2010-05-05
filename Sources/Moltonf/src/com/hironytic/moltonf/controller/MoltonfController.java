@@ -46,9 +46,11 @@ import javax.swing.UIManager;
 import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Story;
+import com.hironytic.moltonf.model.Workspace;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.PeriodView;
+import com.hironytic.moltonf.view.dialog.NewWorkspaceDialog;
 
 /**
  * Moltonf アプリケーションのコントローラ
@@ -102,6 +104,12 @@ public class MoltonfController {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             
             mainFrame = new MainFrame();
+            mainFrame.getCommandActionNewWorkspace().addCommandListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    performNewWorkspace();
+                }
+            });
             mainFrame.getCommandActionExit().addCommandListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -187,6 +195,25 @@ public class MoltonfController {
      */
     public ProfileManager getProfileManager() {
         return profileManager;
+    }
+    
+    /**
+     * ユーザーが新規ワークスペースを選択したときの処理
+     */
+    private void performNewWorkspace() {
+        NewWorkspaceDialog newWorkspaceDialog = new NewWorkspaceDialog();
+        if (!newWorkspaceDialog.showModally(mainFrame)) {
+            return;
+        }
+        
+        Workspace workspace = new Workspace();
+        workspace.setArchivedStoryFile(newWorkspaceDialog.getPlayDataFile());
+        
+        // TODO: ワークスペースの保存先を選択する
+        // TODO: ワークスペースを保存する。
+        // TODO: ワークスペースを開いたときの処理に流す その中で performCloseWorkspace();
+        
+        
     }
     
     /**

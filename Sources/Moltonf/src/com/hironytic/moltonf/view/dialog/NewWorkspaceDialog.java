@@ -25,12 +25,15 @@
 
 package com.hironytic.moltonf.view.dialog;
 
+import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.ResourceBundle;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -38,15 +41,18 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.Group;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.util.DialogHelper;
 
 /**
@@ -101,80 +107,100 @@ public class NewWorkspaceDialog {
      * @return ユーザーが OK でダイアログを閉じたなら true、そうでなければ false
      */
     public boolean showModally(Window owner) {
+        ResourceBundle res = Moltonf.getResource();
+
         isClosedByOk = false;
         comps.dialog = DialogHelper.createModalDialog(owner);
 
-        DialogHelper.setDialogContent(comps.dialog, createContent());
-
+        DialogHelper.setDialogContent(comps.dialog, createContent(res));
+        comps.dialog.getRootPane().setDefaultButton(comps.buttonOk);
         addActionListeners();
-        
         updateValuesToDialog();
-        
+
+        comps.dialog.setTitle(res.getString("newWorkspaceDialog.title"));
         comps.dialog.pack();
+        comps.dialog.setLocationRelativeTo(owner);
+        
         comps.dialog.setVisible(true);
+
+        comps.dialog.dispose();
         
         return isClosedByOk;
     }
     
-    private JComponent createContent() {
+    /**
+     * ダイアログの内容を作成します。
+     * @return
+     */
+    private JComponent createContent(ResourceBundle res) {
         // プレイデータファイル選択部分
-        JComponent selectPanel = createContentOfPlayData();
+        Component selectContent = createContentOfPlayData(res);
         
         // OK、キャンセルボタン
-        JComponent buttonPanel = createContentOfButtons();
+        Component buttonContent = createContentOfButtons(res);
         
         // レイアウト
-        Box panel = new Box(BoxLayout.Y_AXIS);
-        panel.add(selectPanel);
-        panel.add(DialogHelper.createVertivalRigidArea(2));
-        panel.add(Box.createVerticalGlue());
-        panel.add(buttonPanel);
+        Box content = new Box(BoxLayout.Y_AXIS);
+        content.add(selectContent);
+        content.add(DialogHelper.createVertivalRigidArea(2));
+        content.add(Box.createVerticalGlue());
+        content.add(buttonContent);
         
-        return panel;
+        return content;
     }
     
-    private JComponent createContentOfPlayData() {
+    /**
+     * プレイデータ選択部分を作成します。
+     * @return
+     */
+    private JComponent createContentOfPlayData(ResourceBundle res) {
         comps.textPlayDataFile = new JTextField(35);
-        comps.buttonBrowse = new JButton("参照");
+        comps.buttonBrowse = new JButton(res.getString("newWorkspaceDialog.browse"));
+        comps.buttonBrowse.setMnemonic(KeyEvent.VK_B);
 
-        Box eyeCatchPanel = new Box(BoxLayout.LINE_AXIS);
-        eyeCatchPanel.add(new JLabel("プレイデータのアーカイブファイルを選択してください。"));
-        eyeCatchPanel.add(Box.createHorizontalGlue());
+        Box eyeCatchContent = new Box(BoxLayout.LINE_AXIS);
+        eyeCatchContent.add(new JLabel(res.getString("newWorkspaceDialog.playData.eyeCatch")));
+        eyeCatchContent.add(Box.createHorizontalGlue());
         
-        JPanel fileSelectPanel = new JPanel();
-        GroupLayout layout = new GroupLayout(fileSelectPanel);
-        fileSelectPanel.setLayout(layout);
-        layout.setAutoCreateGaps(true);
+        JPanel fileSelectContent = new JPanel();
+        GroupLayout layout = new GroupLayout(fileSelectContent);
+        fileSelectContent.setLayout(layout);
+        layout.setAutoCreateGaps(false);
         layout.setAutoCreateContainerGaps(false);
+        Component rigidArea = DialogHelper.createHorizontalRigidArea(1);
         // --水平方向
         Group hGroup = layout.createSequentialGroup();
         Group hGroup1 = layout.createParallelGroup();
         hGroup1.addComponent(comps.textPlayDataFile);
-        Group hGroup2 = layout.createParallelGroup();
-        hGroup2.addComponent(comps.buttonBrowse);
         hGroup.addGroup(hGroup1);
+        Group hGroup2 = layout.createParallelGroup();
+        hGroup2.addComponent(rigidArea);
         hGroup.addGroup(hGroup2);
+        Group hGroup3 = layout.createParallelGroup();
+        hGroup3.addComponent(comps.buttonBrowse);
+        hGroup.addGroup(hGroup3);
         layout.setHorizontalGroup(hGroup);
         // --垂直方向
         Group vGroup = layout.createSequentialGroup();
         Group vGroup1 = layout.createParallelGroup(Alignment.BASELINE);
         vGroup1.addComponent(comps.textPlayDataFile);
+        vGroup1.addComponent(rigidArea);
         vGroup1.addComponent(comps.buttonBrowse);
         vGroup.addGroup(vGroup1);
         layout.setVerticalGroup(vGroup);
 
-        Box panel = new Box(BoxLayout.Y_AXIS);
-        panel.setBorder(DialogHelper.createTitledBorder("プレイデータ"));
-        panel.add(eyeCatchPanel);
-        panel.add(DialogHelper.createVertivalRigidArea(1));
-        panel.add(fileSelectPanel);
+        Box content = new Box(BoxLayout.Y_AXIS);
+        content.setBorder(DialogHelper.createTitledBorder(res.getString("newWorkspaceDialog.playData")));
+        content.add(eyeCatchContent);
+        content.add(DialogHelper.createVertivalRigidArea(1));
+        content.add(fileSelectContent);
         
-        return panel;
+        return content;
     }
 
-    private JComponent createContentOfButtons() {
-        comps.buttonOk = new JButton("OK");
-        comps.buttonCancel = new JButton("キャンセル");
+    private JComponent createContentOfButtons(ResourceBundle res) {
+        comps.buttonOk = new JButton(res.getString("dialog.buttonOk"));
+        comps.buttonCancel = new JButton(res.getString("dialog.buttonCancel"));
         
         return DialogHelper.createHorizontalButtons(comps.buttonOk, comps.buttonCancel);
     }
@@ -204,6 +230,13 @@ public class NewWorkspaceDialog {
                 performCancel();
             }
         });
+        
+        comps.buttonBrowse.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                performBrowseArchive();
+            }
+        });
     }
     
     /**
@@ -225,6 +258,29 @@ public class NewWorkspaceDialog {
     }
     
     /**
+     * プレイデータ アーカイブファイルの参照ボタンが押されたときの処理
+     */
+    private void performBrowseArchive() {
+        ResourceBundle res = Moltonf.getResource();
+        File initialFile = null;
+        String playDataFilePath = comps.textPlayDataFile.getText();
+        if (!playDataFilePath.isEmpty()) {
+            initialFile = new File(playDataFilePath);
+        }
+        JFileChooser fileChooser = new JFileChooser(initialFile);
+        fileChooser.setDialogTitle(res.getString("newWorkspaceDialog.browse.title"));
+        fileChooser.setApproveButtonText(res.getString("newWorkspaceDialog.browse.btnApprove"));
+        FileFilter xmlFilter = new FileNameExtensionFilter(
+                res.getString("newWorkspaceDialog.browser.xmlFilter"),
+                "xml");
+        fileChooser.addChoosableFileFilter(xmlFilter);
+        if (fileChooser.showOpenDialog(comps.dialog) == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            comps.textPlayDataFile.setText(selectedFile.getAbsolutePath());
+        }
+    }
+    
+    /**
      * フィールド変数の内容をダイアログのコンポーネントに反映します。
      */
     private void updateValuesToDialog() {
@@ -242,36 +298,18 @@ public class NewWorkspaceDialog {
      * @return 入力値が不正な場合は false、そうでなければ true
      */
     private boolean updateValuesFromDialog() {
+        ResourceBundle res = Moltonf.getResource();
         String playDataFilePath = comps.textPlayDataFile.getText();
         playDataFile = new File(playDataFilePath);
         if (!playDataFile.isFile() || !playDataFile.canRead()) {
-            // TODO: よめんぞ
+            JOptionPane.showMessageDialog(comps.dialog,
+                    res.getString("newWorkspaceDialog.warning.cannotReadPlayData"),
+                    res.getString("newWorkspaceDialog.title"),
+                    JOptionPane.WARNING_MESSAGE);
+            comps.textPlayDataFile.requestFocusInWindow();
             return false;
         }
         
         return true;
-    }
-    
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        NewWorkspaceDialog dialog = new NewWorkspaceDialog();
-        //dialog.setPlayDataFile(new File("C:\\Hiron\\Work"));
-        dialog.showModally(null);
-        System.exit(0);
     }
 }

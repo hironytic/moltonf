@@ -43,13 +43,13 @@ import com.hironytic.moltonf.Moltonf;
 public class MainFrame extends JFrame {
 
     /** [新規ワークスペース] コマンドの Action */
-    private final CommandAction commandActionNew = new CommandAction("mainFrame.command.new", KeyEvent.VK_N);
+    private final CommandAction commandActionNewWorkspace = new CommandAction("mainFrame.command.newWorkspace", KeyEvent.VK_N);
     
-    /** [開く] コマンドの Action */
-    private final CommandAction commandActionOpen = new CommandAction("mainFrame.command.open", KeyEvent.VK_O);
+    /** [ワークスペースを開く] コマンドの Action */
+    private final CommandAction commandActionOpenWorkspace = new CommandAction("mainFrame.command.openWorkspace", KeyEvent.VK_O);
     
-    /** [閉じる] コマンドの Action */
-    private final CommandAction commandActionClose = new CommandAction("mainFrame.command.close", KeyEvent.VK_C);
+    /** [ワークスペースを閉じる] コマンドの Action */
+    private final CommandAction commandActionCloseWorkspace = new CommandAction("mainFrame.command.closeWorkspace", KeyEvent.VK_C);
     
     /** [終了] コマンドの Action */
     private final CommandAction commandActionExit = new CommandAction("mainFrame.command.exit", KeyEvent.VK_X);
@@ -91,9 +91,9 @@ public class MainFrame extends JFrame {
         menu = new JMenu(res.getString("mainFrame.menu.file"));
         menu.setMnemonic(KeyEvent.VK_F);
         menuBar.add(menu);
-        menu.add(commandActionNew);
-        menu.add(commandActionOpen);
-        menu.add(commandActionClose);
+        menu.add(commandActionNewWorkspace);
+        menu.add(commandActionOpenWorkspace);
+        menu.add(commandActionCloseWorkspace);
         menu.addSeparator();
         menu.add(commandActionExit);
 
@@ -107,27 +107,27 @@ public class MainFrame extends JFrame {
     }
 
     /**
-     * [新規] コマンドの CommandAction を取得します。
+     * [新規ワークスペース] コマンドの CommandAction を取得します。
      * @return CommandAction オブジェクト
      */
-    public CommandAction getCommandActionNew() {
-        return commandActionNew;
+    public CommandAction getCommandActionNewWorkspace() {
+        return commandActionNewWorkspace;
     }
 
     /**
-     * [開く] コマンドの CommandAction を取得します。
+     * [ワークスペースを開く] コマンドの CommandAction を取得します。
      * @return CommandAction オブジェクト
      */
-    public CommandAction getCommandActionOpen() {
-        return commandActionOpen;
+    public CommandAction getCommandActionOpenWorkspace() {
+        return commandActionOpenWorkspace;
     }
 
     /**
-     * [閉じる] コマンドの CommandAction を取得します。
+     * [ワークスペースを閉じる] コマンドの CommandAction を取得します。
      * @return CommandAction オブジェクト
      */
-    public CommandAction getCommandActionClose() {
-        return commandActionClose;
+    public CommandAction getCommandActionCloseWorkspace() {
+        return commandActionCloseWorkspace;
     }
 
     /**
