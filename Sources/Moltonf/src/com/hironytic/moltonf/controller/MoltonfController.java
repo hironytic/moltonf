@@ -33,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -73,6 +74,30 @@ public class MoltonfController {
     /** メインウィンドウ */
     private MainFrame mainFrame;
     
+    /** 現在開いているワークスペース */
+    private Workspace currentWorkspace;
+    
+    /** MoltonfController のコマンドハンドラとして用いる ActionListener */
+    private abstract class CommandActionListener implements ActionListener {
+        /**
+         * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+         */
+        @Override
+        public final void actionPerformed(ActionEvent e) {
+            try {
+                commandExecuted(e);
+            } catch (MoltonfException ex) {
+                // TODO: メッセージを出す？
+            }
+        }
+    
+        /**
+         * コマンドが実行されたときに呼び出されます。
+         * @param e
+         */
+        protected abstract void commandExecuted(ActionEvent e);
+    }
+    
     /**
      * Moltonf アプリケーションを実行します。
      * @param args アプリケーションの引数
@@ -81,63 +106,33 @@ public class MoltonfController {
         try {
             createProfileManager();
             
-            // 今は試しに第1引数で与えられたものを共通アーカイブ基盤のプレイデータとして読み込んでみる
-            if (args.length == 0) {
-                return;
-            }
-            String path = args[0];
-//            DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-//            docBuilderFactory.setNamespaceAware(true);
-//            docBuilderFactory.setValidating(false);
-//            DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-//            docBuilder.setEntityResolver(new ResourceEntityResolver());
-//            Document doc = docBuilder.parse(new File(path));
-//            Story story = ArchivedStoryLoader.load(doc);
-            InputStream inStream = new BufferedInputStream(
-                    new FileInputStream(new File(path)));
-            Story story = ArchivedStoryLoader.load(inStream);
-            
-            // 補完
-            story.setGraveIconImage(loadFaceIconImage(story.getGraveIconUri()));
-            List<Avatar> avatarList = story.getAvatarList();
-            for (Avatar avatar : avatarList) {
-                fillUpAvatar(avatar);
-            }
-            getProfileManager().save();
-            
-            Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);
-            
             // TODO:
             // システムのルックアンドフィールにしておく
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             
             mainFrame = new MainFrame();
-            mainFrame.getCommandActionNewWorkspace().addCommandListener(new ActionListener() {
+            mainFrame.getCommandActionNewWorkspace().addCommandListener(new CommandActionListener() {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void commandExecuted(ActionEvent e) {
                     performNewWorkspace();
                 }
             });
-            mainFrame.getCommandActionExit().addCommandListener(new ActionListener() {
+            mainFrame.getCommandActionOpenWorkspace().addCommandListener(new CommandActionListener() {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                protected void commandExecuted(ActionEvent e) {
+                    performOpenWorkspace();
+                }
+            });
+            mainFrame.getCommandActionExit().addCommandListener(new CommandActionListener() {
+                @Override
+                public void commandExecuted(ActionEvent e) {
                     performExit();
                 }
             });
             
             mainFrame.setLocationByPlatform(true);
-            
-            PeriodView periodView = new PeriodView();
-            mainFrame.add(periodView, BorderLayout.CENTER);
-            
             mainFrame.pack();
-            mainFrame.setBounds(100, 100, 600, 400);
-
-            periodView.setFont(font);
-            
-            periodView.getContentView().setStoryPeriod(story.getPeriods().get(3));
-            periodView.updateView();
-
+            mainFrame.setBounds(100, 100, 600, 400);    //TODO: アプリ設定
             mainFrame.setVisible(true);
             
         } catch (Exception e) {
@@ -219,6 +214,7 @@ public class MoltonfController {
         workspace.setArchivedStoryFile(newWorkspaceDialog.getPlayDataFile());
         
         // ワークスペースの保存先を選択
+        // TODO: デフォルトファイル名 村名+拡張子はどうか (例: F1999.mtfws)
         ResourceBundle res = Moltonf.getResource();
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle(res.getString("workspaceSaveDialog.title"));
@@ -234,20 +230,12 @@ public class MoltonfController {
         File workspaceFile = fileChooser.getSelectedFile();
         WorkspaceArchiver.save(workspaceFile, workspace);
         
-        // TODO: ワークスペースを開いたときの処理に流す その中で closeWorkspace する;
-        
-        
+        openWorkspace(workspaceFile);
     }
     
     /**
-     * ワークスペースを閉じるときの処理
+     * ワークスペースを開くときの処理
      */
-    private void performCloseWorkspace() {
-        // TODO: ワークスペースの保存
-        
-        // TODO: 閉じる
-    }
-    
     private void performOpenWorkspace() {
         ResourceBundle res = Moltonf.getResource();
         JFileChooser fileChooser = new JFileChooser();
@@ -267,11 +255,56 @@ public class MoltonfController {
         openWorkspace(workspaceFile);
     }
     
+    /**
+     * ワークスペースを開きます。
+     * @param workspaceFile ワークスペースファイル
+     */
     private void openWorkspace(File workspaceFile) {
-        performCloseWorkspace();
+        closeWorkspace();
+
+        // ワークスペースを開く
+        Workspace workspace = WorkspaceArchiver.load(workspaceFile);
         
-        // TODO: ワークスペースを開く
-       
+        // プレイデータ読み込み
+        Story story;
+        try {
+            File playDataFile = workspace.getArchivedStoryFile();
+            InputStream inStream = new BufferedInputStream(new FileInputStream(playDataFile));
+            story = ArchivedStoryLoader.load(inStream);
+        } catch (FileNotFoundException ex) {
+            throw new MoltonfException("Failed to open workspace file", ex);
+        }
+        workspace.setStory(story);
+        
+        // 補完
+        story.setGraveIconImage(loadFaceIconImage(story.getGraveIconUri()));
+        List<Avatar> avatarList = story.getAvatarList();
+        for (Avatar avatar : avatarList) {
+            fillUpAvatar(avatar);
+        }
+        getProfileManager().save(); // 画像キャッシュが変わったかもしれないので
+
+        currentWorkspace = workspace;
+        
+        // ピリオドビュー作成
+        PeriodView periodView = new PeriodView();
+        mainFrame.add(periodView, BorderLayout.CENTER);
+        Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);   // TODO: これはアプリ設定から
+        periodView.setFont(font);
+        
+        periodView.getContentView().setStoryPeriod(currentWorkspace.getStory().getPeriods().get(3));
+        periodView.updateView();
+        
+        mainFrame.validate();
+    }
+    
+    /**
+     * ワークスペースを閉じます。
+     */
+    private void closeWorkspace() {
+        // TODO: ワークスペースの保存
+        
+        // TODO: 閉じる
     }
     
     /**
