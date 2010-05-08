@@ -240,6 +240,41 @@ public class MoltonfController {
     }
     
     /**
+     * ワークスペースを閉じるときの処理
+     */
+    private void performCloseWorkspace() {
+        // TODO: ワークスペースの保存
+        
+        // TODO: 閉じる
+    }
+    
+    private void performOpenWorkspace() {
+        ResourceBundle res = Moltonf.getResource();
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle(res.getString("workspaceOpenDialog.title"));
+        FileFilter xmlFilter = new FileNameExtensionFilter(
+                res.getString("workspaceFilter.title"),
+                WORKSPACE_FILE_EXTENSION);
+        fileChooser.addChoosableFileFilter(xmlFilter);
+        if (fileChooser.showOpenDialog(mainFrame) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File workspaceFile = fileChooser.getSelectedFile();
+        
+        // TODO: ファイルが読めることの確認が必要
+        
+        openWorkspace(workspaceFile);
+    }
+    
+    private void openWorkspace(File workspaceFile) {
+        performCloseWorkspace();
+        
+        // TODO: ワークスペースを開く
+       
+    }
+    
+    /**
      * ユーザーが終了を選択したときの処理
      */
     private void performExit() {

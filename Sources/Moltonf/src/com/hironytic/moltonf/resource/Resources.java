@@ -71,8 +71,9 @@ public class Resources extends ListResourceBundle {
             {"newWorkspaceDialog.browser.xmlFilter", "XML ファイル"},
             {"newWorkspaceDialog.warning.cannotReadPlayData", "指定されたアーカイブファイルが見つからないか、\n読み込むことができません。"},
             
-            // ワークスペース保存ファイル選択ダイアログ
+            // ワークスペースファイル選択ダイアログ
             {"workspaceSaveDialog.title", "観戦データの保存先"},
+            {"workspaceOpenDialog.title", "観戦データを開く"},
         };
     }
 
