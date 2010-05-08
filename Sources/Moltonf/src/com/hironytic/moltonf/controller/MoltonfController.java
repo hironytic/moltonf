@@ -25,7 +25,6 @@
 
 package com.hironytic.moltonf.controller;
 
-import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -44,6 +43,9 @@ import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -73,6 +75,9 @@ public class MoltonfController {
     
     /** メインウィンドウ */
     private MainFrame mainFrame;
+
+    /** ストーリーを表示している部分のタブペイン */
+    private JTabbedPane periodTabbedPane;
     
     /** 現在開いているワークスペース */
     private Workspace currentWorkspace;
@@ -262,7 +267,7 @@ public class MoltonfController {
     private void openWorkspace(File workspaceFile) {
         closeWorkspace();
 
-        // ワークスペースを開く
+        // ワークスペース設定の読み込み
         Workspace workspace = WorkspaceArchiver.load(workspaceFile);
         
         // プレイデータ読み込み
@@ -276,7 +281,7 @@ public class MoltonfController {
         }
         workspace.setStory(story);
         
-        // 補完
+        // プレイデータの補完
         story.setGraveIconImage(loadFaceIconImage(story.getGraveIconUri()));
         List<Avatar> avatarList = story.getAvatarList();
         for (Avatar avatar : avatarList) {
@@ -288,7 +293,15 @@ public class MoltonfController {
         
         // ピリオドビュー作成
         PeriodView periodView = new PeriodView();
-        mainFrame.add(periodView, BorderLayout.CENTER);
+        periodTabbedPane = new JTabbedPane();
+        
+        periodTabbedPane.addTab("てすと", periodView); // TODO:
+        
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JPanel(), periodTabbedPane); // TODO: 左側ペイン
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(100);  // TODO:
+        mainFrame.setMainPane(splitPane);
+        
         Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);   // TODO: これはアプリ設定から
         periodView.setFont(font);
         
@@ -302,9 +315,14 @@ public class MoltonfController {
      * ワークスペースを閉じます。
      */
     private void closeWorkspace() {
-        // TODO: ワークスペースの保存
+        if (currentWorkspace != null) {
+            // TODO: ワークスペースの保存
+
+            currentWorkspace = null;
+        }
         
-        // TODO: 閉じる
+        mainFrame.setMainPane(null);
+        periodTabbedPane = null;
     }
     
     /**

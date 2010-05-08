@@ -25,6 +25,8 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -53,6 +55,9 @@ public class MainFrame extends JFrame {
     
     /** [バージョン情報] コマンドの Action */
     private final CommandAction commandActionAbout = new CommandAction("mainFrame.command.about", KeyEvent.VK_A);
+    
+    /** メインのコンポーネント */
+    private Component mainPane;
     
     /**
      * コンストラクタ
@@ -102,6 +107,21 @@ public class MainFrame extends JFrame {
         return menuBar;
     }
 
+    /**
+     * メインのコンポーネントをセットします。
+     * @param mainPane メインのコンポーネント。null を指定するとメインのコンポーネントを解除します。
+     */
+    public void setMainPane(Component mainPane) {
+        if (this.mainPane != null) {
+            remove(this.mainPane);
+        }
+        this.mainPane = mainPane;
+        if (mainPane != null) {
+            add(this.mainPane, BorderLayout.CENTER);
+        }
+        validate();
+    }
+    
     /**
      * [新規ワークスペース] コマンドの CommandAction を取得します。
      * @return CommandAction オブジェクト
