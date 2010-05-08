@@ -39,10 +39,15 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.Story;
@@ -58,6 +63,9 @@ import com.hironytic.moltonf.view.dialog.NewWorkspaceDialog;
 public class MoltonfController {
     /** デフォルトのユーザー設定格納フォルダの名前 */
     private static final String DEFAULT_PROFILE_FOLDER_NAME = ".moltonf";
+    
+    /** ワークスペースファイルの拡張子 */
+    private static final String WORKSPACE_FILE_EXTENSION = "mtfws";
     
     /** ユーザー設定等の管理を行うオブジェクト */
     private ProfileManager profileManager;
@@ -201,6 +209,7 @@ public class MoltonfController {
      * ユーザーが新規ワークスペースを選択したときの処理
      */
     private void performNewWorkspace() {
+        // ワークスペースの情報を設定
         NewWorkspaceDialog newWorkspaceDialog = new NewWorkspaceDialog();
         if (!newWorkspaceDialog.showModally(mainFrame)) {
             return;
@@ -209,9 +218,23 @@ public class MoltonfController {
         Workspace workspace = new Workspace();
         workspace.setArchivedStoryFile(newWorkspaceDialog.getPlayDataFile());
         
-        // TODO: ワークスペースの保存先を選択する
-        // TODO: ワークスペースを保存する。
-        // TODO: ワークスペースを開いたときの処理に流す その中で performCloseWorkspace();
+        // ワークスペースの保存先を選択
+        ResourceBundle res = Moltonf.getResource();
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle(res.getString("workspaceSaveDialog.title"));
+        FileFilter xmlFilter = new FileNameExtensionFilter(
+                res.getString("workspaceFilter.title"),
+                WORKSPACE_FILE_EXTENSION);
+        fileChooser.addChoosableFileFilter(xmlFilter);
+        if (fileChooser.showSaveDialog(mainFrame) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        // ワークスペースファイルへ保存
+        File workspaceFile = fileChooser.getSelectedFile();
+        WorkspaceArchiver.save(workspaceFile, workspace);
+        
+        // TODO: ワークスペースを開いたときの処理に流す その中で closeWorkspace する;
         
         
     }

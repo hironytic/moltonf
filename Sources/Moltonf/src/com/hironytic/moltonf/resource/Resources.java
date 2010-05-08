@@ -44,6 +44,7 @@ public class Resources extends ListResourceBundle {
         return new Object[][] {
             // アプリケーション全体
             {"app.title", "Moltonf"},
+            {"workspaceFilter.title", "観戦データ"},
             
             // メインフレーム
             // -- メニュー
@@ -51,9 +52,8 @@ public class Resources extends ListResourceBundle {
             {"mainFrame.menu.help", "ヘルプ(H)"},
             
             // -- コマンド
-            {"mainFrame.command.newWorkspace", "新規ワークスペース(N)..."},
-            {"mainFrame.command.openWorkspace", "ワークスペースを開く(O)..."},
-            {"mainFrame.command.closeWorkspace", "ワークスペースを閉じる(C)"},
+            {"mainFrame.command.newWorkspace", "新しい観戦(N)..."},
+            {"mainFrame.command.openWorkspace", "観戦データを開く(O)..."},
             {"mainFrame.command.exit", "終了(X)"},
             {"mainFrame.command.about", "バージョン情報(A)"},
             
@@ -62,14 +62,17 @@ public class Resources extends ListResourceBundle {
             {"dialog.buttonCancel", "キャンセル"},
             
             // 新規ワークスペース作成ダイアログ
-            {"newWorkspaceDialog.title", "新規ワークスペースの作成"},
+            {"newWorkspaceDialog.title", "新しい観戦データの作成"},
             {"newWorkspaceDialog.browse", "参照(B)"},
             {"newWorkspaceDialog.playData", "プレイデータ"},
             {"newWorkspaceDialog.playData.eyeCatch", "観戦するプレイデータのアーカイブファイルを指定してください。"},
-            {"newWorkspaceDialog.browse.title", "アーカイブファイルの選択"},
+            {"newWorkspaceDialog.browse.title", "プレイデータ アーカイブの選択"},
             {"newWorkspaceDialog.browse.btnApprove", "選択"},
             {"newWorkspaceDialog.browser.xmlFilter", "XML ファイル"},
             {"newWorkspaceDialog.warning.cannotReadPlayData", "指定されたアーカイブファイルが見つからないか、\n読み込むことができません。"},
+            
+            // ワークスペース保存ファイル選択ダイアログ
+            {"workspaceSaveDialog.title", "観戦データの保存先"},
         };
     }
 

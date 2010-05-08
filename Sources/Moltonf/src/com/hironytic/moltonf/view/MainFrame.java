@@ -48,9 +48,6 @@ public class MainFrame extends JFrame {
     /** [ワークスペースを開く] コマンドの Action */
     private final CommandAction commandActionOpenWorkspace = new CommandAction("mainFrame.command.openWorkspace", KeyEvent.VK_O);
     
-    /** [ワークスペースを閉じる] コマンドの Action */
-    private final CommandAction commandActionCloseWorkspace = new CommandAction("mainFrame.command.closeWorkspace", KeyEvent.VK_C);
-    
     /** [終了] コマンドの Action */
     private final CommandAction commandActionExit = new CommandAction("mainFrame.command.exit", KeyEvent.VK_X);
     
@@ -93,7 +90,6 @@ public class MainFrame extends JFrame {
         menuBar.add(menu);
         menu.add(commandActionNewWorkspace);
         menu.add(commandActionOpenWorkspace);
-        menu.add(commandActionCloseWorkspace);
         menu.addSeparator();
         menu.add(commandActionExit);
 
@@ -120,14 +116,6 @@ public class MainFrame extends JFrame {
      */
     public CommandAction getCommandActionOpenWorkspace() {
         return commandActionOpenWorkspace;
-    }
-
-    /**
-     * [ワークスペースを閉じる] コマンドの CommandAction を取得します。
-     * @return CommandAction オブジェクト
-     */
-    public CommandAction getCommandActionCloseWorkspace() {
-        return commandActionCloseWorkspace;
     }
 
     /**
