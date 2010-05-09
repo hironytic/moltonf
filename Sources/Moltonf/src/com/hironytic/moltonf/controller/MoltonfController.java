@@ -79,8 +79,14 @@ public class MoltonfController {
     /** ストーリーを表示している部分のタブペイン */
     private JTabbedPane periodTabbedPane;
     
+    /** 現在開いているワークスペースのファイルパス */
+    private File currentWorkspaceFile;
+    
     /** 現在開いているワークスペース */
     private Workspace currentWorkspace;
+    
+    /** 最後に保存したとき以降にワークスペースが変更されたかどうか */
+    private boolean isCurrentWorkspaceModified = false;
     
     /** MoltonfController のコマンドハンドラとして用いる ActionListener */
     private abstract class CommandActionListener implements ActionListener {
@@ -289,7 +295,9 @@ public class MoltonfController {
         }
         getProfileManager().save(); // 画像キャッシュが変わったかもしれないので
 
+        currentWorkspaceFile = workspaceFile;
         currentWorkspace = workspace;
+        isCurrentWorkspaceModified = false;
         
         // ピリオドビュー作成
         PeriodView periodView = new PeriodView();
@@ -315,11 +323,14 @@ public class MoltonfController {
      * ワークスペースを閉じます。
      */
     private void closeWorkspace() {
-        if (currentWorkspace != null) {
-            // TODO: ワークスペースの保存
-
-            currentWorkspace = null;
+        if (currentWorkspace != null && isCurrentWorkspaceModified) {
+            // ワークスペースの保存
+            WorkspaceArchiver.save(currentWorkspaceFile, currentWorkspace);
         }
+
+        currentWorkspaceFile = null;
+        currentWorkspace = null;
+        isCurrentWorkspaceModified = false;
         
         mainFrame.setMainPane(null);
         periodTabbedPane = null;
@@ -329,6 +340,7 @@ public class MoltonfController {
      * ユーザーが終了を選択したときの処理
      */
     private void performExit() {
+        closeWorkspace();
         mainFrame.dispose();
         System.exit(0);
     }
