@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -111,6 +112,7 @@ public class MessageComponent extends JComponent {
      */
     public MessageComponent() {
         lineHeightFactor = 1.3f; /* TODO: G国なら1.5f */
+        setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
     }
 
     /**

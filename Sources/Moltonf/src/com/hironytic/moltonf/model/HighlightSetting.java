@@ -37,6 +37,9 @@ public class HighlightSetting {
     /** 設定名 */
     private String name;
     
+    /** 有効かどうか */
+    private boolean isEnabled = true;
+    
     /** 正規表現で表されるマッチング文字列 */
     private String patternString = null;
     
@@ -58,7 +61,7 @@ public class HighlightSetting {
      * @return 有効なら true、無効なら false
      */
     public boolean isValid() {
-        return pattern != null && highlightColor != null;
+        return pattern != null && highlightColor != null && isEnabled;
     }
 
     /**
@@ -75,6 +78,22 @@ public class HighlightSetting {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * 有効フラグの値を取得します。
+     * @return 有効フラグの値
+     */
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    /**
+     * 有効フラグの値をセットします。
+     * @param isEnabled 有効フラグの値。真なら有効です。
+     */
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
     }
 
     /**
