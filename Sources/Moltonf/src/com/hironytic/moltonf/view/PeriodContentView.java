@@ -32,11 +32,13 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 
 import com.hironytic.moltonf.model.EventFamily;
+import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.StoryElement;
 import com.hironytic.moltonf.model.StoryEvent;
 import com.hironytic.moltonf.model.StoryPeriod;
@@ -86,6 +88,9 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     /** このパネルが表示する StoryPeriod */
     private StoryPeriod storyPeriod;
     
+    /** 強調表示設定 */
+    private List<HighlightSetting> highlightSettingList;
+    
     /**
      * コンストラクタ
      * @param storyPeriod パネルに表示する StoryPeriod オブジェクト
@@ -113,6 +118,14 @@ public class PeriodContentView extends JComponent implements MoltonfView {
         filterContent(displayFilter);
     }
     
+    /**
+     * このパネル内で表示する発言の強調表示設定をセットします。
+     * @param highlightSettingList 強調表示設定のリスト
+     */
+    public void setHighlightSettingList(List<HighlightSetting> highlightSettingList) {
+        this.highlightSettingList = highlightSettingList;
+    }
+
     /**
      * @see javax.swing.JComponent#setFont(java.awt.Font)
      */
@@ -185,6 +198,7 @@ public class PeriodContentView extends JComponent implements MoltonfView {
                     add(talkView);
                     talkView.setTalk(talk);
                     talkView.setAreaWidth(500); //TODO:
+                    talkView.setHighlightSettingList(highlightSettingList);
                     talkView.setFont(getFont());
                 }
             } else if (element instanceof StoryEvent) {

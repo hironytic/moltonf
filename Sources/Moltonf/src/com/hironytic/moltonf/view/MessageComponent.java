@@ -40,8 +40,12 @@ import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
+
+import com.hironytic.moltonf.model.HighlightSetting;
 
 /**
  * ストーリー中のテキストを表示するコンポーネント
@@ -54,6 +58,9 @@ public class MessageComponent extends JComponent {
 
     /** 1行の高さの係数（何倍するか) */
     private float lineHeightFactor;
+    
+    /** 強調表示設定のリスト */
+    private List<HighlightSetting> highlightSettingList;
     
     /** 1行のレイアウト情報 */
     private class LineLayout {
@@ -131,6 +138,14 @@ public class MessageComponent extends JComponent {
     }
     
    /**
+     * メッセージの強調表示設定をセットします。
+     * @param highlightSettingList 強調表示設定のリスト
+     */
+    public void setHighlightSettingList(List<HighlightSetting> highlightSettingList) {
+        this.highlightSettingList = highlightSettingList;
+    }
+
+    /**
      * コンポーネントに必要な領域のサイズを取得します。
      * @return コンポーネントに必要な領域のサイズを返します。
      */
@@ -163,11 +178,7 @@ public class MessageComponent extends JComponent {
                             fontMetrics.getDescent(),
                             fontMetrics.getLeading());
                 } else {
-                    AttributedString attributedString = new AttributedString(line);
-                    attributedString.addAttribute(TextAttribute.FONT, getFont());
-                    attributedString.addAttribute(TextAttribute.BACKGROUND, Paint.TRANSLUCENT);
-                    attributedString.addAttribute(TextAttribute.FOREGROUND, getForeground());
-                    
+                    AttributedString attributedString = makeAttributedString(line);
                     AttributedCharacterIterator charItr = attributedString.getIterator();
                     FontRenderContext frContext = g2.getFontRenderContext();
                     LineBreakMeasurer measurer = new LineBreakMeasurer(charItr, frContext);
@@ -187,6 +198,38 @@ public class MessageComponent extends JComponent {
         setPreferredSize(preferredSize);
         
         revalidate();
+    }
+    
+    /**
+     * 1行分の AttributedString を生成します。
+     * @param line 1行分のメッセージ文字列
+     * @return 生成した AttributedString
+     */
+    private AttributedString makeAttributedString(String line) {
+        AttributedString attributedString = new AttributedString(line);
+        attributedString.addAttribute(TextAttribute.FONT, getFont());
+        attributedString.addAttribute(TextAttribute.BACKGROUND, Paint.TRANSLUCENT);
+        attributedString.addAttribute(TextAttribute.FOREGROUND, getForeground());
+
+        // 強調表示
+        if (highlightSettingList != null) {
+            for (HighlightSetting highlightSetting : highlightSettingList) {
+                if (!highlightSetting.isValid()) {
+                    continue;
+                }
+                
+                Pattern pattern = highlightSetting.getPattern();
+                Matcher matcher = pattern.matcher(line);
+                while (matcher.find()) {
+                    attributedString.addAttribute(TextAttribute.FOREGROUND,
+                            highlightSetting.getHighlightColor(),
+                            matcher.start(),
+                            matcher.end());
+                }
+            }
+        }
+        
+        return attributedString;
     }
     
     /**

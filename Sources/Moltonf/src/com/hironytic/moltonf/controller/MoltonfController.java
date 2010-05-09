@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.controller;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -38,6 +39,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -53,6 +55,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
+import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.Workspace;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
@@ -312,6 +315,19 @@ public class MoltonfController {
         
         Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);   // TODO: これはアプリ設定から
         periodView.setFont(font);
+        // TODO: 強調表示設定はアプリ設定か
+        List<HighlightSetting> highlightSettingList = new ArrayList<HighlightSetting>();
+        HighlightSetting hlSetting;
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("【.*?】");    hlSetting.setHighlightColor(Color.RED);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("★");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("☆");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("●");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("○");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("▼");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("▽");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("■");    hlSetting.setHighlightColor(Color.ORANGE);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(Color.ORANGE);   highlightSettingList.add(hlSetting);
+        periodView.getContentView().setHighlightSettingList(highlightSettingList);
         
         periodView.getContentView().setStoryPeriod(currentWorkspace.getStory().getPeriods().get(3));
         periodView.updateView();

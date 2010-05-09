@@ -42,9 +42,11 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.ImageObserver;
 import java.util.Collections;
+import java.util.List;
 
 import javax.swing.JComponent;
 
+import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.util.TimePart;
@@ -161,6 +163,14 @@ public class TalkView extends JComponent implements MoltonfView {
      */
     public void setTalk(Talk talk) {
         this.talk = talk;
+    }
+
+    /**
+     * 発言の強調表示設定をセットします。
+     * @param highlightSettingList 強調表示設定のリスト
+     */
+    public void setHighlightSettingList(List<HighlightSetting> highlightSettingList) {
+        talkMessageComponent.setHighlightSettingList(highlightSettingList);
     }
     
     /**
