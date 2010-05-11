@@ -60,6 +60,7 @@ import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.Workspace;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.view.MainFrame;
+import com.hironytic.moltonf.view.PeriodContentView;
 import com.hironytic.moltonf.view.PeriodView;
 import com.hironytic.moltonf.view.dialog.NewWorkspaceDialog;
 
@@ -143,6 +144,20 @@ public class MoltonfController {
                     performExit();
                 }
             });
+            
+            // --test
+            mainFrame.getCommandActionAbout().addCommandListener(new CommandActionListener() {
+                @Override
+                protected void commandExecuted(ActionEvent e) {
+                    PeriodView periodView = (PeriodView)periodTabbedPane.getComponentAt(0);
+//                    int index = periodView.getContentView().getFirstVisibleStoryElementIndex();
+//                    Moltonf.getLogger().info("index : " + index);
+                    
+                    periodView.getContentView().setTalkTypeFilter(PeriodContentView.FILTER_TALK_WOLF);
+                    periodView.updateView();
+                }
+            });
+            // --test
             
             mainFrame.setLocationByPlatform(true);
             mainFrame.pack();

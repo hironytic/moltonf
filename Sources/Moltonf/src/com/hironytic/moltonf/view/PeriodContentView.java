@@ -30,13 +30,19 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
 
+import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.StoryElement;
@@ -53,6 +59,9 @@ public class PeriodContentView extends JComponent implements MoltonfView {
 
     /** 背景色 */
     private static final Color BG_COLOR = new Color(0x000000);
+    
+    /** StoryElement を表示するビューに対して StoryElement のインデックスを client property に設定する際のキー */
+    private static final String KEY_STORY_ELEMENT_INDEX = "Moltonf.storyElementIndex";
     
     /** フィルタリング定数：アナウンスイベント */
     public static final int FILTER_EVENT_ANNOUNCE = 0x0001;
@@ -75,55 +84,122 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     /** フィルタリング定数：墓下発言 */
     public static final int FILTER_TALK_GRAVE = 0x0800;
     
-    /** フィルタリング定数：すべて */
-    public static int FILTER_ALL =
-        FILTER_EVENT_ANNOUNCE |
-        FILTER_EVENT_ORDER |
-        FILTER_EVENT_EXTRA |
-        FILTER_TALK_PUBLIC |
-        FILTER_TALK_WOLF |
-        FILTER_TALK_PRIVATE |
-        FILTER_TALK_GRAVE;
+    /** このビューを表示するためのビューポートを持っているスクロールペイン */
+    private PeriodView periodView;
     
     /** このパネルが表示する StoryPeriod */
     private StoryPeriod storyPeriod;
+
+    /** 内容を再作成する必要があるかどうか */
+    private boolean isRebuildContentRequired;
+    
+    /** 表示する発言種別の組み合わせ。ただし 0 なら発言種別によるフィルタを行わない（すべて表示する） */
+    private int talkTypeFilter = 0;
+    
+    /** 表示するイベント種別の組み合わせ。ただし 0 ならイベント種別によるフィルタを行わない（すべて表示する） */
+    private int eventFamilyFilter = 0;
+    
+    /** 表示する発言者を含む Set。ただし null なら発言者によるフィルタを行わない（すべて表示する）*/
+    private Set<Avatar> speakerFilter = null;
     
     /** 強調表示設定 */
     private List<HighlightSetting> highlightSettingList;
     
     /**
      * コンストラクタ
-     * @param storyPeriod パネルに表示する StoryPeriod オブジェクト
+     * @param periodView このビューを表示するためのビューポートを持っているスクロールペイン
      */
-    public PeriodContentView() {
+    public PeriodContentView(PeriodView periodView) {
+        this.periodView = periodView;
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
 
     /**
-     * このパネルに表示する StoryPeriod オブジェクトをセットします。
-     * @param storyPeriod パネルに表示する StoryPeriod オブジェクト
+     * このビューが表示している StoryPeriod オブジェクトを返します。
+     * @return StoryPeriod オブジェクト 
+     */
+    public StoryPeriod getStoryPeriod() {
+        return storyPeriod;
+    }
+
+    /**
+     * このビューに表示する StoryPeriod オブジェクトをセットします。
+     * @param storyPeriod StoryPeriod オブジェクト
      */
     public void setStoryPeriod(StoryPeriod storyPeriod) {
-        setStoryPeriod(storyPeriod, FILTER_ALL);
+        this.storyPeriod = storyPeriod;
+        isRebuildContentRequired = true;
     }
     
     /**
-     * このパネルに表示する StoryPeriod オブジェクトをセットします。
-     * @param storyPeriod パネルに表示する StoryPeriod オブジェクト
-     * @param displayFilters フィルタリング定数の組み合わせ。
-     *                       指定したものが表示され、指定しなかったものが非表示になります。
+     * 発言種別フィルタの設定値を取得します。
+     * @return 表示する発言種別の組み合わせ。(FILTER_TALK_xxxxx の組み合わせ)
+     *         ただし、この値が 0 なら発言種別によるフィルタを行わないことを示します。
      */
-    public void setStoryPeriod(StoryPeriod storyPeriod, int displayFilter) {
-        this.storyPeriod = storyPeriod;
-        filterContent(displayFilter);
+    public int getTalkTypeFilter() {
+        return talkTypeFilter;
     }
-    
+
+    /**
+     * 発言種別フィルタの値をセットします。
+     * @param talkTypeFilter 表示する発言種別の組み合わせ。(FILTER_TALK_xxxxx の組み合わせ)
+     *                       ただし、発言種別によるフィルタを行わない場合は 0 を指定します。
+     */
+    public void setTalkTypeFilter(int talkTypeFilter) {
+        this.talkTypeFilter = talkTypeFilter;
+        isRebuildContentRequired = true;
+    }
+
+    /**
+     * イベント種別フィルタの設定値を取得します。
+     * @return 表示するイベント種別の組み合わせ。(FILTER_EVENT_xxxxx の組み合わせ)
+     *         ただし、この値が 0 ならイベント種別によるフィルタを行わないことを示します。
+     */
+    public int getEventFamilyFilter() {
+        return eventFamilyFilter;
+    }
+
+    /**
+     * イベント種別フィルタの値をセットします。
+     * @param eventFamilyFilter 表示するイベント種別の組み合わせ。(FILTER_EVENT_xxxxx の組み合わせ)
+     *                          ただし、イベント種別によるフィルタを行わない場合は 0 を指定します。
+     */
+    public void setEventFamilyFilter(int eventFamilyFilter) {
+        this.eventFamilyFilter = eventFamilyFilter;
+        isRebuildContentRequired = true;
+    }
+
+    /**
+     * 発言者フィルタの設定値を取得します。
+     * @return 表示する発言者が入った Set。
+     *         ただし、この値が null なら発言者によるフィルタを行わないことを示します。
+     */
+    public Set<Avatar> getSpeakerFilter() {
+        return speakerFilter;
+    }
+
+    /**
+     * 発言者フィルタの値をセットします。
+     * @param speakerFilter 表示する発言者が入った Set。
+     *                      ただし、発言者によるフィルタを行わない場合は null を指定します。
+     */
+    public void setSpeakerFilter(Set<Avatar> speakerFilter) {
+        this.speakerFilter = speakerFilter;
+        isRebuildContentRequired = true;
+    }
+
     /**
      * このパネル内で表示する発言の強調表示設定をセットします。
      * @param highlightSettingList 強調表示設定のリスト
      */
     public void setHighlightSettingList(List<HighlightSetting> highlightSettingList) {
         this.highlightSettingList = highlightSettingList;
+        
+        for (Component child : getComponents()) {
+            if (child instanceof TalkView) {
+                ((TalkView)child).setHighlightSettingList(highlightSettingList);
+            }
+        }
     }
 
     /**
@@ -141,20 +217,47 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     }
 
     /**
+     * 現在のビューポートの範囲に見えている先頭の StoryElement のインデックスを返します。
+     * @return 見えている先頭の StoryElement のインデックス。見つからなければ -1。
+     */
+    public int getFirstVisibleStoryElementIndex() {
+        JViewport viewPort = periodView.getViewport();
+        Point topLeft = viewPort.getViewPosition();
+        Component component = getComponentAt(topLeft);
+        if (component instanceof JComponent) {
+            Integer index = (Integer)((JComponent)component).getClientProperty(KEY_STORY_ELEMENT_INDEX);
+            if (index != null) {
+                return index;
+            }
+        }
+        
+        return -1;
+    }
+
+    /**
+     * 指定した StoryElement が見えるようにスクロールします。
+     * @param index StoryElement のインデックス
+     */
+    public void scrollToStoryElement(int index) {
+        // TODO:
+    }
+    
+    /**
      * 発言種別が発言系のフィルタにマッチするかどうか調べます。
      * @param talkType 発言種別 
-     * @param displayFilters 発言フィルタ（フィルタリング定数の組み合わせ）
      * @return マッチするなら true を返します。
      */
-    private boolean isMatchFilterOfTalk(TalkType talkType, int displayFilters) {
+    private boolean isMatchFilterOfTalk(TalkType talkType) {
         boolean isMatch = false;
-        if (talkType == TalkType.PUBLIC && (displayFilters & FILTER_TALK_PUBLIC) != 0) {
+        if (talkTypeFilter == 0) {
             isMatch = true;
-        } else if (talkType == TalkType.WOLF && (displayFilters & FILTER_TALK_WOLF) != 0) {
+        } else if (talkType == TalkType.PUBLIC && (talkTypeFilter & FILTER_TALK_PUBLIC) != 0) {
             isMatch = true;
-        } else if (talkType == TalkType.PRIVATE && (displayFilters & FILTER_TALK_PRIVATE) != 0) {
+        } else if (talkType == TalkType.WOLF && (talkTypeFilter & FILTER_TALK_WOLF) != 0) {
             isMatch = true;
-        } else if (talkType == TalkType.GRAVE && (displayFilters & FILTER_TALK_GRAVE) != 0) {
+        } else if (talkType == TalkType.PRIVATE && (talkTypeFilter & FILTER_TALK_PRIVATE) != 0) {
+            isMatch = true;
+        } else if (talkType == TalkType.GRAVE && (talkTypeFilter & FILTER_TALK_GRAVE) != 0) {
             isMatch = true;
         }
         return isMatch;
@@ -163,39 +266,65 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     /**
      * イベント種別がイベント系のフィルタにマッチするかどうか調べます。
      * @param eventFamily イベント種別
-     * @param displayFilters イベントフィルタ (フィルタリング定数の組み合わせ)
      * @return マッチするなら true を返します。
      */
-    private boolean isMatchFilterOfEvent(EventFamily eventFamily, int displayFilters) {
+    private boolean isMatchFilterOfEvent(EventFamily eventFamily) {
         boolean isMatch = false;
-        if (eventFamily == EventFamily.ANNOUNCE && (displayFilters & FILTER_EVENT_ANNOUNCE) != 0) {
+        if (eventFamilyFilter == 0) {
             isMatch = true;
-        } else if (eventFamily == EventFamily.ORDER && (displayFilters & FILTER_EVENT_ORDER) != 0) {
+        } else if (eventFamily == EventFamily.ANNOUNCE && (eventFamilyFilter & FILTER_EVENT_ANNOUNCE) != 0) {
             isMatch = true;
-        } else if (eventFamily == EventFamily.EXTRA && (displayFilters & FILTER_EVENT_EXTRA) != 0) {
+        } else if (eventFamily == EventFamily.ORDER && (eventFamilyFilter & FILTER_EVENT_ORDER) != 0) {
+            isMatch = true;
+        } else if (eventFamily == EventFamily.EXTRA && (eventFamilyFilter & FILTER_EVENT_EXTRA) != 0) {
             isMatch = true;
         }
         return isMatch;
     }
     
     /**
-     * 指定したフィルタで内容を更新します。
-     * @param displayFilters フィルタリング定数の組み合わせ。
-     *                       指定したものが表示され、指定しなかったものが非表示になります。
+     * 発言者が発言者フィルタにマッチするかどうか調べます。
+     * @param speaker 発言者
+     * @return マッチするなら true を返します。
      */
-    public void filterContent(int displayFilters) {
+    private boolean isMatchFilterOfSpeaker(Avatar speaker) {
+        boolean isMatch = false;
+        if (speakerFilter == null) {
+            isMatch = true;
+        } else if (speakerFilter.contains(speaker)) {
+            isMatch = true;
+        }
+        return isMatch;
+    }
+    
+    /**
+     * 内容を再作成します。
+     */
+    private void rebuildContent() {
+        
+        // スクロール位置があまり変わらないようにするため
+        int firstStoryElementIndex = getFirstVisibleStoryElementIndex();
+        JComponent scrollToComponent = null;
+        JComponent lastComponent = null;
+        
         removeAll();
 
         if (storyPeriod == null)
             return;
         
-        for (StoryElement element : storyPeriod.getStoryElements()) {
+        List<StoryElement> storyElements = storyPeriod.getStoryElements();
+        int elementsCount = storyElements.size();
+        for (int ix = 0; ix < elementsCount; ++ix) {
+            JComponent storyElementComponent = null;
+            StoryElement element = storyElements.get(ix);
             if (element instanceof Talk) {
                 Talk talk = (Talk)element;
                 TalkType talkType = talk.getTalkType();
-                if (isMatchFilterOfTalk(talkType, displayFilters)) {
+                Avatar speaker = talk.getSpeaker();
+                if (isMatchFilterOfTalk(talkType) && isMatchFilterOfSpeaker(speaker)) {
                     TalkView talkView = new TalkView();
                     add(talkView);
+                    storyElementComponent = talkView;
                     talkView.setTalk(talk);
                     talkView.setAreaWidth(500); //TODO:
                     talkView.setHighlightSettingList(highlightSettingList);
@@ -203,17 +332,62 @@ public class PeriodContentView extends JComponent implements MoltonfView {
                 }
             } else if (element instanceof StoryEvent) {
                 StoryEvent storyEvent = (StoryEvent)element;
-                if (isMatchFilterOfEvent(storyEvent.getEventFamily(), displayFilters)) {
+                EventFamily eventFamily = storyEvent.getEventFamily();
+                if (isMatchFilterOfEvent(eventFamily)) {
                     StoryEventView storyEventView = new StoryEventView();
                     add(storyEventView);
+                    storyElementComponent = storyEventView;
                     storyEventView.setStoryEvent(storyEvent);
                     storyEventView.setAreaWidth(500); // TODO:
                     storyEventView.setFont(getFont());
                 }
             }
+            
+            if (storyElementComponent != null) {
+                // インデックスを記憶させておく
+                storyElementComponent.putClientProperty(KEY_STORY_ELEMENT_INDEX, ix);
+
+                // 更新前のスクロールして見えている先頭にあったもの以降で
+                // 表示されたものが見えるようにスクロールする
+                if (scrollToComponent == null && ix >= firstStoryElementIndex) {
+                    scrollToComponent = storyElementComponent;
+                }
+                
+                lastComponent = storyElementComponent;
+            }
+        }
+        
+        if (scrollToComponent == null) {
+            scrollToComponent = lastComponent;
+        }
+        if (scrollToComponent != null) {
+            final JComponent component = scrollToComponent;
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    component.scrollRectToVisible(new Rectangle(component.getSize()));
+                }
+            });
         }
     }
     
+    /**
+     * @see com.hironytic.moltonf.view.MoltonfView#updateView()
+     */
+    @Override
+    public void updateView() {
+        if (isRebuildContentRequired) {
+            rebuildContent();
+            isRebuildContentRequired = false;
+        }
+        
+        for (Component child : getComponents()) {
+            if (child instanceof MoltonfView) {
+                ((MoltonfView)child).updateView();
+            }
+        }
+    }
+
     /**
      * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
      */
@@ -232,17 +406,5 @@ public class PeriodContentView extends JComponent implements MoltonfView {
         g2d.setColor(BG_COLOR);
         g2d.fill(paintRect);
         g2d.setColor(oldColor);
-    }
-
-    /**
-     * @see com.hironytic.moltonf.view.MoltonfView#updateView()
-     */
-    @Override
-    public void updateView() {
-        for (Component child : getComponents()) {
-            if (child instanceof MoltonfView) {
-                ((MoltonfView)child).updateView();
-            }
-        }
     }
 }

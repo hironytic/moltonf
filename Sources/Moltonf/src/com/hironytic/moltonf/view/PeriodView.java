@@ -54,7 +54,7 @@ public class PeriodView extends JScrollPane implements MoltonfView {
         contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         contentPanel.setBackground(BG_COLOR);
         setViewportView(contentPanel);
-        contentView = new PeriodContentView();
+        contentView = new PeriodContentView(this);
         contentPanel.add(contentView);
     }
 
