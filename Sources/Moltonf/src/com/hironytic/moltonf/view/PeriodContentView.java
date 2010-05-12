@@ -27,6 +27,7 @@ package com.hironytic.moltonf.view;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -39,6 +40,8 @@ import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
@@ -59,6 +62,9 @@ public class PeriodContentView extends JComponent implements MoltonfView {
 
     /** 背景色 */
     private static final Color BG_COLOR = new Color(0x000000);
+    
+    /** 外側の背景色 */
+    private static final Color OUTSIDE_BG_COLOR = new Color(0x776655);
     
     /** StoryElement を表示するビューに対して StoryElement のインデックスを client property に設定する際のキー */
     private static final String KEY_STORY_ELEMENT_INDEX = "Moltonf.storyElementIndex";
@@ -85,7 +91,7 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     public static final int FILTER_TALK_GRAVE = 0x0800;
     
     /** このビューを表示するためのビューポートを持っているスクロールペイン */
-    private PeriodView periodView;
+    private final JScrollPane scrollPane;
     
     /** このパネルが表示する StoryPeriod */
     private StoryPeriod storyPeriod;
@@ -107,13 +113,36 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     
     /**
      * コンストラクタ
-     * @param periodView このビューを表示するためのビューポートを持っているスクロールペイン
      */
-    public PeriodContentView(PeriodView periodView) {
-        this.periodView = periodView;
+    public PeriodContentView() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+        // スクロールペインの中に左右センタリングするためのパネルを挟む
+        JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        contentPanel.setBackground(OUTSIDE_BG_COLOR);
+        contentPanel.add(this);
+        scrollPane = new JScrollPane();
+        scrollPane.setViewportView(contentPanel);
     }
 
+    /**
+     * スクロールペインを取得します。
+     * @return
+     */
+    public JScrollPane getScrollPane() {
+        return scrollPane;
+    }
+    
+    /**
+     * PeriodContentView のスクロールペインから中に入っている PeriodContentView を得ます。
+     * @param scrollPane
+     * @return
+     */
+    public static PeriodContentView getPeriodViewInScrollPane(JScrollPane scrollPane) {
+        JPanel contentPanel = (JPanel)scrollPane.getViewport().getView();
+        return (PeriodContentView)contentPanel.getComponent(0);
+    }
+    
     /**
      * このビューが表示している StoryPeriod オブジェクトを返します。
      * @return StoryPeriod オブジェクト 
@@ -221,8 +250,9 @@ public class PeriodContentView extends JComponent implements MoltonfView {
      * @return 見えている先頭の StoryElement のインデックス。見つからなければ -1。
      */
     public int getFirstVisibleStoryElementIndex() {
-        JViewport viewPort = periodView.getViewport();
+        JViewport viewPort = scrollPane.getViewport();
         Point topLeft = viewPort.getViewPosition();
+        topLeft.x = 0;
         Component component = getComponentAt(topLeft);
         if (component instanceof JComponent) {
             Integer index = (Integer)((JComponent)component).getClientProperty(KEY_STORY_ELEMENT_INDEX);

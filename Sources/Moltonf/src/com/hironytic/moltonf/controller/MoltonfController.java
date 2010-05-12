@@ -46,6 +46,7 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
@@ -61,7 +62,6 @@ import com.hironytic.moltonf.model.Workspace;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.PeriodContentView;
-import com.hironytic.moltonf.view.PeriodView;
 import com.hironytic.moltonf.view.dialog.NewWorkspaceDialog;
 
 /**
@@ -149,12 +149,9 @@ public class MoltonfController {
             mainFrame.getCommandActionAbout().addCommandListener(new CommandActionListener() {
                 @Override
                 protected void commandExecuted(ActionEvent e) {
-                    PeriodView periodView = (PeriodView)periodTabbedPane.getComponentAt(0);
-//                    int index = periodView.getContentView().getFirstVisibleStoryElementIndex();
-//                    Moltonf.getLogger().info("index : " + index);
-                    
-                    periodView.getContentView().setTalkTypeFilter(PeriodContentView.FILTER_TALK_WOLF);
-                    periodView.updateView();
+                    PeriodContentView periodContentView = getCurrentPeriodContentView();
+                    periodContentView.setTalkTypeFilter(PeriodContentView.FILTER_TALK_WOLF);
+                    periodContentView.updateView();
                 }
             });
             // --test
@@ -318,10 +315,10 @@ public class MoltonfController {
         isCurrentWorkspaceModified = false;
         
         // ピリオドビュー作成
-        PeriodView periodView = new PeriodView();
+        PeriodContentView periodContentView = new PeriodContentView();
         periodTabbedPane = new JTabbedPane();
         
-        periodTabbedPane.addTab("てすと", periodView); // TODO:
+        periodTabbedPane.addTab("てすと", periodContentView.getScrollPane()); // TODO:
         
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JPanel(), periodTabbedPane); // TODO: 左側ペイン
         splitPane.setOneTouchExpandable(true);
@@ -329,7 +326,7 @@ public class MoltonfController {
         mainFrame.setMainPane(splitPane);
         
         Font font = new Font("ＭＳ Ｐゴシック", Font.PLAIN, 16);   // TODO: これはアプリ設定から
-        periodView.setFont(font);
+        periodContentView.setFont(font);
         // TODO: 強調表示設定はアプリ設定か
         List<HighlightSetting> highlightSettingList = new ArrayList<HighlightSetting>();
         HighlightSetting hlSetting;
@@ -342,10 +339,10 @@ public class MoltonfController {
         hlSetting = new HighlightSetting(); hlSetting.setPatternString("▽");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
         hlSetting = new HighlightSetting(); hlSetting.setPatternString("■");    hlSetting.setHighlightColor(Color.ORANGE);   highlightSettingList.add(hlSetting);
         hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(Color.ORANGE);   highlightSettingList.add(hlSetting);
-        periodView.getContentView().setHighlightSettingList(highlightSettingList);
+        periodContentView.setHighlightSettingList(highlightSettingList);
         
-        periodView.getContentView().setStoryPeriod(currentWorkspace.getStory().getPeriods().get(3));
-        periodView.updateView();
+        periodContentView.setStoryPeriod(currentWorkspace.getStory().getPeriods().get(3));
+        periodContentView.updateView();
         
         mainFrame.validate();
     }
@@ -365,6 +362,29 @@ public class MoltonfController {
         
         mainFrame.setMainPane(null);
         periodTabbedPane = null;
+    }
+    
+    /**
+     * 指定されたインデックスのタブの PeriodContentView を返します。
+     * @param tabIndex タブのインデックス
+     * @return 指定したタブの PeriodContentView オブジェクトを返します。
+     */
+    private PeriodContentView getPeriodContentViewAt(int tabIndex) {
+        JScrollPane scrollPane = (JScrollPane)periodTabbedPane.getComponent(tabIndex);
+        return PeriodContentView.getPeriodViewInScrollPane(scrollPane);
+    }
+    
+    /**
+     * 現在表示しているタブの PeriodContentView を返します。
+     * @return 現在表示しているタブの PeriodContentView を返します。
+     */
+    private PeriodContentView getCurrentPeriodContentView() {
+        int tabIndex = periodTabbedPane.getSelectedIndex();
+        if (tabIndex >= 0) {
+            return getPeriodContentViewAt(tabIndex);
+        } else {
+            return null;
+        }
     }
     
     /**
