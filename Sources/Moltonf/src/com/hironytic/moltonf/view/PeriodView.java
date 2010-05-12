@@ -55,10 +55,10 @@ import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 
 /**
- * 1単位期間分のストーリーの内容を表示するクラス。 (スクロールする内容)
+ * 1単位期間分のストーリーの内容を表示するクラス。
  */
 @SuppressWarnings("serial")
-public class PeriodContentView extends JComponent implements MoltonfView {
+public class PeriodView extends JComponent implements MoltonfView {
 
     /** 背景色 */
     private static final Color BG_COLOR = new Color(0x000000);
@@ -114,7 +114,7 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     /**
      * コンストラクタ
      */
-    public PeriodContentView() {
+    public PeriodView() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // スクロールペインの中に左右センタリングするためのパネルを挟む
@@ -134,13 +134,13 @@ public class PeriodContentView extends JComponent implements MoltonfView {
     }
     
     /**
-     * PeriodContentView のスクロールペインから中に入っている PeriodContentView を得ます。
+     * PeriodView のスクロールペインから中に入っている PeriodView を得ます。
      * @param scrollPane
      * @return
      */
-    public static PeriodContentView getPeriodViewInScrollPane(JScrollPane scrollPane) {
+    public static PeriodView getPeriodView(JScrollPane scrollPane) {
         JPanel contentPanel = (JPanel)scrollPane.getViewport().getView();
-        return (PeriodContentView)contentPanel.getComponent(0);
+        return (PeriodView)contentPanel.getComponent(0);
     }
     
     /**
