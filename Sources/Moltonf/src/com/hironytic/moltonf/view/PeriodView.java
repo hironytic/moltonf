@@ -246,12 +246,27 @@ public class PeriodView extends JComponent implements MoltonfView {
     }
 
     /**
-     * 現在のビューポートの範囲に見えている先頭の StoryElement のインデックスを返します。
+     * スクロールにより見えている範囲の左上の座標を返します。
+     * @return 左上の座標。マイナスになることもあります。
+     */
+    public Point getScrollPosition() {
+        JViewport viewPort = scrollPane.getViewport();
+        Point topLeft = viewPort.getViewPosition();
+        
+        // topLeft は間に挟んだ JPanel の座標系なので、
+        // これを PeriodView の座標系になおす
+        Point periodViewLocation = getLocation();
+        topLeft.translate(-periodViewLocation.x, -periodViewLocation.y);
+
+        return topLeft;
+    }
+    
+    /**
+     * スクロールにより見えている範囲の先頭の StoryElement のインデックスを返します。
      * @return 見えている先頭の StoryElement のインデックス。見つからなければ -1。
      */
     public int getFirstVisibleStoryElementIndex() {
-        JViewport viewPort = scrollPane.getViewport();
-        Point topLeft = viewPort.getViewPosition();
+        Point topLeft = getScrollPosition();
         topLeft.x = 0;
         Component component = getComponentAt(topLeft);
         if (component instanceof JComponent) {
@@ -333,9 +348,19 @@ public class PeriodView extends JComponent implements MoltonfView {
     private void rebuildContent() {
         
         // スクロール位置があまり変わらないようにするため
-        int firstStoryElementIndex = getFirstVisibleStoryElementIndex();
+        // 元のスクロール位置にある StoryElement を記憶しておく
+        int firstStoryElementIndex = -1;
+        int firstStoryElementY = 0;
+        Point topLeft = getScrollPosition();
+        Component component = getComponentAt(0, topLeft.y);
+        if (component instanceof JComponent) {
+            firstStoryElementIndex = (Integer)((JComponent)component).getClientProperty(KEY_STORY_ELEMENT_INDEX);
+            firstStoryElementY = topLeft.y - component.getLocation().y;
+        }
+        
         JComponent scrollToComponent = null;
         JComponent lastComponent = null;
+        int scrollToComponentTop =  0;
         
         removeAll();
 
@@ -381,6 +406,9 @@ public class PeriodView extends JComponent implements MoltonfView {
                 // 表示されたものが見えるようにスクロールする
                 if (scrollToComponent == null && ix >= firstStoryElementIndex) {
                     scrollToComponent = storyElementComponent;
+                    if (ix == firstStoryElementIndex) {
+                        scrollToComponentTop = firstStoryElementY;
+                    }
                 }
                 
                 lastComponent = storyElementComponent;
@@ -391,11 +419,12 @@ public class PeriodView extends JComponent implements MoltonfView {
             scrollToComponent = lastComponent;
         }
         if (scrollToComponent != null) {
-            final JComponent component = scrollToComponent;
+            final JComponent scrollComponent = scrollToComponent;
+            final Rectangle scrollRect = new Rectangle(0, scrollToComponentTop, scrollToComponent.getWidth(), 1);
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    component.scrollRectToVisible(new Rectangle(component.getSize()));
+                    scrollComponent.scrollRectToVisible(scrollRect);
                 }
             });
         }
