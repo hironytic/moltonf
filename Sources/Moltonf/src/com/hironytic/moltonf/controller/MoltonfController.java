@@ -45,7 +45,6 @@ import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -63,6 +62,7 @@ import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.view.MainFrame;
 import com.hironytic.moltonf.view.PeriodView;
 import com.hironytic.moltonf.view.dialog.NewWorkspaceDialog;
+import com.hironytic.moltonf.view.sidebar.FilterSideBar;
 
 /**
  * Moltonf アプリケーションのコントローラ
@@ -82,6 +82,9 @@ public class MoltonfController {
 
     /** ストーリーを表示している部分のタブペイン */
     private JTabbedPane periodTabbedPane;
+    
+    /** サイドバーを表示している部分のタブペイン */
+    private JTabbedPane sideBarTabbedPane;
     
     /** 現在開いているワークスペースのファイルパス */
     private File currentWorkspaceFile;
@@ -314,13 +317,18 @@ public class MoltonfController {
         currentWorkspace = workspace;
         isCurrentWorkspaceModified = false;
         
+        // サイドバー作成
+        sideBarTabbedPane = new JTabbedPane();
+        FilterSideBar filterSideBar = new FilterSideBar();
+        sideBarTabbedPane.addTab("フィルター", filterSideBar);   // TODO:
+        
         // ピリオドビュー作成
         PeriodView periodView = new PeriodView();
         periodTabbedPane = new JTabbedPane();
         
         periodTabbedPane.addTab("てすと", periodView.getScrollPane()); // TODO:
         
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JPanel(), periodTabbedPane); // TODO: 左側ペイン
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sideBarTabbedPane, periodTabbedPane);
         splitPane.setOneTouchExpandable(true);
         splitPane.setDividerLocation(100);  // TODO:
         mainFrame.setMainPane(splitPane);

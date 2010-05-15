@@ -74,6 +74,9 @@ public class Resources extends ListResourceBundle {
             // ワークスペースファイル選択ダイアログ
             {"workspaceSaveDialog.title", "観戦データの保存先"},
             {"workspaceOpenDialog.title", "観戦データを開く"},
+            
+            // フィルター サイドバー
+            {"filterSideBar.talkTypeFilter", "発言種別"},
         };
     }
 

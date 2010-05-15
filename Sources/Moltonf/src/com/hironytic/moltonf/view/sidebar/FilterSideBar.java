@@ -1,0 +1,83 @@
+/*
+ * Moltonf
+ *
+ * Copyright (c) 2010 Project Moltonf
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+package com.hironytic.moltonf.view.sidebar;
+
+import java.util.List;
+import java.util.ResourceBundle;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+
+import com.hironytic.moltonf.Moltonf;
+import com.hironytic.moltonf.model.Avatar;
+import com.hironytic.moltonf.util.DialogHelper;
+
+/**
+ * サイドバー「フィルタ－」のクラス
+ */
+public class FilterSideBar extends SideBar {
+
+    /** ストーリーに登場する人物のリスト */
+    private List<Avatar> avatarList;
+    
+    /**
+     * コンストラクタ
+     */
+    public FilterSideBar() {
+        ResourceBundle res = Moltonf.getResource();
+        setContent(createContent(res));
+    }
+    
+    /**
+     * ストーリーに登場する人物のリストをセットします。
+     * @param avatarList 登場人物のリスト
+     */
+    public void setAvatarList(List<Avatar> avatarList) {
+        this.avatarList = avatarList;
+    }
+    
+    /**
+     * サイドバーの内容を作成します。
+     * @param res リソースオブジェクト
+     * @return 作成した内容を返します。
+     */
+    private JComponent createContent(ResourceBundle res) {
+        Box talkTypeFilterPane = new Box(BoxLayout.Y_AXIS);
+        talkTypeFilterPane.setBorder(DialogHelper.createTitledBorder(res.getString("filterSideBar.talkTypeFilter")));
+        talkTypeFilterPane.add(new JCheckBox("通常発言")); // TODO: リソース化
+        talkTypeFilterPane.add(new JCheckBox("狼のささやき"));
+        talkTypeFilterPane.add(new JCheckBox("独り言"));
+        talkTypeFilterPane.add(new JCheckBox("墓下発言"));
+        
+        Box content = new Box(BoxLayout.Y_AXIS);
+        content.add(talkTypeFilterPane);
+        return content;
+    }
+    
+    
+}
