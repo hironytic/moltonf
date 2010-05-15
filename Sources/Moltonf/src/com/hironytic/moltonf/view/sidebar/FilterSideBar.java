@@ -40,10 +40,14 @@ import com.hironytic.moltonf.util.DialogHelper;
 /**
  * サイドバー「フィルタ－」のクラス
  */
+@SuppressWarnings("serial")
 public class FilterSideBar extends SideBar {
 
     /** ストーリーに登場する人物のリスト */
     private List<Avatar> avatarList;
+    
+    /** 発言者フィルタのペイン */
+    private Box speakerFilterPane;
     
     /**
      * コンストラクタ
@@ -67,17 +71,44 @@ public class FilterSideBar extends SideBar {
      * @return 作成した内容を返します。
      */
     private JComponent createContent(ResourceBundle res) {
+        speakerFilterPane = new Box(BoxLayout.Y_AXIS);
+        speakerFilterPane.setBorder(DialogHelper.createTitledBorder(res.getString("filterSideBar.speakerFilter")));
+        if (avatarList != null) {
+            for (Avatar speaker : avatarList) {
+                speakerFilterPane.add(new JCheckBox(speaker.getShortName()));
+            }
+        }
+        
         Box talkTypeFilterPane = new Box(BoxLayout.Y_AXIS);
         talkTypeFilterPane.setBorder(DialogHelper.createTitledBorder(res.getString("filterSideBar.talkTypeFilter")));
-        talkTypeFilterPane.add(new JCheckBox("通常発言")); // TODO: リソース化
-        talkTypeFilterPane.add(new JCheckBox("狼のささやき"));
-        talkTypeFilterPane.add(new JCheckBox("独り言"));
-        talkTypeFilterPane.add(new JCheckBox("墓下発言"));
+        talkTypeFilterPane.add(new JCheckBox(res.getString("filterSideBar.talkTypeFilter.public")));
+        talkTypeFilterPane.add(new JCheckBox(res.getString("filterSideBar.talkTypeFilter.wolf")));
+        talkTypeFilterPane.add(new JCheckBox(res.getString("filterSideBar.talkTypeFilter.private")));
+        talkTypeFilterPane.add(new JCheckBox(res.getString("filterSideBar.talkTypeFilter.grave")));
+     
+        Box eventFamilyFilterPane = new Box(BoxLayout.Y_AXIS);
+        eventFamilyFilterPane.setBorder(DialogHelper.createTitledBorder(res.getString("filterSideBar.eventFamilyFilter")));
+        eventFamilyFilterPane.add(new JCheckBox(res.getString("filterSideBar.eventFamilyFilter.announce")));
+        eventFamilyFilterPane.add(new JCheckBox(res.getString("filterSideBar.eventFamilyFilter.extra")));
+        eventFamilyFilterPane.add(new JCheckBox(res.getString("filterSideBar.eventFamilyFilter.order")));
         
         Box content = new Box(BoxLayout.Y_AXIS);
+        content.add(speakerFilterPane);
         content.add(talkTypeFilterPane);
+        content.add(eventFamilyFilterPane);
         return content;
     }
     
-    
+    /**
+     * サイドバーの内容の更新を行います。
+     */
+    public void updateContent() {
+        // TODO: やる必要があるときだけやる
+        speakerFilterPane.removeAll();
+        if (avatarList != null) {
+            for (Avatar speaker : avatarList) {
+                speakerFilterPane.add(new JCheckBox(speaker.getShortName()));
+            }
+        }
+    }
 }

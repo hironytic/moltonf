@@ -320,7 +320,9 @@ public class MoltonfController {
         // サイドバー作成
         sideBarTabbedPane = new JTabbedPane();
         FilterSideBar filterSideBar = new FilterSideBar();
+        filterSideBar.setAvatarList(currentWorkspace.getStory().getAvatarList());
         sideBarTabbedPane.addTab("フィルター", filterSideBar);   // TODO:
+        filterSideBar.updateContent();
         
         // ピリオドビュー作成
         PeriodView periodView = new PeriodView();

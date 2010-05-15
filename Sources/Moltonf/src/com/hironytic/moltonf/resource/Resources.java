@@ -76,7 +76,17 @@ public class Resources extends ListResourceBundle {
             {"workspaceOpenDialog.title", "観戦データを開く"},
             
             // フィルター サイドバー
+            {"filterSideBar.speakerFilter", "人物"},
             {"filterSideBar.talkTypeFilter", "発言種別"},
+            {"filterSideBar.talkTypeFilter.public", "通常発言"},
+            {"filterSideBar.talkTypeFilter.wolf", "狼のささやき"},
+            {"filterSideBar.talkTypeFilter.private", "独り言"},
+            {"filterSideBar.talkTypeFilter.grave", "墓下発言"},
+            {"filterSideBar.eventFamilyFilter", "イベント種別"},
+            {"filterSideBar.eventFamilyFilter.announce", "アナウンス"},
+            {"filterSideBar.eventFamilyFilter.extra", "特殊能力系"},
+            {"filterSideBar.eventFamilyFilter.order", "操作系"},
+            
         };
     }
 
