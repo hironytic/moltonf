@@ -123,6 +123,9 @@ public class TalkView extends JComponent implements MoltonfView {
     /** このビューが扱う発言 */
     private Talk talk;
     
+    /** ビューの更新が必要かどうか */
+    private boolean isUpdateRequired = false;
+    
     /** コンポーネントに必要な領域のサイズ */
     private Dimension2DFloat areaSize = new Dimension2DFloat();
     
@@ -163,6 +166,7 @@ public class TalkView extends JComponent implements MoltonfView {
      */
     public void setTalk(Talk talk) {
         this.talk = talk;
+        isUpdateRequired = true;
     }
 
     /**
@@ -352,6 +356,11 @@ public class TalkView extends JComponent implements MoltonfView {
      */
     @Override
     public void updateView() {
+        if (!isUpdateRequired) {
+            return;
+        }
+        isUpdateRequired = false;
+        
         if (talk == null) {
             return;
         }

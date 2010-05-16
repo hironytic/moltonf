@@ -75,7 +75,7 @@ public class PeriodView extends JComponent implements MoltonfView {
     private StoryPeriod storyPeriod;
 
     /** 内容を再作成する必要があるかどうか */
-    private boolean isRebuildContentRequired;
+    private boolean isRebuildContentRequired = false;
     
     /** 表示する発言種別の組み合わせ。ただし null なら発言種別によるフィルタを行わない（すべて表示する） */
     private Set<TalkType> talkTypeFilter = null;
@@ -85,6 +85,9 @@ public class PeriodView extends JComponent implements MoltonfView {
     
     /** 表示する発言者を含む Set。ただし null なら発言者によるフィルタを行わない（すべて表示する）*/
     private Set<Avatar> speakerFilter = null;
+    
+    /** 内容のフィルタリングの変更の必要があるかどうか */
+    private boolean isRebuildFilterRequired = false;
     
     /** 強調表示設定 */
     private List<HighlightSetting> highlightSettingList;
@@ -154,7 +157,7 @@ public class PeriodView extends JComponent implements MoltonfView {
      */
     public void setTalkTypeFilter(Set<TalkType> talkTypeFilter) {
         this.talkTypeFilter = talkTypeFilter;
-        isRebuildContentRequired = true;
+        isRebuildFilterRequired = true;
     }
 
     /**
@@ -173,7 +176,7 @@ public class PeriodView extends JComponent implements MoltonfView {
      */
     public void setEventFamilyFilter(Set<EventFamily> eventFamilyFilter) {
         this.eventFamilyFilter = eventFamilyFilter;
-        isRebuildContentRequired = true;
+        isRebuildFilterRequired = true;
     }
 
     /**
@@ -192,7 +195,7 @@ public class PeriodView extends JComponent implements MoltonfView {
      */
     public void setSpeakerFilter(Set<Avatar> speakerFilter) {
         this.speakerFilter = speakerFilter;
-        isRebuildContentRequired = true;
+        isRebuildFilterRequired = true;
     }
 
     /**
@@ -314,22 +317,6 @@ public class PeriodView extends JComponent implements MoltonfView {
      * 内容を再作成します。
      */
     private void rebuildContent() {
-        
-        // スクロール位置があまり変わらないようにするため
-        // 元のスクロール位置にある StoryElement を記憶しておく
-        int firstStoryElementIndex = -1;
-        int firstStoryElementY = 0;
-        Point topLeft = getScrollPosition();
-        Component component = getComponentAt(0, topLeft.y);
-        if (component instanceof JComponent) {
-            firstStoryElementIndex = (Integer)((JComponent)component).getClientProperty(KEY_STORY_ELEMENT_INDEX);
-            firstStoryElementY = topLeft.y - component.getLocation().y;
-        }
-        
-        JComponent scrollToComponent = null;
-        JComponent lastComponent = null;
-        int scrollToComponentTop =  0;
-        
         removeAll();
 
         if (storyPeriod == null)
@@ -339,49 +326,126 @@ public class PeriodView extends JComponent implements MoltonfView {
         int elementsCount = storyElements.size();
         for (int ix = 0; ix < elementsCount; ++ix) {
             JComponent storyElementComponent = null;
+            boolean isVisible = false;
             StoryElement element = storyElements.get(ix);
             if (element instanceof Talk) {
                 Talk talk = (Talk)element;
+                TalkView talkView = new TalkView();
+                add(talkView);
+                storyElementComponent = talkView;
+                talkView.setTalk(talk);
+                talkView.setAreaWidth(500); //TODO:
+                talkView.setHighlightSettingList(highlightSettingList);
+                talkView.setFont(getFont());
                 TalkType talkType = talk.getTalkType();
                 Avatar speaker = talk.getSpeaker();
                 if (isMatchFilterOfTalk(talkType) && isMatchFilterOfSpeaker(speaker)) {
-                    TalkView talkView = new TalkView();
-                    add(talkView);
-                    storyElementComponent = talkView;
-                    talkView.setTalk(talk);
-                    talkView.setAreaWidth(500); //TODO:
-                    talkView.setHighlightSettingList(highlightSettingList);
-                    talkView.setFont(getFont());
+                    isVisible = true;
                 }
             } else if (element instanceof StoryEvent) {
                 StoryEvent storyEvent = (StoryEvent)element;
+                StoryEventView storyEventView = new StoryEventView();
+                add(storyEventView);
+                storyElementComponent = storyEventView;
+                storyEventView.setStoryEvent(storyEvent);
+                storyEventView.setAreaWidth(500); // TODO:
+                storyEventView.setFont(getFont());
                 EventFamily eventFamily = storyEvent.getEventFamily();
                 if (isMatchFilterOfEvent(eventFamily)) {
-                    StoryEventView storyEventView = new StoryEventView();
-                    add(storyEventView);
-                    storyElementComponent = storyEventView;
-                    storyEventView.setStoryEvent(storyEvent);
-                    storyEventView.setAreaWidth(500); // TODO:
-                    storyEventView.setFont(getFont());
+                    isVisible = true;
                 }
             }
             
             if (storyElementComponent != null) {
                 // インデックスを記憶させておく
                 storyElementComponent.putClientProperty(KEY_STORY_ELEMENT_INDEX, ix);
+                
+                storyElementComponent.setVisible(isVisible);
+            }
+        }
+    }
+    
+    /**
+     * 指定された位置にある可視の子コンポーネントを返します。
+     * @param x X座標
+     * @param y Y座標
+     * @return 表示されている子コンポーネント。
+     *         その位置に可視の子コンポーネントが見つからなければ null を返します。
+     */
+    private Component getVisibleChildComponentAt(int x, int y) {
+        int componentCount = getComponentCount();
+        for (int ix = 0; ix < componentCount; ++ix) {
+            Component comp = getComponent(ix);
+            if (comp.isVisible() && comp.contains(x - comp.getX(), y - comp.getY())) {
+                return comp;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * フィルタリング状態を再構成します。
+     */
+    private void rebuildFilter() {
+        // スクロール位置があまり変わらないようにするため
+        // 元のスクロール位置にある StoryElement を記憶しておく
+        int firstStoryElementIndex = -1;
+        int firstStoryElementY = 0;
+        Point topLeft = getScrollPosition();
+        Component component = getVisibleChildComponentAt(0, topLeft.y);
+        if (component instanceof JComponent) {
+            Integer storyElementIndex = (Integer)((JComponent)component).getClientProperty(KEY_STORY_ELEMENT_INDEX);
+            if (storyElementIndex != null) {
+                firstStoryElementIndex = storyElementIndex.intValue();
+                firstStoryElementY = topLeft.y - component.getLocation().y;
+            }
+        }
+        
+        JComponent scrollToComponent = null;
+        JComponent lastComponent = null;
+        int scrollToComponentTop =  0;
+        
+        if (storyPeriod == null)
+            return;
+        
+        List<StoryElement> storyElements = storyPeriod.getStoryElements();
+        int componentCount = getComponentCount();
+        for (int ix = 0; ix < componentCount; ++ix) {
+            JComponent comp = (JComponent)getComponent(ix);
+            Integer storyElementIndex = (Integer)comp.getClientProperty(KEY_STORY_ELEMENT_INDEX);
+            if (storyElementIndex != null) {
+                boolean isVisible = false;
+                StoryElement element = storyElements.get(storyElementIndex);
+                if (element instanceof Talk) {
+                    Talk talk = (Talk)element;
+                    TalkType talkType = talk.getTalkType();
+                    Avatar speaker = talk.getSpeaker();
+                    if (isMatchFilterOfTalk(talkType) && isMatchFilterOfSpeaker(speaker)) {
+                        isVisible = true;
+                    }
+                } else if (element instanceof StoryEvent) {
+                    StoryEvent storyEvent = (StoryEvent)element;
+                    EventFamily eventFamily = storyEvent.getEventFamily();
+                    if (isMatchFilterOfEvent(eventFamily)) {
+                        isVisible = true;
+                    }
+                }
+                comp.setVisible(isVisible);
 
                 // 更新前のスクロールして見えている先頭にあったもの以降で
                 // 表示されたものが見えるようにスクロールする
-                if (scrollToComponent == null && ix >= firstStoryElementIndex) {
-                    scrollToComponent = storyElementComponent;
-                    if (ix == firstStoryElementIndex) {
+                if (isVisible && scrollToComponent == null && storyElementIndex >= firstStoryElementIndex) {
+                    scrollToComponent = comp;
+                    if (storyElementIndex == firstStoryElementIndex) {
                         scrollToComponentTop = firstStoryElementY;
                     }
                 }
                 
-                lastComponent = storyElementComponent;
+                lastComponent = comp;
             }
         }
+        
+        revalidate();
         
         if (scrollToComponent == null) {
             scrollToComponent = lastComponent;
@@ -408,8 +472,14 @@ public class PeriodView extends JComponent implements MoltonfView {
     @Override
     public void updateView() {
         if (isRebuildContentRequired) {
-            rebuildContent();
             isRebuildContentRequired = false;
+            isRebuildFilterRequired = false;
+            rebuildContent();
+        }
+        
+        if (isRebuildFilterRequired) {
+            isRebuildFilterRequired = false;
+            rebuildFilter();
         }
         
         for (Component child : getComponents()) {
