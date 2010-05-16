@@ -29,10 +29,13 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
+import com.hironytic.moltonf.view.MoltonfView;
+
 /**
  * サイドバーの基底クラス
  */
-public abstract class SideBar extends JScrollPane {
+@SuppressWarnings("serial")
+public abstract class SideBar extends JScrollPane implements MoltonfView {
 
     public SideBar() {
     }

@@ -69,27 +69,6 @@ public class PeriodView extends JComponent implements MoltonfView {
     /** StoryElement を表示するビューに対して StoryElement のインデックスを client property に設定する際のキー */
     private static final String KEY_STORY_ELEMENT_INDEX = "Moltonf.storyElementIndex";
     
-    /** フィルタリング定数：アナウンスイベント */
-    public static final int FILTER_EVENT_ANNOUNCE = 0x0001;
-    
-    /** フィルタリング定数：操作系イベント */
-    public static final int FILTER_EVENT_ORDER = 0x0002;
-    
-    /** フィルタリング定数：能力系イベント */
-    public static final int FILTER_EVENT_EXTRA = 0x0004;
-    
-    /** フィルタリング定数：通常発言 */
-    public static final int FILTER_TALK_PUBLIC = 0x0100;
-    
-    /** フィルタリング定数：狼発言 */
-    public static final int FILTER_TALK_WOLF = 0x0200;
-    
-    /** フィルタリング定数：独り言 */
-    public static final int FILTER_TALK_PRIVATE = 0x0400;
-    
-    /** フィルタリング定数：墓下発言 */
-    public static final int FILTER_TALK_GRAVE = 0x0800;
-    
     /** このビューを表示するためのビューポートを持っているスクロールペイン */
     private final JScrollPane scrollPane;
     
@@ -99,11 +78,11 @@ public class PeriodView extends JComponent implements MoltonfView {
     /** 内容を再作成する必要があるかどうか */
     private boolean isRebuildContentRequired;
     
-    /** 表示する発言種別の組み合わせ。ただし 0 なら発言種別によるフィルタを行わない（すべて表示する） */
-    private int talkTypeFilter = 0;
+    /** 表示する発言種別の組み合わせ。ただし null なら発言種別によるフィルタを行わない（すべて表示する） */
+    private Set<TalkType> talkTypeFilter = null;
     
-    /** 表示するイベント種別の組み合わせ。ただし 0 ならイベント種別によるフィルタを行わない（すべて表示する） */
-    private int eventFamilyFilter = 0;
+    /** 表示するイベント種別の組み合わせ。ただし null ならイベント種別によるフィルタを行わない（すべて表示する） */
+    private Set<EventFamily> eventFamilyFilter = null;
     
     /** 表示する発言者を含む Set。ただし null なら発言者によるフィルタを行わない（すべて表示する）*/
     private Set<Avatar> speakerFilter = null;
@@ -162,38 +141,38 @@ public class PeriodView extends JComponent implements MoltonfView {
     
     /**
      * 発言種別フィルタの設定値を取得します。
-     * @return 表示する発言種別の組み合わせ。(FILTER_TALK_xxxxx の組み合わせ)
-     *         ただし、この値が 0 なら発言種別によるフィルタを行わないことを示します。
+     * @return 表示する発言種別の組み合わせ。
+     *         ただし、この値が null なら発言種別によるフィルタを行わないことを示します。
      */
-    public int getTalkTypeFilter() {
+    public Set<TalkType> getTalkTypeFilter() {
         return talkTypeFilter;
     }
 
     /**
      * 発言種別フィルタの値をセットします。
-     * @param talkTypeFilter 表示する発言種別の組み合わせ。(FILTER_TALK_xxxxx の組み合わせ)
-     *                       ただし、発言種別によるフィルタを行わない場合は 0 を指定します。
+     * @param talkTypeFilter 表示する発言種別の組み合わせ。
+     *                       ただし、発言種別によるフィルタを行わない場合は null を指定します。
      */
-    public void setTalkTypeFilter(int talkTypeFilter) {
+    public void setTalkTypeFilter(Set<TalkType> talkTypeFilter) {
         this.talkTypeFilter = talkTypeFilter;
         isRebuildContentRequired = true;
     }
 
     /**
      * イベント種別フィルタの設定値を取得します。
-     * @return 表示するイベント種別の組み合わせ。(FILTER_EVENT_xxxxx の組み合わせ)
-     *         ただし、この値が 0 ならイベント種別によるフィルタを行わないことを示します。
+     * @return 表示するイベント種別の組み合わせ。
+     *         ただし、この値が null ならイベント種別によるフィルタを行わないことを示します。
      */
-    public int getEventFamilyFilter() {
+    public Set<EventFamily> getEventFamilyFilter() {
         return eventFamilyFilter;
     }
 
     /**
      * イベント種別フィルタの値をセットします。
-     * @param eventFamilyFilter 表示するイベント種別の組み合わせ。(FILTER_EVENT_xxxxx の組み合わせ)
-     *                          ただし、イベント種別によるフィルタを行わない場合は 0 を指定します。
+     * @param eventFamilyFilter 表示するイベント種別の組み合わせ。
+     *                          ただし、イベント種別によるフィルタを行わない場合は null を指定します。
      */
-    public void setEventFamilyFilter(int eventFamilyFilter) {
+    public void setEventFamilyFilter(Set<EventFamily> eventFamilyFilter) {
         this.eventFamilyFilter = eventFamilyFilter;
         isRebuildContentRequired = true;
     }
@@ -294,15 +273,9 @@ public class PeriodView extends JComponent implements MoltonfView {
      */
     private boolean isMatchFilterOfTalk(TalkType talkType) {
         boolean isMatch = false;
-        if (talkTypeFilter == 0) {
+        if (talkTypeFilter == null) {
             isMatch = true;
-        } else if (talkType == TalkType.PUBLIC && (talkTypeFilter & FILTER_TALK_PUBLIC) != 0) {
-            isMatch = true;
-        } else if (talkType == TalkType.WOLF && (talkTypeFilter & FILTER_TALK_WOLF) != 0) {
-            isMatch = true;
-        } else if (talkType == TalkType.PRIVATE && (talkTypeFilter & FILTER_TALK_PRIVATE) != 0) {
-            isMatch = true;
-        } else if (talkType == TalkType.GRAVE && (talkTypeFilter & FILTER_TALK_GRAVE) != 0) {
+        } else if (talkTypeFilter.contains(talkType)) {
             isMatch = true;
         }
         return isMatch;
@@ -315,13 +288,9 @@ public class PeriodView extends JComponent implements MoltonfView {
      */
     private boolean isMatchFilterOfEvent(EventFamily eventFamily) {
         boolean isMatch = false;
-        if (eventFamilyFilter == 0) {
+        if (eventFamilyFilter == null) {
             isMatch = true;
-        } else if (eventFamily == EventFamily.ANNOUNCE && (eventFamilyFilter & FILTER_EVENT_ANNOUNCE) != 0) {
-            isMatch = true;
-        } else if (eventFamily == EventFamily.ORDER && (eventFamilyFilter & FILTER_EVENT_ORDER) != 0) {
-            isMatch = true;
-        } else if (eventFamily == EventFamily.EXTRA && (eventFamilyFilter & FILTER_EVENT_EXTRA) != 0) {
+        } else if (eventFamilyFilter.contains(eventFamily)) {
             isMatch = true;
         }
         return isMatch;
@@ -420,10 +389,11 @@ public class PeriodView extends JComponent implements MoltonfView {
         }
         if (scrollToComponent != null) {
             final JComponent scrollComponent = scrollToComponent;
-            final Rectangle scrollRect = new Rectangle(0, scrollToComponentTop, scrollToComponent.getWidth(), 1);
+            final int top = scrollToComponentTop;
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
+                    Rectangle scrollRect = new Rectangle(0, top, scrollComponent.getWidth(), 1);
                     scrollComponent.scrollRectToVisible(scrollRect);
                 }
             });

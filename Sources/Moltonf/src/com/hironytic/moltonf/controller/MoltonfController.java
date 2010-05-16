@@ -40,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -57,6 +58,7 @@ import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Story;
+import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.model.Workspace;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.view.MainFrame;
@@ -86,6 +88,12 @@ public class MoltonfController {
     /** サイドバーを表示している部分のタブペイン */
     private JTabbedPane sideBarTabbedPane;
     
+    /** フィルターサイドバー */
+    private FilterSideBar filterSideBar;
+    
+    /** フィルターを管理するオブジェクト */
+    private FilterManager filterManager;
+    
     /** 現在開いているワークスペースのファイルパス */
     private File currentWorkspaceFile;
     
@@ -114,6 +122,13 @@ public class MoltonfController {
          * @param e
          */
         protected abstract void commandExecuted(ActionEvent e);
+    }
+    
+    /**
+     * コンストラクタ
+     */
+    public MoltonfController() {
+        filterManager = new FilterManager(this);        
     }
     
     /**
@@ -153,7 +168,7 @@ public class MoltonfController {
                 @Override
                 protected void commandExecuted(ActionEvent e) {
                     PeriodView periodView = getCurrentPeriodView();
-                    periodView.setTalkTypeFilter(PeriodView.FILTER_TALK_WOLF);
+                    periodView.setTalkTypeFilter(EnumSet.of(TalkType.WOLF));
                     periodView.updateView();
                 }
             });
@@ -319,10 +334,11 @@ public class MoltonfController {
         
         // サイドバー作成
         sideBarTabbedPane = new JTabbedPane();
-        FilterSideBar filterSideBar = new FilterSideBar();
-        filterSideBar.setAvatarList(currentWorkspace.getStory().getAvatarList());
+        filterSideBar = new FilterSideBar();
+        filterSideBar.addFilterChangeListener(filterManager);
+        filterSideBar.setSpeakerList(currentWorkspace.getStory().getAvatarList());
         sideBarTabbedPane.addTab("フィルター", filterSideBar);   // TODO:
-        filterSideBar.updateContent();
+        filterSideBar.updateView();
         
         // ピリオドビュー作成
         PeriodView periodView = new PeriodView();
@@ -372,6 +388,11 @@ public class MoltonfController {
         
         mainFrame.setMainPane(null);
         periodTabbedPane = null;
+        if (filterSideBar != null) {
+            filterSideBar.removeFilterChangeListener(filterManager);
+        }
+        filterSideBar = null;
+        sideBarTabbedPane = null;
     }
     
     /**
@@ -388,13 +409,21 @@ public class MoltonfController {
      * 現在表示しているタブの PeriodView を返します。
      * @return 現在表示しているタブの PeriodView を返します。
      */
-    private PeriodView getCurrentPeriodView() {
+    public PeriodView getCurrentPeriodView() {
         int tabIndex = periodTabbedPane.getSelectedIndex();
         if (tabIndex >= 0) {
             return getPeriodViewAt(tabIndex);
         } else {
             return null;
         }
+    }
+    
+    /**
+     * フィルターサイドバーを返します。
+     * @return フィルターサイドバー
+     */
+    public FilterSideBar getFilterSideBar() {
+        return filterSideBar;
     }
     
     /**
