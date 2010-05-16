@@ -365,39 +365,41 @@ public class PeriodView extends JComponent implements MoltonfView {
         }
     }
     
-    /**
-     * 指定された位置にある可視の子コンポーネントを返します。
-     * @param x X座標
-     * @param y Y座標
-     * @return 表示されている子コンポーネント。
-     *         その位置に可視の子コンポーネントが見つからなければ null を返します。
-     */
-    private Component getVisibleChildComponentAt(int x, int y) {
-        int componentCount = getComponentCount();
-        for (int ix = 0; ix < componentCount; ++ix) {
-            Component comp = getComponent(ix);
-            if (comp.isVisible() && comp.contains(x - comp.getX(), y - comp.getY())) {
-                return comp;
-            }
-        }
-        return null;
-    }
+//    /**
+//     * 指定された位置にある可視の子コンポーネントを返します。
+//     * @param x X座標
+//     * @param y Y座標
+//     * @return 表示されている子コンポーネント。
+//     *         その位置に可視の子コンポーネントが見つからなければ null を返します。
+//     */
+//    private Component getVisibleChildComponentAt(int x, int y) {
+//        int componentCount = getComponentCount();
+//        for (int ix = 0; ix < componentCount; ++ix) {
+//            Component comp = getComponent(ix);
+//            if (comp.isVisible() && comp.contains(x - comp.getX(), y - comp.getY())) {
+//                return comp;
+//            }
+//        }
+//        return null;
+//    }
     
     /**
      * フィルタリング状態を再構成します。
      */
     private void rebuildFilter() {
         // スクロール位置があまり変わらないようにするため
-        // 元のスクロール位置にある StoryElement を記憶しておく
-        int firstStoryElementIndex = -1;
-        int firstStoryElementY = 0;
+        // 元のスクロール位置にあるコンポーネントを記憶しておく
+        int firstComponentIndex = -1;
+        int firstComponentY = 0;
         Point topLeft = getScrollPosition();
-        Component component = getVisibleChildComponentAt(0, topLeft.y);
-        if (component instanceof JComponent) {
-            Integer storyElementIndex = (Integer)((JComponent)component).getClientProperty(KEY_STORY_ELEMENT_INDEX);
-            if (storyElementIndex != null) {
-                firstStoryElementIndex = storyElementIndex.intValue();
-                firstStoryElementY = topLeft.y - component.getLocation().y;
+        topLeft.x = 0;
+        int componentCount = getComponentCount();
+        for (int ix = 0; ix < componentCount; ++ix) {
+            Component comp = getComponent(ix);
+            if (comp.isVisible() && comp.contains(topLeft.x - comp.getX(), topLeft.y - comp.getY())) {
+                firstComponentIndex = ix;
+                firstComponentY = topLeft.y - comp.getY();
+                break;
             }
         }
         
@@ -409,7 +411,6 @@ public class PeriodView extends JComponent implements MoltonfView {
             return;
         
         List<StoryElement> storyElements = storyPeriod.getStoryElements();
-        int componentCount = getComponentCount();
         for (int ix = 0; ix < componentCount; ++ix) {
             JComponent comp = (JComponent)getComponent(ix);
             Integer storyElementIndex = (Integer)comp.getClientProperty(KEY_STORY_ELEMENT_INDEX);
@@ -431,22 +432,25 @@ public class PeriodView extends JComponent implements MoltonfView {
                     }
                 }
                 comp.setVisible(isVisible);
-
-                // 更新前のスクロールして見えている先頭にあったもの以降で
-                // 表示されたものが見えるようにスクロールする
-                if (isVisible && scrollToComponent == null && storyElementIndex >= firstStoryElementIndex) {
-                    scrollToComponent = comp;
-                    if (storyElementIndex == firstStoryElementIndex) {
-                        scrollToComponentTop = firstStoryElementY;
-                    }
-                }
-                
-                lastComponent = comp;
             }
+            
+            // 更新前のスクロールして見えている先頭にあったもの以降で
+            // 表示されたものが見えるようにスクロールする
+            if (scrollToComponent == null && 
+                    ix >= firstComponentIndex &&
+                    comp.isVisible()) {
+                scrollToComponent = comp;
+                if (ix == firstComponentIndex) {
+                    scrollToComponentTop = firstComponentY;
+                }
+            }
+            
+            lastComponent = comp;
         }
         
         revalidate();
         
+        // スクロール位置を復元
         if (scrollToComponent == null) {
             scrollToComponent = lastComponent;
         }
