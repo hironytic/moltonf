@@ -32,7 +32,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -393,8 +392,11 @@ public class PeriodView extends JComponent implements MoltonfView {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    Rectangle scrollRect = new Rectangle(0, top, scrollComponent.getWidth(), 1);
-                    scrollComponent.scrollRectToVisible(scrollRect);
+                    int viewTop = scrollComponent.getY() + top;
+                    JViewport viewport = PeriodView.this.getScrollPane().getViewport();
+                    Point viewPos = viewport.getViewPosition();
+                    viewPos.y = viewTop;
+                    viewport.setViewPosition(viewPos);
                 }
             });
         }
