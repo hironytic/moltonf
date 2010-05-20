@@ -41,6 +41,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.ImageObserver;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -93,8 +94,11 @@ public class TalkView extends JComponent implements MoltonfView {
     /** 顔アイコン画像の左端 */
     private static final float FACE_ICON_IMAGE_LEFT = 0;
     
-    /** 情報テキスト (発言者、発言時刻など) の文字色 */
-    private static final Color INFO_TEXT_COLOR = new Color(0xffffff);
+    /** 情報テキスト (発言者など) の文字色 */
+    private static final Color INFO_TEXT_COLOR = new Color(0xdddddd);
+    
+    /** 情報テキストのうち発言時刻の文字色 */
+    private static final Color INFO_TIME_TEXT_COLOR = new Color(0x888888); 
     
     /** 通常メッセージの背景色 */
     private static final Color MESSAGE_BG_COLOR_PUBLIC = new Color(0xffffff);
@@ -368,15 +372,21 @@ public class TalkView extends JComponent implements MoltonfView {
         areaSize.height = 0f;
         
         // 発言情報 (発言者名、発言時刻など)
+        int start, end;
         StringBuilder infoTextBuilder = new StringBuilder();
         String speakerName = talk.getSpeaker().getFullName();
         infoTextBuilder.append(speakerName);
         TimePart time = talk.getTime();
         String timeString = String.format("%02d:%02d", time.getHourPart(), time.getMinutePart());
         infoTextBuilder.append(" ");
+        start = infoTextBuilder.length();
         infoTextBuilder.append(timeString);
+        end = start + timeString.length();
         talkInfoComponent.setMessage(Collections.singletonList(infoTextBuilder.toString()));  // TODO: 発言回数なども
         talkInfoComponent.setForeground(INFO_TEXT_COLOR);
+        talkInfoComponent.setAttributedAreaInfoList(Arrays.asList(
+            new MessageComponent.AttributedAreaInfo(0, start, end, INFO_TIME_TEXT_COLOR)
+        ));
         talkInfoComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + VIEW_PADDING_RIGHT));
         Dimension2D infoAreaSize = talkInfoComponent.getAreaSize();
         Rectangle2D infoAreaRect = new Rectangle2D.Float(

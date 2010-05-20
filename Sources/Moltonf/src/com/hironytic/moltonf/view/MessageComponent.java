@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -40,7 +41,9 @@ import java.awt.geom.Rectangle2D;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +65,122 @@ public class MessageComponent extends JComponent {
     
     /** 強調表示設定のリスト */
     private List<HighlightSetting> highlightSettingList;
+
+    /** テキスト属性情報のリスト */
+    private List<AttributedAreaInfo> attributedAreaInfoList;
     
+    /** 各行の TextLayout */
+    private List<LineLayout> lineLayouts = null;
+    
+    /** メッセージ表示領域の矩形 */
+    private Rectangle2D.Float messageAreaRect = new Rectangle2D.Float(0, 0, 0, 0);
+
+    /** コンポーネントに必要な領域のサイズ */
+    private Dimension2DFloat areaSize = new Dimension2DFloat();
+    
+    /**
+     * テキストの属性が設定された箇所の情報
+     */
+    public static class AttributedAreaInfo {
+        
+        /** 何行目に対する情報か */
+        private int lineIndex = -1;
+        
+        /** 行内の開始インデックス */
+        private int start = 0;
+        
+        /** 行内の終了インデックス */
+        private int end = 0;
+        
+        /** 色 */
+        private Color color = null;
+        
+        /**
+         * デフォルトコンストラクタ
+         */
+        public AttributedAreaInfo() {
+            
+        }
+        
+        /**
+         * 位置を指定するコンストラクタ
+         * @param lineIndex 何行目に対する情報か
+         * @param start 行内の開始インデックス
+         * @param end 行内の終了インデックス
+         */
+        public AttributedAreaInfo(int lineIndex, int start, int end) {
+            this.lineIndex = lineIndex;
+            this.start = start;
+            this.end = end;
+        }
+        
+        /**
+         * 位置と色を指定するコンストラクタ
+         * @param lineIndex 何行目に対する情報か
+         * @param start 行内の開始インデックス
+         * @param end 行内の終了インデックス
+         * @param color 色
+         */
+        public AttributedAreaInfo(int lineIndex, int start, int end, Color color) {
+            this.lineIndex = lineIndex;
+            this.start = start;
+            this.end = end;
+            this.color = color;
+        }
+    
+        /**
+         * 何行目かを取得します。
+         * @return lineIndex を返します。
+         */
+        public int getLineIndex() {
+            return lineIndex;
+        }
+    
+        /**
+         * 行内の開始インデックスを取得します。
+         * @return 開始インデックスを返します。
+         */
+        public int getStart() {
+            return start;
+        }
+    
+        /**
+         * 行内の終了インデックスを取得します。
+         * @return 終了インデックスを返します。
+         */
+        public int getEnd() {
+            return end;
+        }
+
+        /**
+         * 色を取得します。
+         * @return 色を返します。
+         */
+        public Color getColor() {
+            return color;
+        }
+    
+        /**
+         * 位置を設定します。
+         * @param lineIndex 何行目に対する情報か
+         * @param start 行内の開始インデックス
+         * @param end 行内の終了インデックス
+         */
+        public void setArea(int lineIndex, int start, int end) {
+            this.lineIndex = lineIndex;
+            this.start = start;
+            this.end = end;
+        }
+    
+        /**
+         * 色をセットします。
+         * @param color 色
+         */
+        public void setColor(Color color) {
+            this.color = color;
+        }
+    }
+
     /** 1行のレイアウト情報 */
     private class LineLayout {
         /** 行の上端座標 */
@@ -80,7 +198,7 @@ public class MessageComponent extends JComponent {
             this.lineTop = lineTop;
             this.textLayout = textLayout;
         }
-
+    
         /**
          * lineTop を取得します。
          * @return lineTop を返します。
@@ -88,7 +206,7 @@ public class MessageComponent extends JComponent {
         public float getLineTop() {
             return lineTop;
         }
-
+    
         /**
          * textLayout を取得します。
          * @return textLayout を返します。
@@ -97,16 +215,7 @@ public class MessageComponent extends JComponent {
             return textLayout;
         }
     }
-    
-    /** 各行の TextLayout */
-    private List<LineLayout> lineLayouts = null;
-    
-    /** メッセージ表示領域の矩形 */
-    private Rectangle2D.Float messageAreaRect = new Rectangle2D.Float(0, 0, 0, 0);
 
-    /** コンポーネントに必要な領域のサイズ */
-    private Dimension2DFloat areaSize = new Dimension2DFloat();
-    
     /**
      * コンストラクタ
      */
@@ -148,6 +257,14 @@ public class MessageComponent extends JComponent {
     }
 
     /**
+     * 属性付けを行った範囲に関する情報をセットします。
+     * @param attributedAreaInfoList 属性付け範囲の情報のリスト
+     */
+    public void setAttributedAreaInfoList(List<AttributedAreaInfo> attributedAreaInfoList) {
+        this.attributedAreaInfoList = attributedAreaInfoList;
+    }
+    
+    /**
      * コンポーネントに必要な領域のサイズを取得します。
      * @return コンポーネントに必要な領域のサイズを返します。
      */
@@ -172,7 +289,8 @@ public class MessageComponent extends JComponent {
                 lineList = lineList.subList(0, lineList.size() - 1);
             }
             lineLayouts = new ArrayList<LineLayout>();
-            for (String line : lineList) {
+            for (int lineIndex = 0; lineIndex < lineList.size(); ++lineIndex) {
+                String line = lineList.get(lineIndex);
                 if (line.isEmpty()) {
                     FontMetrics fontMetrics = getFontMetrics(getFont());
                     addLineLayout(null,
@@ -180,7 +298,7 @@ public class MessageComponent extends JComponent {
                             fontMetrics.getDescent(),
                             fontMetrics.getLeading());
                 } else {
-                    AttributedString attributedString = makeAttributedString(line);
+                    AttributedString attributedString = makeAttributedString(line, lineIndex);
                     AttributedCharacterIterator charItr = attributedString.getIterator();
                     FontRenderContext frContext = g2.getFontRenderContext();
                     LineBreakMeasurer measurer = new LineBreakMeasurer(charItr, frContext);
@@ -205,9 +323,10 @@ public class MessageComponent extends JComponent {
     /**
      * 1行分の AttributedString を生成します。
      * @param line 1行分のメッセージ文字列
+     * @param lineIndex 行のインデックス
      * @return 生成した AttributedString
      */
-    private AttributedString makeAttributedString(String line) {
+    private AttributedString makeAttributedString(String line, int lineIndex) {
         AttributedString attributedString = new AttributedString(line);
         attributedString.addAttribute(TextAttribute.FONT, getFont());
         attributedString.addAttribute(TextAttribute.BACKGROUND, Paint.TRANSLUCENT);
@@ -227,6 +346,24 @@ public class MessageComponent extends JComponent {
                             highlightSetting.getHighlightColor(),
                             matcher.start(),
                             matcher.end());
+                }
+            }
+        }
+        
+        // 属性付け
+        if (attributedAreaInfoList != null) {
+            for (AttributedAreaInfo attrAreaInfo : attributedAreaInfoList) {
+                if (attrAreaInfo.getLineIndex() != lineIndex) {
+                    continue;
+                }
+                
+                Map<AttributedCharacterIterator.Attribute, Object> attributes = new HashMap<AttributedCharacterIterator.Attribute, Object>();
+                if (attrAreaInfo.getColor() != null) {
+                    attributes.put(TextAttribute.FOREGROUND, attrAreaInfo.getColor());
+                }
+                
+                if (!attributes.isEmpty()) {
+                    attributedString.addAttributes(attributes, attrAreaInfo.getStart(), attrAreaInfo.getEnd());
                 }
             }
         }
