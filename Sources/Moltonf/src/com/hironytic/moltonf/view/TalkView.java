@@ -41,6 +41,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.ImageObserver;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +49,8 @@ import java.util.List;
 import javax.swing.JComponent;
 
 import com.hironytic.moltonf.model.HighlightSetting;
+import com.hironytic.moltonf.model.Link;
+import com.hironytic.moltonf.model.MessageRange;
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.util.TimePart;
@@ -385,7 +388,9 @@ public class TalkView extends JComponent implements MoltonfView {
         talkInfoComponent.setMessage(Collections.singletonList(infoTextBuilder.toString()));  // TODO: 発言回数なども
         talkInfoComponent.setForeground(INFO_TEXT_COLOR);
         talkInfoComponent.setAttributedAreaInfoList(Arrays.asList(
-            new MessageComponent.AttributedAreaInfo(0, start, end, INFO_TIME_TEXT_COLOR)
+            new MessageComponent.AttributedAreaInfo(
+                    new MessageRange(0, start, end),
+                    INFO_TIME_TEXT_COLOR)
         ));
         talkInfoComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + VIEW_PADDING_RIGHT));
         Dimension2D infoAreaSize = talkInfoComponent.getAreaSize();
@@ -412,6 +417,14 @@ public class TalkView extends JComponent implements MoltonfView {
         // 発言
         talkMessageComponent.setMessage(talk.getMessageLines());
         talkMessageComponent.setForeground(getMessageTextColor());
+//        //test
+//        class DummyLink extends Link {
+//            DummyLink(MessageRange range) { super(range); }
+//        }
+//        List<Link> linkList = new ArrayList<Link>();
+//        linkList.add(new DummyLink(new MessageRange(0, 0, 2)));
+//        talkMessageComponent.setLinkList(linkList);
+//        //test
         talkMessageComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT + VIEW_PADDING_RIGHT));
         Dimension2D messageAreaSize = talkMessageComponent.getAreaSize();
         Rectangle2D messageAreaRect = new Rectangle2D.Float(
@@ -422,7 +435,6 @@ public class TalkView extends JComponent implements MoltonfView {
         Rectangle messageAreaRectInt = new Rectangle();
         messageAreaRectInt.setRect(messageAreaRect);
         talkMessageComponent.setBounds(messageAreaRectInt);
-        
         float talkMessageHeight = MESSAGE_PADDING_TOP +
                                   (float)messageAreaSize.getHeight() +
                                   MESSAGE_PADDING_BOTTOM;

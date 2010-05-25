@@ -50,12 +50,17 @@ import java.util.regex.Pattern;
 import javax.swing.JComponent;
 
 import com.hironytic.moltonf.model.HighlightSetting;
+import com.hironytic.moltonf.model.Link;
+import com.hironytic.moltonf.model.MessageRange;
 
 /**
  * ストーリー中のテキストを表示するコンポーネント
  */
 @SuppressWarnings("serial")
 public class MessageComponent extends JComponent {
+    
+    /** リンクの色 */
+    private static final Color LINK_COLOR = new Color(0xff0000); //= new Color(0xff8800);   //TODO: 発言内はff0000、発言の外はff8800。外部から指定できるようにせんと
     
     /** 表示するメッセージ */
     private List<String> messageLines;
@@ -68,6 +73,9 @@ public class MessageComponent extends JComponent {
 
     /** テキスト属性情報のリスト */
     private List<AttributedAreaInfo> attributedAreaInfoList;
+    
+    /** リンク情報 */
+    private List<Link> linkList;
     
     /** 各行の TextLayout */
     private List<LineLayout> lineLayouts = null;
@@ -83,14 +91,8 @@ public class MessageComponent extends JComponent {
      */
     public static class AttributedAreaInfo {
         
-        /** 何行目に対する情報か */
-        private int lineIndex = -1;
-        
-        /** 行内の開始インデックス */
-        private int start = 0;
-        
-        /** 行内の終了インデックス */
-        private int end = 0;
+        /** 属性の範囲 */
+        private MessageRange range;
         
         /** 色 */
         private Color color = null;
@@ -103,55 +105,31 @@ public class MessageComponent extends JComponent {
         }
         
         /**
-         * 位置を指定するコンストラクタ
-         * @param lineIndex 何行目に対する情報か
-         * @param start 行内の開始インデックス
-         * @param end 行内の終了インデックス
+         * 範囲を指定するコンストラクタ
+         * @param range 属性の範囲
          */
-        public AttributedAreaInfo(int lineIndex, int start, int end) {
-            this.lineIndex = lineIndex;
-            this.start = start;
-            this.end = end;
+        public AttributedAreaInfo(MessageRange range) {
+            this.range = range;
         }
         
         /**
-         * 位置と色を指定するコンストラクタ
-         * @param lineIndex 何行目に対する情報か
-         * @param start 行内の開始インデックス
-         * @param end 行内の終了インデックス
+         * 範囲と色を指定するコンストラクタ
+         * @param range 属性の範囲
          * @param color 色
          */
-        public AttributedAreaInfo(int lineIndex, int start, int end, Color color) {
-            this.lineIndex = lineIndex;
-            this.start = start;
-            this.end = end;
+        public AttributedAreaInfo(MessageRange range, Color color) {
+            this.range = range;
             this.color = color;
         }
     
         /**
-         * 何行目かを取得します。
-         * @return lineIndex を返します。
+         * 属性の範囲を取得します。
+         * @return 属性の範囲
          */
-        public int getLineIndex() {
-            return lineIndex;
+        public MessageRange getRange() {
+            return range;
         }
-    
-        /**
-         * 行内の開始インデックスを取得します。
-         * @return 開始インデックスを返します。
-         */
-        public int getStart() {
-            return start;
-        }
-    
-        /**
-         * 行内の終了インデックスを取得します。
-         * @return 終了インデックスを返します。
-         */
-        public int getEnd() {
-            return end;
-        }
-
+        
         /**
          * 色を取得します。
          * @return 色を返します。
@@ -161,15 +139,11 @@ public class MessageComponent extends JComponent {
         }
     
         /**
-         * 位置を設定します。
-         * @param lineIndex 何行目に対する情報か
-         * @param start 行内の開始インデックス
-         * @param end 行内の終了インデックス
+         * 属性の範囲を設定します。
+         * @param range 属性の範囲
          */
-        public void setArea(int lineIndex, int start, int end) {
-            this.lineIndex = lineIndex;
-            this.start = start;
-            this.end = end;
+        public void setRange(MessageRange range) {
+            this.range = range;
         }
     
         /**
@@ -265,6 +239,14 @@ public class MessageComponent extends JComponent {
     }
     
     /**
+     * メッセージ中のリンクに関する情報をセットします。
+     * @param linkList リンク情報のリスト
+     */
+    public void setLinkList(List<Link> linkList) {
+        this.linkList = linkList;
+    }
+    
+    /**
      * コンポーネントに必要な領域のサイズを取得します。
      * @return コンポーネントに必要な領域のサイズを返します。
      */
@@ -350,10 +332,24 @@ public class MessageComponent extends JComponent {
             }
         }
         
+        // リンク
+        if (linkList != null) {
+            for (Link link : linkList) {
+                if (link.getRange().getLineIndex() != lineIndex) {
+                    continue;
+                }
+                
+                attributedString.addAttribute(TextAttribute.FOREGROUND, LINK_COLOR,
+                        link.getRange().getStart(), link.getRange().getEnd());
+                attributedString.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON,
+                        link.getRange().getStart(), link.getRange().getEnd());
+            }
+        }
+        
         // 属性付け
         if (attributedAreaInfoList != null) {
             for (AttributedAreaInfo attrAreaInfo : attributedAreaInfoList) {
-                if (attrAreaInfo.getLineIndex() != lineIndex) {
+                if (attrAreaInfo.getRange().getLineIndex() != lineIndex) {
                     continue;
                 }
                 
@@ -363,7 +359,7 @@ public class MessageComponent extends JComponent {
                 }
                 
                 if (!attributes.isEmpty()) {
-                    attributedString.addAttributes(attributes, attrAreaInfo.getStart(), attrAreaInfo.getEnd());
+                    attributedString.addAttributes(attributes, attrAreaInfo.getRange().getStart(), attrAreaInfo.getRange().getEnd());
                 }
             }
         }
