@@ -127,6 +127,12 @@ public class TalkView extends JComponent implements MoltonfView {
     /** 墓下メッセージの文字色 */
     private static final Color MESSAGE_TEXT_COLOR_GRAVE = new Color(0x000000);
     
+    /** 通常のリンクの色 */
+    private static final Color LINK_COLOR = new Color(0xff8800);
+    
+    /** 発言中のリンクの色 */
+    private static final Color LINK_COLOR_IN_TALK = new Color(0xff0000);
+    
     /** このビューが扱う発言 */
     private Talk talk;
     
@@ -421,9 +427,9 @@ public class TalkView extends JComponent implements MoltonfView {
 //        class DummyLink extends Link {
 //            DummyLink(MessageRange range) { super(range); }
 //        }
-//        List<Link> linkList = new ArrayList<Link>();
-//        linkList.add(new DummyLink(new MessageRange(0, 0, 2)));
-//        talkMessageComponent.setLinkList(linkList);
+//        List<MessageComponent.LinkInfo> linkInfoList = new ArrayList<MessageComponent.LinkInfo>();
+//        linkInfoList.add(new MessageComponent.LinkInfo(new DummyLink(new MessageRange(0, 0, 2)), LINK_COLOR_IN_TALK));
+//        talkMessageComponent.setLinkInfoList(linkInfoList);
 //        //test
         talkMessageComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT + VIEW_PADDING_RIGHT));
         Dimension2D messageAreaSize = talkMessageComponent.getAreaSize();

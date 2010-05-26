@@ -59,9 +59,6 @@ import com.hironytic.moltonf.model.MessageRange;
 @SuppressWarnings("serial")
 public class MessageComponent extends JComponent {
     
-    /** リンクの色 */
-    private static final Color LINK_COLOR = new Color(0xff0000); //= new Color(0xff8800);   //TODO: 発言内はff0000、発言の外はff8800。外部から指定できるようにせんと
-    
     /** 表示するメッセージ */
     private List<String> messageLines;
 
@@ -75,7 +72,7 @@ public class MessageComponent extends JComponent {
     private List<AttributedAreaInfo> attributedAreaInfoList;
     
     /** リンク情報 */
-    private List<Link> linkList;
+    private List<LinkInfo> linkInfoList;
     
     /** 各行の TextLayout */
     private List<LineLayout> lineLayouts = null;
@@ -149,6 +146,65 @@ public class MessageComponent extends JComponent {
         /**
          * 色をセットします。
          * @param color 色
+         */
+        public void setColor(Color color) {
+            this.color = color;
+        }
+    }
+    
+    /**
+     * リンクの情報
+     */
+    public static class LinkInfo {
+        /** リンク */
+        private Link link = null;
+        
+        /** 表示色 */
+        private Color color = null;
+        
+        /**
+         * デフォルトコンストラクタ
+         */
+        public LinkInfo() {
+        }
+        
+        /**
+         * リンクと色を指定するコンストラクタ
+         * @param link リンク
+         * @param color 表示色
+         */
+        public LinkInfo(Link link, Color color) {
+            this.link = link;
+            this.color = color;
+        }
+
+        /**
+         * link を取得します。
+         * @return link を返します。
+         */
+        public Link getLink() {
+            return link;
+        }
+
+        /**
+         * color を取得します。
+         * @return color を返します。
+         */
+        public Color getColor() {
+            return color;
+        }
+
+        /**
+         * link をセットします。
+         * @param link セットしたい link の値
+         */
+        public void setLink(Link link) {
+            this.link = link;
+        }
+
+        /**
+         * color をセットします。
+         * @param color セットしたい color の値
          */
         public void setColor(Color color) {
             this.color = color;
@@ -240,10 +296,10 @@ public class MessageComponent extends JComponent {
     
     /**
      * メッセージ中のリンクに関する情報をセットします。
-     * @param linkList リンク情報のリスト
+     * @param linkInfoList リンク情報のリスト
      */
-    public void setLinkList(List<Link> linkList) {
-        this.linkList = linkList;
+    public void setLinkInfoList(List<LinkInfo> linkInfoList) {
+        this.linkInfoList = linkInfoList;
     }
     
     /**
@@ -333,16 +389,17 @@ public class MessageComponent extends JComponent {
         }
         
         // リンク
-        if (linkList != null) {
-            for (Link link : linkList) {
-                if (link.getRange().getLineIndex() != lineIndex) {
+        if (linkInfoList != null) {
+            for (LinkInfo linkInfo : linkInfoList) {
+                MessageRange range = linkInfo.getLink().getRange();
+                if (range.getLineIndex() != lineIndex) {
                     continue;
                 }
                 
-                attributedString.addAttribute(TextAttribute.FOREGROUND, LINK_COLOR,
-                        link.getRange().getStart(), link.getRange().getEnd());
+                attributedString.addAttribute(TextAttribute.FOREGROUND, linkInfo.getColor(),
+                        range.getStart(), range.getEnd());
                 attributedString.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON,
-                        link.getRange().getStart(), link.getRange().getEnd());
+                        range.getStart(), range.getEnd());
             }
         }
         
