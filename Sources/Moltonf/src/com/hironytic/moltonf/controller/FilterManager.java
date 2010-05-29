@@ -31,13 +31,14 @@ import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.view.PeriodView;
+import com.hironytic.moltonf.view.event.FilterChangeListener;
+import com.hironytic.moltonf.view.event.FilterChangedEvent;
 import com.hironytic.moltonf.view.sidebar.FilterSideBar;
-import com.hironytic.moltonf.view.sidebar.FilterSideBar.FilterType;
 
 /**
  * フィルタ状態を管理するクラス
  */
-public class FilterManager implements FilterSideBar.FilterChangeListener {
+public class FilterManager implements FilterChangeListener {
     
     /** コントローラー */
     private MoltonfController controller;
@@ -50,39 +51,67 @@ public class FilterManager implements FilterSideBar.FilterChangeListener {
     }
 
     /**
-     * @see com.hironytic.moltonf.view.sidebar.FilterSideBar.FilterChangeListener#filterChanged(com.hironytic.moltonf.view.sidebar.FilterSideBar.FilterType)
+     * @see com.hironytic.moltonf.view.event.FilterChangeListener#filterChanged(com.hironytic.moltonf.view.event.FilterChangedEvent)
      */
     @Override
-    public void filterChanged(FilterType filterType) {
-        FilterSideBar sideBar = controller.getFilterSideBar();
+    public void filterChanged(FilterChangedEvent e) {
         PeriodView periodView = controller.getCurrentPeriodView();
-        if (sideBar == null || periodView == null) {
-            return;
-        }
+        FilterSideBar filterSideBar = controller.getFilterSideBar();
+        boolean isDoWithPeriodView = (periodView != null);
+        boolean isDoWithFilterSideBar = (!(e.getSource() instanceof FilterSideBar) && filterSideBar != null);
         
-        if (filterType == FilterType.TALK_KIND) {
-            Set<TalkType> filterValue = sideBar.getTalkTypeFilter();
-            if (filterValue.isEmpty()) {
-                periodView.setTalkTypeFilter(null);
-            } else {
-                periodView.setTalkTypeFilter(filterValue);
+        switch (e.getFilterType()) {
+        case TALK_TYPE:
+            {
+                Set<TalkType> filterValue = e.getTalkTypeFilterValue();
+                if (isDoWithPeriodView) {
+                    if (filterValue.isEmpty()) {
+                        periodView.setTalkTypeFilter(null);
+                    } else {
+                        periodView.setTalkTypeFilter(filterValue);
+                    }
+                }
+                if (isDoWithFilterSideBar) {
+                    filterSideBar.setTalkTypeFilter(filterValue);
+                }
             }
-        } else if (filterType == FilterType.EVENT_FAMILY) {
-            Set<EventFamily> filterValue = sideBar.getEventFamilyFilter();
-            if (filterValue.isEmpty()) {
-                periodView.setEventFamilyFilter(null);
-            } else {
-                periodView.setEventFamilyFilter(filterValue);
+            break;
+        case EVENT_FAMILY:
+            {
+                Set<EventFamily> filterValue = e.getEventFamilyFilterValue();
+                if (isDoWithPeriodView) {
+                    if (filterValue.isEmpty()) {
+                        periodView.setEventFamilyFilter(null);
+                    } else {
+                        periodView.setEventFamilyFilter(filterValue);
+                    }
+                }
+                if (isDoWithFilterSideBar) {
+                    filterSideBar.setEventFamilyFilter(filterValue);
+                }
             }
-        } else if (filterType == FilterType.SPEAKER) {
-            Set<Avatar> filterValue = sideBar.getSpeakerFilter();
-            if (filterValue.isEmpty()) {
-                periodView.setSpeakerFilter(null);
-            } else {
-                periodView.setSpeakerFilter(filterValue);
+            break;
+        case SPEAKER:
+            {
+                Set<Avatar> filterValue = e.getSpeakerFilterValue();
+                if (isDoWithPeriodView) {
+                    if (filterValue.isEmpty()) {
+                        periodView.setSpeakerFilter(null);
+                    } else {
+                        periodView.setSpeakerFilter(filterValue);
+                    }
+                }
+                if (isDoWithFilterSideBar) {
+                    filterSideBar.setSpeakerFilter(filterValue);
+                }
             }
+            break;
         }
-        
-        periodView.updateView();
+        if (isDoWithPeriodView) {
+            periodView.updateView();
+        }
+        if (isDoWithFilterSideBar) {
+            filterSideBar.updateView();
+        }
     }
 }

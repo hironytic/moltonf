@@ -29,7 +29,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -46,6 +45,8 @@ import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.util.DialogHelper;
+import com.hironytic.moltonf.view.event.FilterChangeListener;
+import com.hironytic.moltonf.view.event.FilterChangedEvent;
 
 /**
  * サイドバー「フィルタ－」のクラス
@@ -106,27 +107,6 @@ public class FilterSideBar extends SideBar {
     
     /** 発言者チェックボックスのリスト */
     private final List<JCheckBox> cbSpeakerList = new ArrayList<JCheckBox>();
-    
-    /** フィルタの種別 */
-    public enum FilterType {
-        /** 発言種別 */
-        TALK_KIND,
-        
-        /** イベント種別 */
-        EVENT_FAMILY,
-        
-        /** 発言者 */
-        SPEAKER,
-    }
-    
-    /** フィルタの状態が変化したときに通知を受け取るインタフェース */
-    public interface FilterChangeListener extends EventListener {
-        /**
-         * フィルタの状態が変化したときに呼ばれます。
-         * @param filterType どの種別のフィルタで状態が変わったかを示します。
-         */
-        void filterChanged(FilterType filterType);
-    }
     
     /** フィルタ状態が変更された通知を受け取るリスナーのリスト */
     private final EventListenerList filterChangeListenerList = new EventListenerList();
@@ -224,14 +204,30 @@ public class FilterSideBar extends SideBar {
      * フィルタの状態が変化したことを通知します。
      * @param filterType どの種別のフィルタの状態が変化したか
      */
-    private void fireFilterChanged(FilterType filterType) {
+    private void fireFilterChanged(FilterChangedEvent.FilterType filterType) {
         // Guaranteed to return a non-null array
         Object[] listeners = filterChangeListenerList.getListenerList();
         // Process the listeners last to first, notifying
         // those that are interested in this event
+        FilterChangedEvent filterChangedEvent = null;
         for (int i = listeners.length-2; i>=0; i-=2) {
             if (listeners[i]==FilterChangeListener.class) {
-                ((FilterChangeListener)listeners[i+1]).filterChanged(filterType);
+                // Lazily create the event:
+                if (filterChangedEvent == null) {
+                    filterChangedEvent = new FilterChangedEvent(this);
+                    switch (filterType) {
+                    case TALK_TYPE:
+                        filterChangedEvent.setTalkTypeFilterValue(talkTypeFilter);
+                        break;
+                    case EVENT_FAMILY:
+                        filterChangedEvent.setEventFamilyFilterValue(eventFamilyFilter);
+                        break;
+                    case SPEAKER:
+                        filterChangedEvent.setSpeakerFilterValue(speakerFilter);
+                        break;
+                    }
+                }
+                ((FilterChangeListener)listeners[i+1]).filterChanged(filterChangedEvent);
             }          
         }
     }
@@ -254,7 +250,7 @@ public class FilterSideBar extends SideBar {
                 talkTypeFilter.add(TalkType.GRAVE);
             }
             
-            fireFilterChanged(FilterType.TALK_KIND);
+            fireFilterChanged(FilterChangedEvent.FilterType.TALK_TYPE);
         }
     };
 
@@ -273,7 +269,7 @@ public class FilterSideBar extends SideBar {
                 eventFamilyFilter.add(EventFamily.ORDER);
             }
             
-            fireFilterChanged(FilterType.EVENT_FAMILY);
+            fireFilterChanged(FilterChangedEvent.FilterType.EVENT_FAMILY);
         }
     };
     
@@ -289,7 +285,7 @@ public class FilterSideBar extends SideBar {
                 }
             }
             
-            fireFilterChanged(FilterType.SPEAKER);
+            fireFilterChanged(FilterChangedEvent.FilterType.SPEAKER);
         }
     };
 
