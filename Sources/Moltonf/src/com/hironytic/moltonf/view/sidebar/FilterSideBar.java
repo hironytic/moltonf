@@ -96,15 +96,16 @@ public class FilterSideBar extends SideBar {
     
     /** 墓下発言チェックボックス */
     private JCheckBox cbTalkGrave;
-    
-    /** 通常イベントチェックボックス */
-    private JCheckBox cbEventAnnounce;
-    
-    /** 能力系イベントチェックボックス */
-    private JCheckBox cbEventExtra;
-    
-    /** 操作系イベントチェックボックス */
-    private JCheckBox cbEventOrder;
+
+//FEATURE: EVENT_FAMILY
+//    /** 通常イベントチェックボックス */
+//    private JCheckBox cbEventAnnounce;
+//    
+//    /** 能力系イベントチェックボックス */
+//    private JCheckBox cbEventExtra;
+//    
+//    /** 操作系イベントチェックボックス */
+//    private JCheckBox cbEventOrder;
     
     /** 発言者チェックボックスのリスト */
     private final List<JCheckBox> cbSpeakerList = new ArrayList<JCheckBox>();
@@ -255,24 +256,25 @@ public class FilterSideBar extends SideBar {
         }
     };
 
-    /** イベント種別チェックボックスのアクションリスナー */
-    private final ActionListener eventFamilyCheckBoxActionListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            eventFamilyFilter = EnumSet.noneOf(EventFamily.class);
-            if (cbEventAnnounce.isSelected()) {
-                eventFamilyFilter.add(EventFamily.ANNOUNCE);
-            }
-            if (cbEventExtra.isSelected()) {
-                eventFamilyFilter.add(EventFamily.EXTRA);
-            }
-            if (cbEventOrder.isSelected()) {
-                eventFamilyFilter.add(EventFamily.ORDER);
-            }
-            
-            fireFilterChanged(FilterChangedEvent.FilterType.EVENT_FAMILY);
-        }
-    };
+//FEATURE: EVENT_FAMILY
+//    /** イベント種別チェックボックスのアクションリスナー */
+//    private final ActionListener eventFamilyCheckBoxActionListener = new ActionListener() {
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            eventFamilyFilter = EnumSet.noneOf(EventFamily.class);
+//            if (cbEventAnnounce.isSelected()) {
+//                eventFamilyFilter.add(EventFamily.ANNOUNCE);
+//            }
+//            if (cbEventExtra.isSelected()) {
+//                eventFamilyFilter.add(EventFamily.EXTRA);
+//            }
+//            if (cbEventOrder.isSelected()) {
+//                eventFamilyFilter.add(EventFamily.ORDER);
+//            }
+//            
+//            fireFilterChanged(FilterChangedEvent.FilterType.EVENT_FAMILY);
+//        }
+//    };
     
     /** 発言者チェックボックスのアクションリスナー */
     private final ActionListener speakerCheckboxActionListener = new ActionListener() {
@@ -324,17 +326,18 @@ public class FilterSideBar extends SideBar {
         talkTypeFilterPane.add(cbTalkGrave);
         talkTypeFilterPane.add(DialogHelper.createVertivalRigidArea(2));
         
-        // イベント種別
-        Box eventFamilyFilterPane = new Box(BoxLayout.Y_AXIS);
-        cbEventAnnounce = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.announce"), eventFamilyCheckBoxActionListener);
-        cbEventExtra = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.extra"), eventFamilyCheckBoxActionListener);
-        cbEventOrder = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.order"), eventFamilyCheckBoxActionListener);
-        eventFamilyFilterPane.add(new JLabel(res.getString("filterSideBar.eventFamilyFilter")));
-        eventFamilyFilterPane.add(DialogHelper.createVertivalRigidArea(1));
-        eventFamilyFilterPane.add(cbEventAnnounce);
-        eventFamilyFilterPane.add(cbEventExtra);
-        eventFamilyFilterPane.add(cbEventOrder);
-        eventFamilyFilterPane.add(DialogHelper.createVertivalRigidArea(2));
+//FEATURE: EVENT_FAMILY
+//        // イベント種別
+//        Box eventFamilyFilterPane = new Box(BoxLayout.Y_AXIS);
+//        cbEventAnnounce = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.announce"), eventFamilyCheckBoxActionListener);
+//        cbEventExtra = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.extra"), eventFamilyCheckBoxActionListener);
+//        cbEventOrder = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.order"), eventFamilyCheckBoxActionListener);
+//        eventFamilyFilterPane.add(new JLabel(res.getString("filterSideBar.eventFamilyFilter")));
+//        eventFamilyFilterPane.add(DialogHelper.createVertivalRigidArea(1));
+//        eventFamilyFilterPane.add(cbEventAnnounce);
+//        eventFamilyFilterPane.add(cbEventExtra);
+//        eventFamilyFilterPane.add(cbEventOrder);
+//        eventFamilyFilterPane.add(DialogHelper.createVertivalRigidArea(2));
         
         // 発言者
         Box speakerFilterParentPane = new Box(BoxLayout.Y_AXIS);
@@ -347,7 +350,8 @@ public class FilterSideBar extends SideBar {
         Box content = new Box(BoxLayout.Y_AXIS);
         content.add(speakerFilterParentPane);
         content.add(talkTypeFilterPane);
-        content.add(eventFamilyFilterPane);
+//FEATURE: EVENT_FAMILY
+//        content.add(eventFamilyFilterPane);
         return content;
     }
     
@@ -386,9 +390,10 @@ public class FilterSideBar extends SideBar {
         // イベント種別
         if (isEventFamilyFilterModified) {
             isEventFamilyFilterModified = false;
-            cbEventAnnounce.setSelected(eventFamilyFilter.contains(EventFamily.ANNOUNCE));
-            cbEventExtra.setSelected(eventFamilyFilter.contains(EventFamily.EXTRA));
-            cbEventOrder.setSelected(eventFamilyFilter.contains(EventFamily.ORDER));
+//FEATURE: EVENT_FAMILY
+//            cbEventAnnounce.setSelected(eventFamilyFilter.contains(EventFamily.ANNOUNCE));
+//            cbEventExtra.setSelected(eventFamilyFilter.contains(EventFamily.EXTRA));
+//            cbEventOrder.setSelected(eventFamilyFilter.contains(EventFamily.ORDER));
         }
         
         // 発言者
