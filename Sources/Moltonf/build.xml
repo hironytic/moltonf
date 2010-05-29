@@ -2,16 +2,65 @@
 <!--
     Ant Build File for Moltonf
 -->
-<project name="Moltonf" default="compile">
-    <description>
-            description
-    </description>
-
-    <!-- ================================= 
-          target: compile              
-         ================================= -->
-    <target name="compile" description="compile">
-        
+<project name="Moltonf" basedir="." default="all">
+    
+    <!-- アプリケーション名 -->
+    <property name="app.name" value="Moltonf" />
+    
+    <!-- ソースディレクトリ -->
+    <property name="build.src" value="src" />
+    
+    <!-- class ファイル出力先ディレクトリ -->
+    <property name="build.dest" value="bin" />
+    
+    <!-- リリースファイル出力先ディレクトリ -->
+    <property name="release" value="release" />
+    
+    <!-- 利用ライブラリディレクトリ -->
+    <property name="build.lib" value="lib" />
+    <property name="release.lib" value="${release}/lib" />
+    
+    
+    
+    <!-- 出力 jar ファイル -->
+    <property name="jarfile" value="${release}/${app.name}.jar" />
+    
+    <!-- jar 作成時のマニフェストファイル名 -->
+    <property name="manifest" value="${app.name}.manifest" />
+    
+    <!-- コンパイル実行 -->
+    <target name="compile">
+        <mkdir dir="${build.dest}" />
+        <path id="classpath">
+            <fileset dir="${build.lib}">
+                <include name="**/*.jar" />
+            </fileset>
+        </path>
+        <javac srcdir="${build.src}" encoding="UTF-8" debug="${debug}"
+               destdir="${build.dest}"
+               classpathref="classpath" />
     </target>
+    
+    <!-- Jar 作成 -->
+    <target name="createJar" depends="compile">
+        <mkdir dir="${release}" />
+        <jar jarfile="${jarfile}" basedir="${build.dest}" manifest="${manifest}" />
+    </target>
+    
+    <!-- ライブラリコピー -->
+    <target name="copyLib">
+        <mkdir dir="${release}" />
+        <copy todir="${release.lib}">
+            <fileset dir="${build.lib}" />
+        </copy>
+    </target>
+    
+    <!-- すべて作成 -->
+    <target name="all" depends="createJar, copyLib" />
 
+    <!-- クリーンアップ -->
+    <target name="cleanup">
+        <delete dir="${release}" />
+        <delete dir="${build.dest}" />
+    </target>
 </project>
