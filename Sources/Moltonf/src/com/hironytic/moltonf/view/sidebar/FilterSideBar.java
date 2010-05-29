@@ -38,6 +38,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.event.EventListenerList;
 
 import com.hironytic.moltonf.Moltonf;
@@ -308,33 +309,43 @@ public class FilterSideBar extends SideBar {
      */
     private JComponent createContent(ResourceBundle res) {
         speakerFilterPane = new Box(BoxLayout.Y_AXIS);
-        speakerFilterPane.setBorder(DialogHelper.createTitledBorder(res.getString("filterSideBar.speakerFilter")));
         
         // 発言種別
         Box talkTypeFilterPane = new Box(BoxLayout.Y_AXIS);
-        talkTypeFilterPane.setBorder(DialogHelper.createTitledBorder(res.getString("filterSideBar.talkTypeFilter")));
         cbTalkPublic = createFilterCheckBox(res.getString("filterSideBar.talkTypeFilter.public"), talkKindCheckBoxActionListener);
         cbTalkWolf = createFilterCheckBox(res.getString("filterSideBar.talkTypeFilter.wolf"), talkKindCheckBoxActionListener);
         cbTalkPrivate = createFilterCheckBox(res.getString("filterSideBar.talkTypeFilter.private"), talkKindCheckBoxActionListener);
         cbTalkGrave = createFilterCheckBox(res.getString("filterSideBar.talkTypeFilter.grave"), talkKindCheckBoxActionListener);
+        talkTypeFilterPane.add(new JLabel(res.getString("filterSideBar.talkTypeFilter")));
+        talkTypeFilterPane.add(DialogHelper.createVertivalRigidArea(1));
         talkTypeFilterPane.add(cbTalkPublic);
         talkTypeFilterPane.add(cbTalkWolf);
         talkTypeFilterPane.add(cbTalkPrivate);
         talkTypeFilterPane.add(cbTalkGrave);
-     
+        talkTypeFilterPane.add(DialogHelper.createVertivalRigidArea(2));
+        
         // イベント種別
         Box eventFamilyFilterPane = new Box(BoxLayout.Y_AXIS);
-        eventFamilyFilterPane.setBorder(DialogHelper.createTitledBorder(res.getString("filterSideBar.eventFamilyFilter")));
         cbEventAnnounce = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.announce"), eventFamilyCheckBoxActionListener);
         cbEventExtra = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.extra"), eventFamilyCheckBoxActionListener);
         cbEventOrder = createFilterCheckBox(res.getString("filterSideBar.eventFamilyFilter.order"), eventFamilyCheckBoxActionListener);
+        eventFamilyFilterPane.add(new JLabel(res.getString("filterSideBar.eventFamilyFilter")));
+        eventFamilyFilterPane.add(DialogHelper.createVertivalRigidArea(1));
         eventFamilyFilterPane.add(cbEventAnnounce);
         eventFamilyFilterPane.add(cbEventExtra);
         eventFamilyFilterPane.add(cbEventOrder);
+        eventFamilyFilterPane.add(DialogHelper.createVertivalRigidArea(2));
         
         // 発言者
+        Box speakerFilterParentPane = new Box(BoxLayout.Y_AXIS);
+        speakerFilterParentPane.add(new JLabel(res.getString("filterSideBar.speakerFilter")));
+        speakerFilterParentPane.add(DialogHelper.createVertivalRigidArea(1));
+        speakerFilterParentPane.add(speakerFilterPane);
+        speakerFilterParentPane.add(DialogHelper.createVertivalRigidArea(2));
+        
+        // サイドバーの内容
         Box content = new Box(BoxLayout.Y_AXIS);
-        content.add(speakerFilterPane);
+        content.add(speakerFilterParentPane);
         content.add(talkTypeFilterPane);
         content.add(eventFamilyFilterPane);
         return content;
@@ -354,7 +365,7 @@ public class FilterSideBar extends SideBar {
             cbSpeakerList.clear();
             if (speakerList != null) {
                 for (Avatar speaker : speakerList) {
-                    JCheckBox cbSpeaker = createFilterCheckBox(speaker.getShortName(), speakerCheckboxActionListener);
+                    JCheckBox cbSpeaker = createFilterCheckBox(speaker.getFullName(), speakerCheckboxActionListener);
                     cbSpeaker.putClientProperty(KEY_SPEAKER, speaker);
                     cbSpeakerList.add(cbSpeaker);
                     speakerFilterPane.add(cbSpeaker);
