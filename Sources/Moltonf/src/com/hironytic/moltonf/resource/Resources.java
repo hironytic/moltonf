@@ -46,16 +46,18 @@ public class Resources extends ListResourceBundle {
             {"app.title", "Moltonf"},
             {"workspaceFilter.title", "観戦データ"},
             
-            // メインフレーム
-            // -- メニュー
+            // メインフレーム メニュー
             {"mainFrame.menu.file", "ファイル(F)"},
             {"mainFrame.menu.help", "ヘルプ(H)"},
             
-            // -- コマンド
+            // メインフレーム コマンド
             {"mainFrame.command.newWorkspace", "新しい観戦(N)..."},
             {"mainFrame.command.openWorkspace", "観戦データを開く(O)..."},
             {"mainFrame.command.exit", "終了(X)"},
             {"mainFrame.command.about", "バージョン情報(A)"},
+            
+            // ピリオドビュー
+            {"periodView.nextDay", "次の日へ"},
             
             // ダイアログ共通
             {"dialog.buttonOk", "OK"},

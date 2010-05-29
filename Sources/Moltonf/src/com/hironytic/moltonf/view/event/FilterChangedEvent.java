@@ -33,7 +33,7 @@ import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.TalkType;
 
 /**
- * フィルタの設定値が変更されたことを示すイベント
+ * フィルタの設定値が変更されたときの情報を保持するイベント
  */
 @SuppressWarnings("serial")
 public class FilterChangedEvent extends EventObject {
@@ -55,6 +55,10 @@ public class FilterChangedEvent extends EventObject {
     /** 変更されたフィルタの設定値 */
     private Set<?> filterValue;
     
+    /**
+     * コンストラクタ
+     * @param source イベントが最初に発生したオブジェクト
+     */
     public FilterChangedEvent(Object source) {
         super(source);
     }

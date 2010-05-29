@@ -34,7 +34,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.swing.BoxLayout;
@@ -44,9 +47,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
+import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.EventFamily;
 import com.hironytic.moltonf.model.HighlightSetting;
+import com.hironytic.moltonf.model.Link;
+import com.hironytic.moltonf.model.MessageRange;
 import com.hironytic.moltonf.model.StoryElement;
 import com.hironytic.moltonf.model.StoryEvent;
 import com.hironytic.moltonf.model.StoryPeriod;
@@ -64,6 +70,9 @@ public class PeriodView extends JComponent implements MoltonfView {
     
     /** 外側の背景色 */
     private static final Color OUTSIDE_BG_COLOR = new Color(0x776655);
+    
+    /** リンクの色 */
+    private static final Color LINK_COLOR = new Color(0xff8800);
     
     /** StoryElement を表示するビューに対して StoryElement のインデックスを client property に設定する際のキー */
     private static final String KEY_STORY_ELEMENT_INDEX = "Moltonf.storyElementIndex";
@@ -91,6 +100,8 @@ public class PeriodView extends JComponent implements MoltonfView {
     
     /** 強調表示設定 */
     private List<HighlightSetting> highlightSettingList;
+    
+    private MessageComponent nextDayLink;   // TODO: MoltonfView できちんと実装すれば持つ必要ない
     
     /**
      * コンストラクタ
@@ -222,6 +233,8 @@ public class PeriodView extends JComponent implements MoltonfView {
         for (Component child : getComponents()) {
             if (child instanceof MoltonfView) {
                 ((MoltonfView)child).setFont(font);
+            } else if (child instanceof MessageComponent) {
+                ((MessageComponent)child).setFont(font);
             }
         }
     }
@@ -317,6 +330,8 @@ public class PeriodView extends JComponent implements MoltonfView {
      * 内容を再作成します。
      */
     private void rebuildContent() {
+        ResourceBundle res = Moltonf.getResource();
+        
         removeAll();
 
         if (storyPeriod == null)
@@ -363,6 +378,21 @@ public class PeriodView extends JComponent implements MoltonfView {
                 storyElementComponent.setVisible(isVisible);
             }
         }
+        
+        // 次の日へリンク
+        // TODO: エピには出さないようにする
+        // TODO: リンクのクラスについて要検討 今はとにかく表示するだけ。というか今のはいろいろダメ。MoltonfView実装のJComponent継承クラスを1つ作る。
+        class CommandLink extends Link {
+            CommandLink(MessageRange range) {
+                super(range);
+            }
+        }
+        nextDayLink = new MessageComponent();
+        String nextDayString = res.getString("periodView.nextDay");
+        nextDayLink.setMessage(Arrays.asList(nextDayString));
+        nextDayLink.setFont(getFont());
+        nextDayLink.setLinkInfoList(Arrays.asList(new MessageComponent.LinkInfo(new CommandLink(new MessageRange(0, 0, nextDayString.length())), LINK_COLOR)));
+        add(nextDayLink);
     }
     
 //    /**
@@ -490,6 +520,9 @@ public class PeriodView extends JComponent implements MoltonfView {
             if (child instanceof MoltonfView) {
                 ((MoltonfView)child).updateView();
             }
+        }
+        if (nextDayLink != null) {
+            nextDayLink.updateLayout(500);  // TODO: 500
         }
     }
 

@@ -48,10 +48,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
+import javax.swing.event.EventListenerList;
 
 import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Link;
 import com.hironytic.moltonf.model.MessageRange;
+import com.hironytic.moltonf.view.event.LinkClickListener;
+import com.hironytic.moltonf.view.event.LinkClickedEvent;
 
 /**
  * ストーリー中のテキストを表示するコンポーネント
@@ -82,6 +85,9 @@ public class MessageComponent extends JComponent {
 
     /** コンポーネントに必要な領域のサイズ */
     private Dimension2DFloat areaSize = new Dimension2DFloat();
+
+    /** イベント通知を受け取るリスナーのリスト */
+    private final EventListenerList eventListenerList = new EventListenerList();
     
     /**
      * テキストの属性が設定された箇所の情報
@@ -310,6 +316,44 @@ public class MessageComponent extends JComponent {
         return areaSize;
     }
 
+    /**
+     * リンククリックの通知を受け取るリスナーを追加します。
+     * @param listener リスナー
+     */
+    public void addLinkClickListener(LinkClickListener listener) {
+        eventListenerList.add(LinkClickListener.class, listener);
+    }
+    
+    /**
+     * リンククリックの通知を受け取るリスナーを削除します。
+     * @param listener リスナー
+     */
+    public void removeLinkClickListener(LinkClickListener listener) {
+        eventListenerList.remove(LinkClickListener.class, listener);
+    }
+    
+    /**
+     * リンクがクリックされたことを通知します。
+     * @param link クリックされたリンク
+     */
+    private void fireLinkClicked(Link link) {
+        // Guaranteed to return a non-null array
+        Object[] listeners = eventListenerList.getListenerList();
+        // Process the listeners last to first, notifying
+        // those that are interested in this event
+        LinkClickedEvent linkClickedEvent = null;
+        for (int i = listeners.length-2; i>=0; i-=2) {
+            if (listeners[i]==LinkClickListener.class) {
+                // Lazily create the event:
+                if (linkClickedEvent == null) {
+                    linkClickedEvent = new LinkClickedEvent(this);
+                    linkClickedEvent.setLink(link);
+                }    
+                ((LinkClickListener)listeners[i+1]).linkClicked(linkClickedEvent);
+            }
+        }
+    }
+    
     /**
      * レイアウトの更新を行います。
      * @param width 表示幅
