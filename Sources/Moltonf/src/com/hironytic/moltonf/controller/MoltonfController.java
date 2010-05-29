@@ -46,6 +46,7 @@ import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -113,7 +114,8 @@ public class MoltonfController {
             try {
                 commandExecuted(e);
             } catch (MoltonfException ex) {
-                // TODO: メッセージを出す？
+                // TODO: とりあえず、なんでもいいからメッセージを出しておく。あとでなおせ。
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage());
             }
         }
     

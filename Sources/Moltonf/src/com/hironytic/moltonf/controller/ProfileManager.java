@@ -29,9 +29,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
@@ -194,12 +194,20 @@ public class ProfileManager {
             File extMapFile = new File(profileFolder, EXTERNAL_DATA_MAP_FILE_NAME);
             if (extMapFile.exists()) {
                 Yaml yamlLoader = new Yaml();
-                externalDataMap = (Map<String, String>)yamlLoader.load(new FileReader(extMapFile));
-                externalDataMapModified = false;
+                InputStream inStream = new FileInputStream(extMapFile);
+                InputStreamReader inStreamReader = new InputStreamReader(inStream, Charset.forName(CHARSET_UTF8));
+                try {
+                    externalDataMap = (Map<String, String>)yamlLoader.load(inStreamReader);
+                    externalDataMapModified = false;
+                } finally {
+                    inStreamReader.close();
+                }
             }
         } catch (FileNotFoundException ex) {
             Moltonf.getLogger().warning("failed to load external data map file", ex);
         } catch (SecurityException ex) {
+            Moltonf.getLogger().warning("failed to load external data map file", ex);
+        } catch (IOException ex) {
             Moltonf.getLogger().warning("failed to load external data map file", ex);
         } catch (YAMLException ex) {
             Moltonf.getLogger().warning("failed to load external data map file", ex);

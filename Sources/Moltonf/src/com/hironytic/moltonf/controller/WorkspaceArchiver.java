@@ -26,10 +26,12 @@
 package com.hironytic.moltonf.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
@@ -108,8 +110,16 @@ public class WorkspaceArchiver {
         Map<String, Object> rootMap;
         try {
             Yaml yamlLoader = new Yaml();
-            rootMap = (Map<String, Object>)yamlLoader.load(new FileReader(archiveFile));
+            InputStream inStream = new FileInputStream(archiveFile);
+            InputStreamReader inStreamReader = new InputStreamReader(inStream, Charset.forName(CHARSET_UTF8));
+            try {
+                rootMap = (Map<String, Object>)yamlLoader.load(inStreamReader);
+            } finally {
+                inStreamReader.close();
+            }
         } catch (FileNotFoundException ex) {
+            throw new MoltonfException("failed to load workspace", ex);
+        } catch (IOException ex) {
             throw new MoltonfException("failed to load workspace", ex);
         } catch (YAMLException ex) {
             throw new MoltonfException("failed to load workspace", ex);
