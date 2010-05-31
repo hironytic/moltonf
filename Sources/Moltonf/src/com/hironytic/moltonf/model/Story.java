@@ -30,137 +30,80 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * ストーリーの情報を保持するクラスです。
+ * ストーリーの情報を保持するインタフェースです。
  * 通常、ストーリーは1回のプレイデータ全体に相当します。
  */
-public class Story {
+public interface Story {
 
-    /** この Story に含まれる StoryPeriod のリスト */
-    private List<StoryPeriod> periods;
-    
-    /** 登場人物のリスト */
-    private List<Avatar> avatarList;
-    
-    /** 村の完全名 */
-    private String villageFullName;
-    
-    /** 村の状態 */
-    private VillageState villageState;
-    
-    /** 墓アイコン画像への URI */
-    private URI graveIconUri;
-    
-    /** 墓アイコン画像 */
-    private Image graveIconImage;
-    
-    /**
-     * コンストラクタ
-     */
-    public Story() {
-        
-    }
-    
     /**
      * このストーリーに含まれる StoryPeriod を返します。
      * @return StoryPeriod のリスト
      */
-    public List<StoryPeriod> getPeriods() {
-        return periods;
-    }
+    public List<StoryPeriod> getPeriods();
 
     /**
      * このストーリーに登場する人物のリストを返します。
      * @return 登場人物のリスト
      */
-    public List<Avatar> getAvatarList() {
-        return avatarList;
-    }
+    public List<Avatar> getAvatarList();
 
     /**
      * 村のフルネームを返します。
      * @return 村のフルネーム
      */
-    public String getVillageFullName() {
-        return villageFullName;
-    }
+    public String getVillageFullName();
 
     /**
      * 村の状態を返します。
      * @return 村の状態
      */
-    public VillageState getVillageState() {
-        return villageState;
-    }
+    public VillageState getVillageState();
     
     /**
      * 墓アイコン画像の URI を取得します。
      * @return 墓アイコン画像の URI
      */
-    public URI getGraveIconUri() {
-        return graveIconUri;
-    }
+    public URI getGraveIconUri();
 
     /**
      * 墓アイコン画像を取得します。
      * @return 墓アイコン画像
      */
-    public Image getGraveIconImage() {
-        return graveIconImage;
-    }
-
+    public Image getGraveIconImage();
+    
     /**
      * このストーリーに含まれる StoryPeriod をセットします。
      * @param periods セットしたい StoryPeriod のリスト
      */
-    public void setPeriods(List<StoryPeriod> periods) {
-        this.periods = periods;
-    }
-
+    public void setPeriods(List<StoryPeriod> periods);
+    
     /**
      * 登場人物のリストをセットします。
      * @param avatarList セットしたい Avatar のリスト
      */
-    public void setAvatarList(List<Avatar> avatarList) {
-        this.avatarList = avatarList;
-    }
+    public void setAvatarList(List<Avatar> avatarList);
 
     /**
      * 村のフルネームをセットします。
      * @param villageFullName セットしたいフルネーム
      */
-    public void setVillageFullName(String villageFullName) {
-        this.villageFullName = villageFullName;
-    }
+    public void setVillageFullName(String villageFullName);
 
     /**
      * 村の状態をセットします。
      * @param villageState セットしたい村の状態
      */
-    public void setVillageState(VillageState villageState) {
-        this.villageState = villageState;
-    }
+    public void setVillageState(VillageState villageState);
 
     /**
      * 墓アイコン画像の URIをセットします。
      * @param graveIconUri 墓アイコン画像の URI
      */
-    public void setGraveIconUri(URI graveIconUri) {
-        this.graveIconUri = graveIconUri;
-    }
+    public void setGraveIconUri(URI graveIconUri);
 
     /**
      * 墓アイコン画像をセットします。
      * @param graveIconImage 墓アイコン画像
      */
-    public void setGraveIconImage(Image graveIconImage) {
-        this.graveIconImage = graveIconImage;
-    }
-    
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "Story [villageFullName=" + villageFullName + "]";
-    }
+    public void setGraveIconImage(Image graveIconImage);
 }

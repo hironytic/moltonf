@@ -28,64 +28,37 @@ package com.hironytic.moltonf.model;
 import java.util.List;
 
 /**
- * ストーリーを構成する要素の基底クラスです。
+ * ストーリーを構成する要素のインタフェース。
  */
-public abstract class StoryElement {
+public interface StoryElement {
 
-    /** このオブジェクトが属する StoryPeriod */
-    private StoryPeriod storyPeriod;
-    
-    /** メッセージ */
-    private List<String> messageLines;
-
-    /**
-     * protected コンストラクタ
-     */
-    protected StoryElement() {
-        
-    }
-    
     /**
      * このオブジェクトが属する StoryPeriod を取得します。
      * @return このオブジェクトが属する StoryPeriod
      */
-    public StoryPeriod getStoryPeriod() {
-        return storyPeriod;
-    }
+    public StoryPeriod getStoryPeriod();
 
     /**
      * このオブジェクトが属する Story を取得します。
      * @return このオブジェクトが属する Story
      */
-    public Story getStory() {
-        if (storyPeriod == null) {
-            return null;
-        } else {
-            return storyPeriod.getStory();
-        }
-    }
+    public Story getStory();
     
     /**
      * メッセージを返します。
      * @return メッセージの行のリスト。
      */
-    public List<String> getMessageLines() {
-        return messageLines;
-    }
+    public List<String> getMessageLines();
     
     /**
      * このオブジェクトが属する StoryPeriod をセットします。
      * @param storyPeriod このオブジェクトが属する StoryPeriod
      */
-    public void setStoryPeriod(StoryPeriod storyPeriod) {
-        this.storyPeriod = storyPeriod;
-    }
+    public void setStoryPeriod(StoryPeriod storyPeriod);
     
     /**
      * メッセージをセットします。
      * @param messageLines メッセージの行のリスト
      */
-    public void setMessageLines(List<String> messageLines) {
-        this.messageLines = messageLines;
-    }
+    public void setMessageLines(List<String> messageLines);
 }

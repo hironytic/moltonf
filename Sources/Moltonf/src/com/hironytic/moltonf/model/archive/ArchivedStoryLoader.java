@@ -54,7 +54,12 @@ import com.hironytic.moltonf.model.StoryPeriod;
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.model.VillageState;
-import com.hironytic.moltonf.model.WolfAttackTalk;
+import com.hironytic.moltonf.model.basic.BasicAvatar;
+import com.hironytic.moltonf.model.basic.BasicStory;
+import com.hironytic.moltonf.model.basic.BasicStoryEvent;
+import com.hironytic.moltonf.model.basic.BasicStoryPeriod;
+import com.hironytic.moltonf.model.basic.BasicTalk;
+import com.hironytic.moltonf.model.basic.BasicWolfAttackTalk;
 import com.hironytic.moltonf.util.TimePart;
 
 /**
@@ -133,7 +138,7 @@ public class ArchivedStoryLoader {
      * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
     private Story loadVillageElement() throws XMLStreamException {
-        Story story = new Story();
+        Story story = new BasicStory();
         
         // 属性
         for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
@@ -250,7 +255,7 @@ public class ArchivedStoryLoader {
      * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
     private Avatar loadAvatar(Story story) throws XMLStreamException {
-        Avatar avatar = new Avatar();
+        Avatar avatar = new BasicAvatar();
         avatar.setStory(story);
         
         // 属性
@@ -301,7 +306,7 @@ public class ArchivedStoryLoader {
      * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
     private StoryPeriod loadPeriod(Story story) throws XMLStreamException {
-        StoryPeriod period = new StoryPeriod();
+        StoryPeriod period = new BasicStoryPeriod();
         period.setStory(story);
         List<StoryElement> elementList = new ArrayList<StoryElement>();
         
@@ -362,7 +367,7 @@ public class ArchivedStoryLoader {
      * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
     private Talk loadTalk(StoryPeriod period) throws XMLStreamException {
-        Talk talk = new Talk();
+        Talk talk = new BasicTalk();
         talk.setStoryPeriod(period);
         
         // 属性
@@ -435,7 +440,7 @@ public class ArchivedStoryLoader {
      * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
     private StoryEvent loadStoryEvent(StoryPeriod period, EventFamily eventFamily) throws XMLStreamException {
-        StoryEvent storyEvent = new StoryEvent();
+        StoryEvent storyEvent = new BasicStoryEvent();
         storyEvent.setStoryPeriod(period);
         storyEvent.setEventFamily(eventFamily);
 
@@ -468,7 +473,7 @@ public class ArchivedStoryLoader {
      * @throws XMLStreamException 読み込み時にエラーが発生した場合
      */
     private Talk loadAssault(StoryPeriod period) throws XMLStreamException {
-        Talk talk = new WolfAttackTalk();
+        Talk talk = new BasicWolfAttackTalk();
         talk.setStoryPeriod(period);
         talk.setTalkType(TalkType.WOLF);
         

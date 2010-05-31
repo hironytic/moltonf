@@ -26,55 +26,19 @@
 package com.hironytic.moltonf.model;
 
 /**
- * 発言以外でストーリー中に発生するイベントの情報を保持するクラスです。
+ * 発言以外でストーリー中に発生するイベントのインタフェース。
  */
-public class StoryEvent extends StoryElement {
+public interface StoryEvent extends StoryElement {
 
-    /** イベントの種別 */
-    private EventFamily eventFamily;
-    
-    /**
-     * コンストラクタ
-     */
-    public StoryEvent() {
-        
-    }
-    
     /**
      * イベントの種別を返します。
      * @return イベントの種別
      */
-    public EventFamily getEventFamily() {
-        return eventFamily;
-    }
+    public EventFamily getEventFamily();
     
     /**
      * イベントの種別をセットします。
      * @param eventFamily セットしたいイベントの種別
      */
-    public void setEventFamily(EventFamily eventFamily) {
-        this.eventFamily = eventFamily;
-    }
-
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        final int maxLen = 3;
-        StringBuilder builder = new StringBuilder();
-        builder.append("StoryEvent [");
-        if (eventFamily != null) {
-            builder.append("eventFamily=");
-            builder.append(eventFamily);
-            builder.append(", ");
-        }
-        if (getMessageLines() != null) {
-            builder.append("getMessageLines()=");
-            builder.append(getMessageLines().subList(0,
-                    Math.min(getMessageLines().size(), maxLen)));
-        }
-        builder.append("]");
-        return builder.toString();
-    }
+    public void setEventFamily(EventFamily eventFamily);
 }

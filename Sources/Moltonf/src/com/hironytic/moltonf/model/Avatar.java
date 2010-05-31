@@ -29,53 +29,21 @@ import java.awt.Image;
 import java.net.URI;
 
 /**
- * 登場人物の情報を保持するクラスです。
+ * 登場人物の情報を保持するインタフェース。
  */
-public class Avatar {
+public interface Avatar {
 
-    /** このオブジェクトが属する Story */    
-    private Story story;
-    
-    /** 省略名 */
-    private String abbreviatedName;
- 
-    /** アバターの ID */
-    private String avatarId;
-    
-    /** 顔アイコン画像への URI */
-    private URI faceIconUri;
-    
-    /** 顔アイコン画像 */
-    private Image faceIconImage;
-    
-    /** フルネーム */
-    private String fullName;
-    
-    /** 短い名前 */
-    private String shortName;
-    
-    /**
-     * コンストラクタ
-     */
-    public Avatar() {
-        
-    }
-    
     /**
      * このオブジェクトが属する Story を取得します。
      * @return このオブジェクトが属する Story
      */
-    public Story getStory() {
-        return story;
-    }
-
+    public Story getStory();
+    
     /**
      * 登場人物の識別子を返します。 
      * @return 識別子
      */
-    public String getAvatarId() {
-        return avatarId;
-    }
+    public String getAvatarId();
 
     /**
      * フルネームを返します。
@@ -83,9 +51,7 @@ public class Avatar {
      * 例：「楽天家 ゲルト」
      * @return フルネーム 
      */
-    public String getFullName() {
-        return fullName;
-    }
+    public String getFullName();
 
     /**
      * 短い名前を返します。
@@ -93,9 +59,7 @@ public class Avatar {
      * 例：「ゲルト」
      * @return 短い名前
      */
-    public String getShortName() {
-        return shortName;
-    }
+    public String getShortName();
 
     /**
      * 短縮名を返します。
@@ -103,87 +67,59 @@ public class Avatar {
      * 例：「楽」
      * @return 短縮名
      */
-    public String getAbbreviatedName() {
-        return abbreviatedName;
-    }
+    public String getAbbreviatedName();
 
     /**
      * 顔アイコン画像のある URI を返します。
      * @return 顔アイコンへの URI
      */
-    public URI getFaceIconUri() {
-        return faceIconUri;
-    }
+    public URI getFaceIconUri();
     
     /**
      * 顔アイコン画像を返します。
      * @return 顔アイコン画像
      */
-    public Image getFaceIconImage() {
-        return faceIconImage;
-    }
+    public Image getFaceIconImage();
     
     /**
      * このオブジェクトが属する Story をセットします。
      * @param story このオブジェクトが属する Story
      */
-    public void setStory(Story story) {
-        this.story = story;
-    }
+    public void setStory(Story story);
     
     /**
      * 登場人物の識別子をセットします。
      * @param avatarId セットしたい登場人物の識別子の値
      */
-    public void setAvatarId(String avatarId) {
-        this.avatarId = avatarId;
-    }
+    public void setAvatarId(String avatarId);
 
     /**
      * フルネームをセットします。
      * @param fullName セットしたいフルネームの値
      */
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
+    public void setFullName(String fullName);
 
     /**
      * 短い名前をセットします。
      * @param shortName セットしたい短い名前の値
      */
-    public void setShortName(String shortName) {
-        this.shortName = shortName;
-    }
+    public void setShortName(String shortName);
 
     /**
      * 短縮名をセットします。
      * @param abbreviatedName セットしたい短縮名の値
      */
-    public void setAbbreviatedName(String abbreviatedName) {
-        this.abbreviatedName = abbreviatedName;
-    }
+    public void setAbbreviatedName(String abbreviatedName);
 
     /**
      * 顔アイコン画像のある URI をセットします。
      * @param faceIconUri セットしたい URI の値
      */
-    public void setFaceIconUri(URI faceIconUri) {
-        this.faceIconUri = faceIconUri;
-    }
+    public void setFaceIconUri(URI faceIconUri);
 
     /**
      * 顔アイコン画像をセットします。
      * @param faceIconImage セットしたい顔アイコン画像の値
      */
-    public void setFaceIconImage(Image faceIconImage) {
-        this.faceIconImage = faceIconImage;
-    }
-    
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "Avatar [shortName=" + shortName + "]";
-    }
+    public void setFaceIconImage(Image faceIconImage);
 }

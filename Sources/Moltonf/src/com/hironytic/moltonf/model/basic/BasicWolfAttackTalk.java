@@ -23,17 +23,17 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.hironytic.moltonf.model;
+package com.hironytic.moltonf.model.basic;
 
 /**
- * 狼の襲撃発言 (○○ ！ 今日がお前の命日だ！) 専用の発言クラスです。
+ * 狼の襲撃発言 (○○ ！ 今日がお前の命日だ！) 専用の発言クラス。
  */
-public class WolfAttackTalk extends Talk {
+public class BasicWolfAttackTalk extends BasicTalk {
 
     /**
      * コンストラクタ
      */
-    public WolfAttackTalk() {
+    public BasicWolfAttackTalk() {
         
     }
 
