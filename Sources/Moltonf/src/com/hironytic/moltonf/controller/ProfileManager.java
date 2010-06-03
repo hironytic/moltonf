@@ -151,17 +151,24 @@ public class ProfileManager {
                 }
         
                 // ファイルに保存
+                HttpAccess httpAccess = new HttpAccess();
                 final int BUFFER_SIZE = 4096;
                 byte[] data = new byte[BUFFER_SIZE];
-                InputStream externalInStream = url.openStream();
-                OutputStream fileOutStream = new FileOutputStream(saveFile);
-                int readSize = externalInStream.read(data);
-                while (readSize > 0) {
-                    fileOutStream.write(data, 0, readSize);
-                    readSize = externalInStream.read(data);
+                InputStream externalInStream = httpAccess.doGet(url);
+                try {
+                    OutputStream fileOutStream = new FileOutputStream(saveFile);
+                    try {
+                        int readSize = externalInStream.read(data);
+                        while (readSize > 0) {
+                            fileOutStream.write(data, 0, readSize);
+                            readSize = externalInStream.read(data);
+                        }
+                    } finally {
+                        fileOutStream.close();
+                    }
+                } finally {
+                    externalInStream.close();
                 }
-                fileOutStream.close();
-                externalInStream.close();
                 
                 // 保存したファイルを記憶
                 externalDataMap.put(urlString, fileName);
