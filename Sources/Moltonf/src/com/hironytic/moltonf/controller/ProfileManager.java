@@ -40,10 +40,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.error.YAMLException;
+import net.arnx.jsonic.JSON;
+import net.arnx.jsonic.JSONException;
 
 import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.MoltonfException;
@@ -57,7 +55,7 @@ public class ProfileManager {
     private static final String EXTERNAL_DATA_FOLDER_NAME = "extdata";
     
     /** 取得済み外部データの URL とファイル名の対応を保存するファイルの名前 */
-    private static final String EXTERNAL_DATA_MAP_FILE_NAME = "extdata.yaml";
+    private static final String EXTERNAL_DATA_MAP_FILE_NAME = "extdata.json";
     
     /** UTF-8 文字セットの名前 */
     private static final String CHARSET_UTF8 = "UTF-8";
@@ -200,11 +198,10 @@ public class ProfileManager {
         try {
             File extMapFile = new File(profileFolder, EXTERNAL_DATA_MAP_FILE_NAME);
             if (extMapFile.exists()) {
-                Yaml yamlLoader = new Yaml();
                 InputStream inStream = new FileInputStream(extMapFile);
                 InputStreamReader inStreamReader = new InputStreamReader(inStream, Charset.forName(CHARSET_UTF8));
                 try {
-                    externalDataMap = (Map<String, String>)yamlLoader.load(inStreamReader);
+                    externalDataMap = (Map<String, String>)JSON.decode(inStreamReader, Map.class);
                     externalDataMapModified = false;
                 } finally {
                     inStreamReader.close();
@@ -216,7 +213,7 @@ public class ProfileManager {
             Moltonf.getLogger().warning("failed to load external data map file", ex);
         } catch (IOException ex) {
             Moltonf.getLogger().warning("failed to load external data map file", ex);
-        } catch (YAMLException ex) {
+        } catch (JSONException ex) {
             Moltonf.getLogger().warning("failed to load external data map file", ex);
         } catch (ClassCastException ex) {
             Moltonf.getLogger().warning("failed to load external data map file", ex);
@@ -237,10 +234,7 @@ public class ProfileManager {
                 OutputStream outStream = new FileOutputStream(extMapFile);
                 OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, Charset.forName(CHARSET_UTF8));
                 try {
-                    DumperOptions opt = new DumperOptions();
-                    opt.setDefaultFlowStyle(FlowStyle.BLOCK);
-                    Yaml yamlDumper = new Yaml(opt);
-                    yamlDumper.dump(externalDataMap, outStreamWriter);
+                    JSON.encode(externalDataMap, outStreamWriter, true);
                 } finally {
                     outStreamWriter.close();
                 }
@@ -250,7 +244,7 @@ public class ProfileManager {
                 Moltonf.getLogger().warning("failed to save external data map file", ex);
             } catch (IOException ex) {
                 Moltonf.getLogger().warning("failed to save external data map file", ex);
-            } catch (YAMLException ex) {
+            } catch (JSONException ex) {
                 Moltonf.getLogger().warning("failed to save external data map file", ex);
             }
             externalDataMapModified = false;

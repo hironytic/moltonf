@@ -38,12 +38,9 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.error.YAMLException;
+import net.arnx.jsonic.JSON;
+import net.arnx.jsonic.JSONException;
 
-import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Workspace;
 
@@ -81,12 +78,7 @@ public class WorkspaceArchiver {
             outStream = new FileOutputStream(archiveFile);
             OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, Charset.forName(CHARSET_UTF8));
             try {
-                outStreamWriter.write("# Moltonf workspace file. Created by Moltonf version " + Moltonf.getVersion() + "\n");
-                
-                DumperOptions opt = new DumperOptions();
-                opt.setDefaultFlowStyle(FlowStyle.BLOCK);
-                Yaml yamlDumper = new Yaml(opt);
-                yamlDumper.dump(rootMap, outStreamWriter);
+                JSON.encode(rootMap, outStreamWriter, true);
             } finally {
                 outStreamWriter.close();
             }
@@ -94,7 +86,7 @@ public class WorkspaceArchiver {
             throw new MoltonfException("failed to save workspace", ex);
         } catch (IOException ex) {
             throw new MoltonfException("failed to save workspace", ex);
-        } catch (YAMLException ex) {
+        } catch (JSONException ex) {
             throw new MoltonfException("failed to save workspace", ex);
         }
     }
@@ -109,11 +101,10 @@ public class WorkspaceArchiver {
         // 読み込み
         Map<String, Object> rootMap;
         try {
-            Yaml yamlLoader = new Yaml();
             InputStream inStream = new FileInputStream(archiveFile);
             InputStreamReader inStreamReader = new InputStreamReader(inStream, Charset.forName(CHARSET_UTF8));
             try {
-                rootMap = (Map<String, Object>)yamlLoader.load(inStreamReader);
+                rootMap = (Map<String, Object>)JSON.decode(inStreamReader, Map.class);
             } finally {
                 inStreamReader.close();
             }
@@ -121,7 +112,7 @@ public class WorkspaceArchiver {
             throw new MoltonfException("failed to load workspace", ex);
         } catch (IOException ex) {
             throw new MoltonfException("failed to load workspace", ex);
-        } catch (YAMLException ex) {
+        } catch (JSONException ex) {
             throw new MoltonfException("failed to load workspace", ex);
         } 
         
