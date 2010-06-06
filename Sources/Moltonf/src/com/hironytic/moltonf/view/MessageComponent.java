@@ -32,9 +32,13 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
+import java.awt.font.TextHitInfo;
 import java.awt.font.TextLayout;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
@@ -50,6 +54,7 @@ import java.util.regex.Pattern;
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 
+import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Link;
 import com.hironytic.moltonf.model.MessageRange;
@@ -217,32 +222,70 @@ public class MessageComponent extends JComponent {
         }
     }
 
-    /** 1行のレイアウト情報 */
+    /** 見た目の1行分のレイアウト情報 */
     private class LineLayout {
         /** 行の上端座標 */
-        private float lineTop;
+        private float top;
+        
+        /** 高さ */
+        private float height;
         
         /** 行の TextLayout */
         private TextLayout textLayout;
         
+        /** 元となった行のインデックス */
+        private int lineIndex;
+        
+        /** この見た目の行の先頭文字が元となった行の何文字目か */
+        private int startCharIndex;
+        
         /**
          * コンストラクタ
-         * @param lineTop 行の上端座標
+         * @param lineIndex 元となった行のインデックス
+         * @param startCharIndex この見た目の行の先頭文字が元となった行の何文字目か
+         * @param top 行の上端座標
          * @param textLayout 行の TextLayout
          */
-        public LineLayout(float lineTop, TextLayout textLayout) {
-            this.lineTop = lineTop;
+        public LineLayout(int lineIndex, int startCharIndex, float top, float height, TextLayout textLayout) {
+            this.lineIndex = lineIndex;
+            this.startCharIndex = startCharIndex;
+            this.top = top;
+            this.height = height;
             this.textLayout = textLayout;
         }
-    
+
         /**
-         * lineTop を取得します。
-         * @return lineTop を返します。
+         * lineIndex を取得します。
+         * @return lineIndex を返します。
          */
-        public float getLineTop() {
-            return lineTop;
+        public int getLineIndex() {
+            return lineIndex;
         }
-    
+
+        /**
+         * startCharIndex を取得します。
+         * @return startCharIndex を返します。
+         */
+        public int getStartCharIndex() {
+            return startCharIndex;
+        }
+
+        /**
+         * top を取得します。
+         * @return top を返します。
+         */
+        public float getTop() {
+            return top;
+        }
+
+        /**
+         * height を取得します。
+         * @return height を返します。
+         */
+        public float getHeight() {
+            return height;
+        }
+
         /**
          * textLayout を取得します。
          * @return textLayout を返します。
@@ -257,7 +300,14 @@ public class MessageComponent extends JComponent {
      */
     public MessageComponent() {
         lineHeightFactor = 1.3f; /* TODO: G国なら1.5f */
-        setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+        addMouseListener(new MouseAdapter() {
+        });
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                MessageComponent.this.mouseMoved(e);
+            }
+        });
     }
 
     /**
@@ -332,6 +382,184 @@ public class MessageComponent extends JComponent {
         eventListenerList.remove(LinkClickListener.class, listener);
     }
     
+    /** ヒットした位置 */
+    enum HitArea {
+        /** 範囲外 */
+        NONE,
+        
+        /** 通常の文字の上 */
+        CHARACTER,
+        
+        /** リンクの上 */
+        LINK,
+    }
+    
+    /** ヒットテストの結果を格納するクラス */
+    private static class HitResult {
+        /** ヒットした位置にあるもの */
+        private HitArea hitArea = HitArea.NONE;
+        
+        /** ヒットした見た目の行。textLayouts のインデックスと等しくなります。*/
+        private int lineLayoutIndex = -1;
+        
+        /** ヒットした見た目の行内の、ヒットした部分の情報 */
+        private TextHitInfo textHitInfo = null;
+        
+        /** ヒットしたリンクの情報 */
+        private LinkInfo hitLinkInfo = null;
+
+        /**
+         * hitArea を取得します。
+         * @return hitArea を返します。
+         */
+        public HitArea getHitArea() {
+            return hitArea;
+        }
+
+        /**
+         * lineLayoutIndex を取得します。
+         * @return lineLayoutIndex を返します。
+         */
+        public int getLineLayoutIndex() {
+            return lineLayoutIndex;
+        }
+
+        /**
+         * textHitInfo を取得します。
+         * @return textHitInfo を返します。
+         */
+        public TextHitInfo getTextHitInfo() {
+            return textHitInfo;
+        }
+
+        /**
+         * hitLinkInfo を取得します。
+         * @return hitLinkInfo を返します。
+         */
+        public LinkInfo getHitLinkInfo() {
+            return hitLinkInfo;
+        }
+
+        /**
+         * hitArea をセットします。
+         * @param hitArea セットしたい hitArea の値
+         */
+        public void setHitArea(HitArea hitArea) {
+            this.hitArea = hitArea;
+        }
+
+        /**
+         * lineLayoutIndex をセットします。
+         * @param lineLayoutIndex セットしたい lineLayoutIndex の値
+         */
+        public void setLineLayoutIndex(int lineLayoutIndex) {
+            this.lineLayoutIndex = lineLayoutIndex;
+        }
+
+        /**
+         * textHitInfo をセットします。
+         * @param textHitInfo セットしたい textHitInfo の値
+         */
+        public void setTextHitInfo(TextHitInfo textHitInfo) {
+            this.textHitInfo = textHitInfo;
+        }
+
+        /**
+         * hitLinkInfo をセットします。
+         * @param hitLinkInfo セットしたい hitLinkInfo の値
+         */
+        public void setHitLinkInfo(LinkInfo hitLinkInfo) {
+            this.hitLinkInfo = hitLinkInfo;
+        }
+
+    }
+    
+    /**
+     * 指定された座標のヒットテストを行います。
+     * @param x X座標
+     * @param y Y座標
+     * @return ヒットテストの結果
+     */
+    private HitResult hitTest(float x, float y) {
+        HitResult result = new HitResult();
+        
+        if (x < 0 || x > areaSize.width || y < 0 || y > areaSize.height) {
+            // エリア外
+            result.setHitArea(HitArea.NONE);
+        } else {
+            LineLayout lineLayout = null;
+            for (int ix = lineLayouts.size() - 1; ix >= 0; --ix) {
+                lineLayout = lineLayouts.get(ix);
+                if (lineLayout.getTop() < y) {
+                    result.setLineLayoutIndex(ix);
+                    break;
+                }
+            }
+            if (lineLayout == null) {
+                // ここには来ないはず...
+                Moltonf.getLogger().warning("unexpected result in hitTest()");
+                assert false;
+                result.setHitArea(HitArea.NONE);
+                return result;
+            }
+            TextLayout textLayout = lineLayout.getTextLayout();
+            if (textLayout == null) {
+                // 空行の場合
+                result.setHitArea(HitArea.NONE);
+                result.setTextHitInfo(TextHitInfo.beforeOffset(0));
+            } else {
+                TextHitInfo textHitInfo = textLayout.hitTestChar(x, y);
+                result.setTextHitInfo(textHitInfo);
+                int lineIndex = lineLayout.getLineIndex();
+                int charIndex = lineLayout.getStartCharIndex() + textHitInfo.getCharIndex();
+                
+                // 文字上にあるかどうかの判定
+                Rectangle2D lineBounds = textLayout.getBounds();
+                if (x >= messageAreaRect.x + lineBounds.getX() &&
+                        x <= messageAreaRect.x + lineBounds.getX() + lineBounds.getWidth()) {
+                    // リンク上にあるかどうかの判定
+                    LinkInfo hitLinkInfo = null;
+                    if (linkInfoList != null) {
+                        for (LinkInfo linkInfo : linkInfoList) {
+                            MessageRange range = linkInfo.getLink().getRange();
+                            if (range.getLineIndex() == lineIndex &&
+                                    range.getStart() <= charIndex && range.getEnd() > charIndex) {
+                                hitLinkInfo = linkInfo;
+                                break;
+                            }
+                        }
+                    }
+                    if (hitLinkInfo == null) {
+                        result.setHitArea(HitArea.CHARACTER);
+                    } else {
+                        result.setHitArea(HitArea.LINK);
+                        result.setHitLinkInfo(hitLinkInfo);
+                    }
+                } else {
+                    result.setHitArea(HitArea.NONE);
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * マウスカーソルが動いたときにリスナーから呼ばれます。
+     * @param e マウスイベント
+     */
+    private void mouseMoved(MouseEvent e) {
+        HitResult hitResult = hitTest(e.getX(), e.getY());
+        HitArea hitArea = hitResult.getHitArea();
+        if (hitArea == HitArea.LINK) {
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        } else if (hitArea == HitArea.CHARACTER) {
+            setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+        } else {
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+    
     /**
      * リンクがクリックされたことを通知します。
      * @param link クリックされたリンク
@@ -375,7 +603,8 @@ public class MessageComponent extends JComponent {
                 String line = lineList.get(lineIndex);
                 if (line.isEmpty()) {
                     FontMetrics fontMetrics = getFontMetrics(getFont());
-                    addLineLayout(null,
+                    addLineLayout(lineIndex, 0,
+                            null,
                             fontMetrics.getAscent(),
                             fontMetrics.getDescent(),
                             fontMetrics.getLeading());
@@ -383,13 +612,16 @@ public class MessageComponent extends JComponent {
                     AttributedString attributedString = makeAttributedString(line, lineIndex);
                     AttributedCharacterIterator charItr = attributedString.getIterator();
                     FontRenderContext frContext = g2.getFontRenderContext();
+                    int startCharIndex = 0;
                     LineBreakMeasurer measurer = new LineBreakMeasurer(charItr, frContext);
                     while (measurer.getPosition() < line.length()) {
                         TextLayout oneLineLayout = measurer.nextLayout(width);
-                        addLineLayout(oneLineLayout,
+                        addLineLayout(lineIndex, startCharIndex,
+                                oneLineLayout,
                                 oneLineLayout.getAscent(),
                                 oneLineLayout.getDescent(),
                                 oneLineLayout.getLeading());
+                        startCharIndex += oneLineLayout.getCharacterCount();
                     }
                 }
             }
@@ -469,14 +701,16 @@ public class MessageComponent extends JComponent {
     }
     
     /**
-     * 1行分のレイアウトを追加します。
+     * 見た目の1行分のレイアウトを追加します。
      * updateLayoutから呼び出されるヘルパメソッドです。
+     * @param lineIndex 元となる行のインデックス
+     * @param startCharIndex 先頭文字の、元の行の文字インデックス
      * @param textLayout 1行の TextLayout。空行なら null。
      * @param ascent 行の ascent
      * @param descent 行の descent
      * @param leading 行の leading
      */
-    private void addLineLayout(TextLayout textLayout, float ascent, float descent, float leading) {
+    private void addLineLayout(int lineIndex, int startCharIndex, TextLayout textLayout, float ascent, float descent, float leading) {
         float fontHeight = ascent + descent + leading;
         float lineHeight = fontHeight * lineHeightFactor;
         fontHeight = Math.round(fontHeight);
@@ -486,7 +720,8 @@ public class MessageComponent extends JComponent {
             lineTop += Math.round((lineHeight - fontHeight) / 2);
         }
         
-        lineLayouts.add(new LineLayout(areaSize.height + lineTop, textLayout));
+        lineLayouts.add(new LineLayout(lineIndex, startCharIndex,
+                areaSize.height + lineTop, lineHeight, textLayout));
         areaSize.height += lineHeight;
     }
     
@@ -503,7 +738,7 @@ public class MessageComponent extends JComponent {
                 TextLayout textLayout = lineLayout.getTextLayout();
                 if (textLayout != null) {
                     textLayout.draw(g2, messageAreaRect.x,
-                        lineLayout.getLineTop() + textLayout.getAscent());
+                        lineLayout.getTop() + textLayout.getAscent());
                 }
             }
         }
