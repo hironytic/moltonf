@@ -515,8 +515,12 @@ public class MessageComponent extends JComponent {
                 
                 // 文字上にあるかどうかの判定
                 Rectangle2D lineBounds = textLayout.getBounds();
-                if (x >= messageAreaRect.x + lineBounds.getX() &&
-                        x <= messageAreaRect.x + lineBounds.getX() + lineBounds.getWidth()) {
+                lineBounds.setRect(
+                        messageAreaRect.x + lineBounds.getX(),
+                        lineLayout.getTop() + textLayout.getAscent() + lineBounds.getY(),
+                        lineBounds.getWidth(),
+                        lineBounds.getHeight());
+                if (lineBounds.contains(x, y)) {
                     // リンク上にあるかどうかの判定
                     LinkInfo hitLinkInfo = null;
                     if (linkInfoList != null) {
