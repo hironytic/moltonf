@@ -34,7 +34,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -78,7 +77,7 @@ public class PeriodView extends JComponent implements MoltonfView {
     private static final String KEY_STORY_ELEMENT_INDEX = "Moltonf.storyElementIndex";
     
     /** このビューを表示するためのビューポートを持っているスクロールペイン */
-    private final JScrollPane scrollPane;
+    private final ScrollPane scrollPane;
     
     /** このパネルが表示する StoryPeriod */
     private StoryPeriod storyPeriod;
@@ -104,6 +103,21 @@ public class PeriodView extends JComponent implements MoltonfView {
     private MessageComponent nextDayLink;   // TODO: MoltonfView できちんと実装すれば持つ必要ない
     
     /**
+     * PeriodView 用のスクロールペイン
+     */
+    public static class ScrollPane extends JScrollPane {
+        private PeriodView periodView;
+        
+        public ScrollPane(PeriodView periodView) {
+            this.periodView = periodView;
+        }
+        
+        public PeriodView getPeriodView() {
+            return periodView;
+        }
+    }
+    
+    /**
      * コンストラクタ
      */
     public PeriodView() {
@@ -113,7 +127,7 @@ public class PeriodView extends JComponent implements MoltonfView {
         JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         contentPanel.setBackground(OUTSIDE_BG_COLOR);
         contentPanel.add(this);
-        scrollPane = new JScrollPane();
+        scrollPane = new ScrollPane(this);
         scrollPane.setViewportView(contentPanel);
     }
 
@@ -121,18 +135,8 @@ public class PeriodView extends JComponent implements MoltonfView {
      * スクロールペインを取得します。
      * @return
      */
-    public JScrollPane getScrollPane() {
+    public ScrollPane getScrollPane() {
         return scrollPane;
-    }
-    
-    /**
-     * PeriodView のスクロールペインから中に入っている PeriodView を得ます。
-     * @param scrollPane
-     * @return
-     */
-    public static PeriodView getPeriodView(JScrollPane scrollPane) {
-        JPanel contentPanel = (JPanel)scrollPane.getViewport().getView();
-        return (PeriodView)contentPanel.getComponent(0);
     }
     
     /**

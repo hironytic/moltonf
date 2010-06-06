@@ -47,7 +47,6 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
@@ -403,8 +402,8 @@ public class MoltonfController {
      * @return 指定したタブの PeriodView オブジェクトを返します。
      */
     private PeriodView getPeriodViewAt(int tabIndex) {
-        JScrollPane scrollPane = (JScrollPane)periodTabbedPane.getComponent(tabIndex);
-        return PeriodView.getPeriodView(scrollPane);
+        PeriodView.ScrollPane scrollPane = (PeriodView.ScrollPane)periodTabbedPane.getComponent(tabIndex);
+        return scrollPane.getPeriodView();
     }
     
     /**
