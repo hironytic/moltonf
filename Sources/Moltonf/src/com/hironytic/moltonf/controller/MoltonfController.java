@@ -40,7 +40,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -58,7 +57,6 @@ import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Story;
-import com.hironytic.moltonf.model.TalkType;
 import com.hironytic.moltonf.model.Workspace;
 import com.hironytic.moltonf.model.archive.ArchivedStoryLoader;
 import com.hironytic.moltonf.view.MainFrame;
@@ -164,16 +162,12 @@ public class MoltonfController {
                 }
             });
             
-            // --test
             mainFrame.getCommandActionAbout().addCommandListener(new CommandActionListener() {
                 @Override
                 protected void commandExecuted(ActionEvent e) {
-                    PeriodView periodView = getCurrentPeriodView();
-                    periodView.setTalkTypeFilter(EnumSet.of(TalkType.WOLF));
-                    periodView.updateView();
+                    // TODO: About ダイアログを出す
                 }
             });
-            // --test
             
             mainFrame.setLocationByPlatform(true);
             mainFrame.pack();
