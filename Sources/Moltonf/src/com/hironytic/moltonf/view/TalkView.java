@@ -31,6 +31,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -126,9 +127,6 @@ public class TalkView extends JComponent implements MoltonfView {
     
     /** 墓下メッセージの文字色 */
     private static final Color MESSAGE_TEXT_COLOR_GRAVE = new Color(0x000000);
-    
-    /** 通常のリンクの色 */
-    private static final Color LINK_COLOR = new Color(0xff8800);
     
     /** 発言中のリンクの色 */
     private static final Color LINK_COLOR_IN_TALK = new Color(0xff0000);
@@ -432,6 +430,11 @@ public class TalkView extends JComponent implements MoltonfView {
 //        talkMessageComponent.setLinkInfoList(linkInfoList);
 //        //test
         talkMessageComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT + VIEW_PADDING_RIGHT));
+        
+//test
+        talkMessageComponent.selectRange(new Point(0, 0), new Point(32, 10));
+//test
+        
         Dimension2D messageAreaSize = talkMessageComponent.getAreaSize();
         Rectangle2D messageAreaRect = new Rectangle2D.Float(
                 VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT,

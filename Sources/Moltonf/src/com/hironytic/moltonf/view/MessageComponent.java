@@ -25,13 +25,17 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.Point;
+import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -65,7 +69,7 @@ import com.hironytic.moltonf.view.event.LinkClickedEvent;
  * ストーリー中のテキストを表示するコンポーネント
  */
 @SuppressWarnings("serial")
-public class MessageComponent extends JComponent {
+public class MessageComponent extends JComponent implements Selectable {
     
     /** 表示するメッセージ */
     private List<String> messageLines;
@@ -93,6 +97,12 @@ public class MessageComponent extends JComponent {
 
     /** イベント通知を受け取るリスナーのリスト */
     private final EventListenerList eventListenerList = new EventListenerList();
+    
+    /** 選択範囲の開始点 */
+    private Position startOfSelectedRange = null;
+    
+    /** 選択範囲の終了点 */
+    private Position endOfSelectedRange = null;
     
     /**
      * テキストの属性が設定された箇所の情報
@@ -382,6 +392,101 @@ public class MessageComponent extends JComponent {
         eventListenerList.remove(LinkClickListener.class, listener);
     }
     
+    /**
+     * メッセージ中の特定の位置を指すためのクラス
+     */
+    private static class Position implements Comparable<Position> {
+        /** 見た目の行。textLayouts のインデックスと等しくなります。*/
+        private int lineLayoutIndex;
+        
+        /** lineLayoutIndex で示される見た目の行内の、位置情報 */
+        private TextHitInfo textHitInfo;
+        
+        /**
+         * コンストラクタ
+         * @param lineLayoutIndex 見た目の行。
+         * @param textHitInfolineLayoutIndex で示される見た目の行内の、位置情報。
+         */
+        public Position(int lineLayoutIndex, TextHitInfo textHitInfo) {
+            this.lineLayoutIndex = lineLayoutIndex;
+            this.textHitInfo = textHitInfo;
+        }
+
+        /**
+         * 見た目の行を取得します。
+         * @return ヒットした見た目の行。textLayouts のインデックスと等しくなります。
+         */
+        public int getLineLayoutIndex() {
+            return lineLayoutIndex;
+        }
+
+        /**
+         * getLineLayoutIndex() が返す見た目の行内の、位置情報を取得します。
+         * @return 位置情報を返します。
+         */
+        public TextHitInfo getTextHitInfo() {
+            return textHitInfo;
+        }
+
+        /**
+         * @see java.lang.Comparable#compareTo(java.lang.Object)
+         */
+        @Override
+        public int compareTo(Position other) {
+            if (lineLayoutIndex < other.lineLayoutIndex) {
+                return -1;
+            } else if (lineLayoutIndex > other.lineLayoutIndex) {
+                return 1;
+            } else {
+                return (textHitInfo.getInsertionIndex() - other.textHitInfo.getInsertionIndex());
+            }
+        }
+        
+        /**
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Position other = (Position) obj;
+            if (lineLayoutIndex != other.lineLayoutIndex)
+                return false;
+            if (textHitInfo == null) {
+                if (other.textHitInfo != null)
+                    return false;
+            } else if (!textHitInfo.equals(other.textHitInfo))
+                return false;
+            return true;
+        }
+        
+        /**
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + lineLayoutIndex;
+            result = prime * result
+                    + ((textHitInfo == null) ? 0 : textHitInfo.hashCode());
+            return result;
+        }
+
+        /**
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return "Position [lineLayoutIndex=" + lineLayoutIndex
+                    + ", textHitInfo=" + textHitInfo + "]";
+        }
+    }
+    
     /** ヒットした位置 */
     enum HitArea {
         /** 範囲外 */
@@ -399,11 +504,8 @@ public class MessageComponent extends JComponent {
         /** ヒットした位置にあるもの */
         private HitArea hitArea = HitArea.NONE;
         
-        /** ヒットした見た目の行。textLayouts のインデックスと等しくなります。*/
-        private int lineLayoutIndex = -1;
-        
-        /** ヒットした見た目の行内の、ヒットした部分の情報 */
-        private TextHitInfo textHitInfo = null;
+        /** ヒットした位置 */
+        private Position hitPosition = null;
         
         /** ヒットしたリンクの情報 */
         private LinkInfo hitLinkInfo = null;
@@ -417,19 +519,11 @@ public class MessageComponent extends JComponent {
         }
 
         /**
-         * lineLayoutIndex を取得します。
-         * @return lineLayoutIndex を返します。
+         * hitPosition を取得します。
+         * @return hitPosition を返します。
          */
-        public int getLineLayoutIndex() {
-            return lineLayoutIndex;
-        }
-
-        /**
-         * textHitInfo を取得します。
-         * @return textHitInfo を返します。
-         */
-        public TextHitInfo getTextHitInfo() {
-            return textHitInfo;
+        public Position getHitPosition() {
+            return hitPosition;
         }
 
         /**
@@ -449,19 +543,11 @@ public class MessageComponent extends JComponent {
         }
 
         /**
-         * lineLayoutIndex をセットします。
-         * @param lineLayoutIndex セットしたい lineLayoutIndex の値
+         * hitPosition をセットします。
+         * @param hitPosition セットしたい hitPosition の値
          */
-        public void setLineLayoutIndex(int lineLayoutIndex) {
-            this.lineLayoutIndex = lineLayoutIndex;
-        }
-
-        /**
-         * textHitInfo をセットします。
-         * @param textHitInfo セットしたい textHitInfo の値
-         */
-        public void setTextHitInfo(TextHitInfo textHitInfo) {
-            this.textHitInfo = textHitInfo;
+        public void setHitPosition(Position hitPosition) {
+            this.hitPosition = hitPosition;
         }
 
         /**
@@ -483,7 +569,8 @@ public class MessageComponent extends JComponent {
     private HitResult hitTest(float x, float y) {
         HitResult result = new HitResult();
         
-        if (x < 0 || x > areaSize.width || y < 0 || y > areaSize.height) {
+        if (lineLayouts == null ||
+                x < 0 || x > areaSize.width || y < 0 || y > areaSize.height) {
             // エリア外
             result.setHitArea(HitArea.NONE);
         } else {
@@ -491,7 +578,6 @@ public class MessageComponent extends JComponent {
             for (int ix = lineLayouts.size() - 1; ix >= 0; --ix) {
                 lineLayout = lineLayouts.get(ix);
                 if (lineLayout.getTop() < y) {
-                    result.setLineLayoutIndex(ix);
                     break;
                 }
             }
@@ -506,12 +592,12 @@ public class MessageComponent extends JComponent {
             if (textLayout == null) {
                 // 空行の場合
                 result.setHitArea(HitArea.NONE);
-                result.setTextHitInfo(TextHitInfo.beforeOffset(0));
+                result.setHitPosition(new Position(lineLayout.getLineIndex(), TextHitInfo.beforeOffset(0)));
             } else {
                 TextHitInfo textHitInfo = textLayout.hitTestChar(x, y);
-                result.setTextHitInfo(textHitInfo);
                 int lineIndex = lineLayout.getLineIndex();
                 int charIndex = lineLayout.getStartCharIndex() + textHitInfo.getCharIndex();
+                result.setHitPosition(new Position(lineIndex, textHitInfo));
                 
                 // 文字上にあるかどうかの判定
                 Rectangle2D lineBounds = textLayout.getBounds();
@@ -738,12 +824,105 @@ public class MessageComponent extends JComponent {
 
         Graphics2D g2 = (Graphics2D)g;
         if (lineLayouts != null) {
-            for (LineLayout lineLayout : lineLayouts) {
+            for (int lineLayoutIndex = 0; lineLayoutIndex < lineLayouts.size(); ++lineLayoutIndex) {
+                LineLayout lineLayout = lineLayouts.get(lineLayoutIndex);
                 TextLayout textLayout = lineLayout.getTextLayout();
                 if (textLayout != null) {
+                    // 文字列の描画
+                    g2.setPaintMode();
                     textLayout.draw(g2, messageAreaRect.x,
                         lineLayout.getTop() + textLayout.getAscent());
+                    
+                    // 選択範囲の描画
+                    if (startOfSelectedRange != null && endOfSelectedRange != null) {
+                        if (startOfSelectedRange.getLineLayoutIndex() <= lineLayoutIndex &&
+                                endOfSelectedRange.getLineLayoutIndex() >= lineLayoutIndex) {
+                            TextHitInfo beginInfo;
+                            if (startOfSelectedRange.getLineLayoutIndex() == lineLayoutIndex) {
+                                beginInfo = startOfSelectedRange.getTextHitInfo();
+                            } else {
+                                beginInfo = TextHitInfo.beforeOffset(0);
+                            }
+                            TextHitInfo endInfo;
+                            if (endOfSelectedRange.getLineLayoutIndex() == lineLayoutIndex) {
+                                endInfo = endOfSelectedRange.getTextHitInfo();
+                            } else {
+                                endInfo = TextHitInfo.afterOffset(textLayout.getCharacterCount() - 1);
+                            }
+                            Shape selectionShape = textLayout.getVisualHighlightShape(beginInfo, endInfo);
+                            Color oldColor = g2.getColor();
+                            Composite oldComposite = g2.getComposite();
+                            g2.setPaintMode();
+                            g2.setColor(new Color(0x55BBff));   // TODO: 選択範囲の色。どこで定義する？
+                            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)); // TODO: 選択範囲のアルファ値。どこで定義する？
+                            float tx = messageAreaRect.x;
+                            float ty = lineLayout.getTop() + textLayout.getAscent();
+                            g2.translate(tx, ty);
+                            g2.fill(selectionShape);
+                            g2.translate(-tx, -ty);
+                            g2.setComposite(oldComposite);
+                            g2.setColor(oldColor);
+                        }
+                    }
                 }
+            }
+        }
+    }
+
+    /**
+     * @see com.hironytic.moltonf.view.Selectable#clearSelection()
+     */
+    @Override
+    public void clearSelection() {
+        if (startOfSelectedRange != null || endOfSelectedRange != null) {
+            startOfSelectedRange = null;
+            endOfSelectedRange = null;
+            repaint();
+        }
+    }
+
+    /**
+     * @see com.hironytic.moltonf.view.Selectable#selectRange(java.awt.Point, java.awt.Point)
+     */
+    @Override
+    public void selectRange(Point startPt, Point endPt) {
+        if (lineLayouts == null) {
+            return;
+        }
+        
+        Position startPos;
+        if (startPt == null) {
+            startPos = new Position(0, TextHitInfo.beforeOffset(0));
+        } else {
+            startPos = hitTest(startPt.x, startPt.y).getHitPosition();
+        }
+        Position endPos;
+        if (endPt == null) {
+            int lineIndex = lineLayouts.size() - 1;
+            TextLayout textLayout = lineLayouts.get(lineIndex).getTextLayout();
+            if (textLayout == null) {
+                endPos = new Position(lineIndex, TextHitInfo.afterOffset(0));
+            } else {
+                endPos = new Position(lineIndex, TextHitInfo.afterOffset(textLayout.getCharacterCount() - 1));
+            }
+        } else {
+            endPos = hitTest(endPt.x, endPt.y).getHitPosition();
+        }
+        
+        if (startPos == null || endPos == null) {
+            clearSelection();
+        } else {
+            // 開始位置が終了位置より後にあれば入れ替える
+            if (startPos.compareTo(endPos) > 0) {
+                Position tempPos = endPos;
+                endPos = startPos;
+                startPos = tempPos;
+            }
+            
+            if (!startPos.equals(startOfSelectedRange) || !endPos.equals(endOfSelectedRange)) {
+                startOfSelectedRange = startPos;
+                endOfSelectedRange = endPos;
+                repaint();
             }
         }
     }
