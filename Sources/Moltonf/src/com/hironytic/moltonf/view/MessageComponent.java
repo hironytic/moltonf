@@ -575,9 +575,11 @@ public class MessageComponent extends JComponent implements Selectable {
             result.setHitArea(HitArea.NONE);
         } else {
             LineLayout lineLayout = null;
+            int lineLayoutIndex = -1;
             for (int ix = lineLayouts.size() - 1; ix >= 0; --ix) {
                 lineLayout = lineLayouts.get(ix);
                 if (lineLayout.getTop() < y) {
+                    lineLayoutIndex = ix;
                     break;
                 }
             }
@@ -592,12 +594,12 @@ public class MessageComponent extends JComponent implements Selectable {
             if (textLayout == null) {
                 // 空行の場合
                 result.setHitArea(HitArea.NONE);
-                result.setHitPosition(new Position(lineLayout.getLineIndex(), TextHitInfo.beforeOffset(0)));
+                result.setHitPosition(new Position(lineLayoutIndex, TextHitInfo.leading(0)));
             } else {
                 TextHitInfo textHitInfo = textLayout.hitTestChar(x, y);
+                result.setHitPosition(new Position(lineLayoutIndex, textHitInfo));
                 int lineIndex = lineLayout.getLineIndex();
                 int charIndex = lineLayout.getStartCharIndex() + textHitInfo.getCharIndex();
-                result.setHitPosition(new Position(lineIndex, textHitInfo));
                 
                 // 文字上にあるかどうかの判定
                 Rectangle2D lineBounds = textLayout.getBounds();
@@ -841,13 +843,13 @@ public class MessageComponent extends JComponent implements Selectable {
                             if (startOfSelectedRange.getLineLayoutIndex() == lineLayoutIndex) {
                                 beginInfo = startOfSelectedRange.getTextHitInfo();
                             } else {
-                                beginInfo = TextHitInfo.beforeOffset(0);
+                                beginInfo = TextHitInfo.leading(0);
                             }
                             TextHitInfo endInfo;
                             if (endOfSelectedRange.getLineLayoutIndex() == lineLayoutIndex) {
                                 endInfo = endOfSelectedRange.getTextHitInfo();
                             } else {
-                                endInfo = TextHitInfo.afterOffset(textLayout.getCharacterCount() - 1);
+                                endInfo = TextHitInfo.trailing(textLayout.getCharacterCount() - 1);
                             }
                             Shape selectionShape = textLayout.getVisualHighlightShape(beginInfo, endInfo);
                             Color oldColor = g2.getColor();
@@ -890,24 +892,43 @@ public class MessageComponent extends JComponent implements Selectable {
             return;
         }
         
-        Position startPos;
-        if (startPt == null) {
-            startPos = new Position(0, TextHitInfo.beforeOffset(0));
-        } else {
-            startPos = hitTest(startPt.x, startPt.y).getHitPosition();
+        if (startPt.y > endPt.y){
+            Point tempPt = endPt;
+            endPt = startPt;
+            startPt = tempPt;
         }
-        Position endPos;
-        if (endPt == null) {
-            int lineIndex = lineLayouts.size() - 1;
-            TextLayout textLayout = lineLayouts.get(lineIndex).getTextLayout();
-            if (textLayout == null) {
-                endPos = new Position(lineIndex, TextHitInfo.afterOffset(0));
-            } else {
-                endPos = new Position(lineIndex, TextHitInfo.afterOffset(textLayout.getCharacterCount() - 1));
-            }
-        } else {
-            endPos = hitTest(endPt.x, endPt.y).getHitPosition();
+
+        float startX = startPt.x;
+        float startY = startPt.y;
+        float endX = endPt.x;
+        float endY = endPt.y;
+        
+        if (startX < 0) {
+            startX = 0;
+        } else if (startX > areaSize.width) {
+            startX = (int)areaSize.width;
         }
+        
+        if (startY < 0) {
+            startY = 0;
+        } else if (startY > areaSize.height) {
+            startY = (int)areaSize.height;
+        }
+        
+        if (endX < 0) {
+            endX = 0;
+        } else if (endX > areaSize.width) {
+            endX = (int)areaSize.width;
+        }
+        
+        if (endY < 0) {
+            endY = 0;
+        } else if (endY > areaSize.height){
+            endY = (int)areaSize.height;
+        }
+        
+        Position startPos = hitTest(startX, startY).getHitPosition();
+        Position endPos = hitTest(endX, endY).getHitPosition();
         
         if (startPos == null || endPos == null) {
             clearSelection();

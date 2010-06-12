@@ -34,8 +34,8 @@ public interface Selectable {
 
     /**
      * 指定した範囲を選択します。
-     * @param startPt 選択の開始点。null なら先頭からを意味します。
-     * @param endPt 選択の終了点。null なら終端までを意味します。
+     * @param startPt 選択の開始点。
+     * @param endPt 選択の終了点。
      */
     public void selectRange(Point startPt, Point endPt);
     
