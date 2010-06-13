@@ -25,7 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
-import java.awt.Point;
+import java.awt.geom.Point2D;
 
 /**
  * 選択可能なオブジェクトのインタフェース
@@ -37,7 +37,7 @@ public interface Selectable {
      * @param startPt 選択の開始点。
      * @param endPt 選択の終了点。
      */
-    public void selectRange(Point startPt, Point endPt);
+    public void selectRange(Point2D startPt, Point2D endPt);
     
     /**
      * 範囲選択をクリアします。

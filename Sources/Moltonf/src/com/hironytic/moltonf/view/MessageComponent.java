@@ -34,17 +34,15 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextHitInfo;
 import java.awt.font.TextLayout;
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -57,11 +55,14 @@ import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.MouseInputListener;
 
 import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Link;
 import com.hironytic.moltonf.model.MessageRange;
+import com.hironytic.moltonf.view.ViewUtilities.RangeSelectionGesture;
 import com.hironytic.moltonf.view.event.LinkClickListener;
 import com.hironytic.moltonf.view.event.LinkClickedEvent;
 
@@ -97,6 +98,9 @@ public class MessageComponent extends JComponent implements Selectable {
 
     /** イベント通知を受け取るリスナーのリスト */
     private final EventListenerList eventListenerList = new EventListenerList();
+    
+    /** 範囲選択オブジェクト */
+    private RangeSelector rangeSelector = null;
     
     /** 選択範囲の開始点 */
     private Position startOfSelectedRange = null;
@@ -310,14 +314,20 @@ public class MessageComponent extends JComponent implements Selectable {
      */
     public MessageComponent() {
         lineHeightFactor = 1.3f; /* TODO: G国なら1.5f */
-        addMouseListener(new MouseAdapter() {
-        });
-        addMouseMotionListener(new MouseMotionAdapter() {
+        
+        MouseInputListener mouseInputListener = new MouseInputAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                MessageComponent.this.mouseClicked(e);
+            }
+            
             @Override
             public void mouseMoved(MouseEvent e) {
                 MessageComponent.this.mouseMoved(e);
             }
-        });
+        };
+        addMouseListener(mouseInputListener);
+        addMouseMotionListener(mouseInputListener);
     }
 
     /**
@@ -390,6 +400,14 @@ public class MessageComponent extends JComponent implements Selectable {
      */
     public void removeLinkClickListener(LinkClickListener listener) {
         eventListenerList.remove(LinkClickListener.class, listener);
+    }
+    
+    /**
+     * 範囲選択オブジェクトをセットします。
+     * @param rangeSelector 範囲選択オブジェクト
+     */
+    public void setRangeSelector(RangeSelector rangeSelector) {
+        this.rangeSelector = rangeSelector;
     }
     
     /**
@@ -653,10 +671,36 @@ public class MessageComponent extends JComponent implements Selectable {
     }
     
     /**
+     * マウスがクリックされたときにリスナーから呼ばれます。
+     * @param e マウスイベント
+     */
+    private void mouseClicked(MouseEvent e) {
+        HitResult hitResult = hitTest(e.getX(), e.getY());
+        HitArea hitArea = hitResult.getHitArea();
+        
+        // リンクのクリックか？
+        if (hitArea == HitArea.LINK){
+            fireLinkClicked(hitResult.getHitLinkInfo().getLink(), e);
+            return;
+        }
+        
+        // 範囲選択か？
+        if (rangeSelector != null) {
+            RangeSelectionGesture rsGesture = ViewUtilities.getRangeSelectionGesture(e);
+            if (rsGesture == RangeSelectionGesture.SET_START_POSITION) {
+                rangeSelector.selectFrom(this, e.getPoint());
+            } else if (rsGesture == RangeSelectionGesture.SET_END_POSITION) {
+                rangeSelector.selectTo(this, e.getPoint());
+            }
+        }
+    }
+    
+    /**
      * リンクがクリックされたことを通知します。
      * @param link クリックされたリンク
+     * @param mouseEvent 元となったマウスイベント
      */
-    private void fireLinkClicked(Link link) {
+    private void fireLinkClicked(Link link, MouseEvent mouseEvent) {
         // Guaranteed to return a non-null array
         Object[] listeners = eventListenerList.getListenerList();
         // Process the listeners last to first, notifying
@@ -884,51 +928,64 @@ public class MessageComponent extends JComponent implements Selectable {
     }
 
     /**
-     * @see com.hironytic.moltonf.view.Selectable#selectRange(java.awt.Point, java.awt.Point)
+     * @see com.hironytic.moltonf.view.Selectable#selectRange(java.awt.geom.Point2D, java.awt.geom.Point2D)
      */
     @Override
-    public void selectRange(Point startPt, Point endPt) {
+    public void selectRange(Point2D startPt, Point2D endPt) {
         if (lineLayouts == null) {
             return;
         }
         
-        if (startPt.y > endPt.y){
-            Point tempPt = endPt;
+        // startPt と endPt を Y座標の小さい順にする
+        if (startPt.getY() > endPt.getY()){
+            Point2D tempPt = endPt;
             endPt = startPt;
             startPt = tempPt;
         }
-
-        float startX = startPt.x;
-        float startY = startPt.y;
-        float endX = endPt.x;
-        float endY = endPt.y;
+        float startX = (float)startPt.getX();
+        float startY = (float)startPt.getY();
+        float endX = (float)endPt.getX();
+        float endY = (float)endPt.getY();
         
+        // X座標について、範囲をはみ出したものを範囲内へ持ってくる
         if (startX < 0) {
             startX = 0;
         } else if (startX > areaSize.width) {
             startX = (int)areaSize.width;
         }
-        
-        if (startY < 0) {
-            startY = 0;
-        } else if (startY > areaSize.height) {
-            startY = (int)areaSize.height;
-        }
-        
         if (endX < 0) {
             endX = 0;
         } else if (endX > areaSize.width) {
             endX = (int)areaSize.width;
         }
         
-        if (endY < 0) {
-            endY = 0;
-        } else if (endY > areaSize.height){
-            endY = (int)areaSize.height;
+        Position startPos = null;
+        if (startY < 0) {
+            // 先頭から選択
+            startPos = new Position(0, TextHitInfo.leading(0));
+        } else if (startY > areaSize.height) {
+            startPos = null;    // 選択範囲なし
+        } else {
+            startPos = hitTest(startX, startY).getHitPosition();
         }
         
-        Position startPos = hitTest(startX, startY).getHitPosition();
-        Position endPos = hitTest(endX, endY).getHitPosition();
+        Position endPos = null;
+        if (endY < 0) {
+            startPos = null;    // 選択範囲なし
+        } else if (endY > areaSize.height){
+            // 末尾まで選択
+            int lineLayoutIndex = lineLayouts.size() - 1;
+            TextLayout textLayout = lineLayouts.get(lineLayoutIndex).getTextLayout();
+            TextHitInfo textHitInfo;
+            if (textLayout == null) {   // 最後が空行はあり得ないはずだが念のため
+                textHitInfo = TextHitInfo.leading(0);
+            } else {
+                textHitInfo = TextHitInfo.trailing(textLayout.getCharacterCount() - 1);
+            }
+            endPos = new Position(lineLayoutIndex, textHitInfo);
+        } else {
+            endPos = hitTest(endX, endY).getHitPosition();
+        }
         
         if (startPos == null || endPos == null) {
             clearSelection();

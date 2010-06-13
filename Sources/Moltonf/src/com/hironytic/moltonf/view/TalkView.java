@@ -421,19 +421,7 @@ public class TalkView extends JComponent implements MoltonfView {
         // 発言
         talkMessageComponent.setMessage(talk.getMessageLines());
         talkMessageComponent.setForeground(getMessageTextColor());
-//        //test
-//        class DummyLink extends Link {
-//            DummyLink(MessageRange range) { super(range); }
-//        }
-//        List<MessageComponent.LinkInfo> linkInfoList = new ArrayList<MessageComponent.LinkInfo>();
-//        linkInfoList.add(new MessageComponent.LinkInfo(new DummyLink(new MessageRange(0, 0, 2)), LINK_COLOR_IN_TALK));
-//        talkMessageComponent.setLinkInfoList(linkInfoList);
-//        //test
         talkMessageComponent.updateLayout(areaSize.width - (VIEW_PADDING_LEFT + MESSAGE_LEFT + MESSAGE_PADDING_LEFT + MESSAGE_PADDING_RIGHT + VIEW_PADDING_RIGHT));
-        
-//test
-        talkMessageComponent.selectRange(new Point(0, 0), new Point(32, 10));
-//test
         
         Dimension2D messageAreaSize = talkMessageComponent.getAreaSize();
         Rectangle2D messageAreaRect = new Rectangle2D.Float(

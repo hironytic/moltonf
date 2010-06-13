@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.view.event;
 
+import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
 import com.hironytic.moltonf.model.Link;
@@ -37,6 +38,9 @@ public class LinkClickedEvent extends EventObject {
 
     /** クリックされたリンク */
     private Link link;
+    
+    /** クリックの引き金になったマウスイベント */
+    private MouseEvent mouseEvent;
     
     /**
      * コンストラクタ
@@ -60,6 +64,22 @@ public class LinkClickedEvent extends EventObject {
      */
     public void setLink(Link link) {
         this.link = link;
+    }
+
+    /**
+     * クリックの引き金になったマウスイベントを取得します。
+     * @return マウスイベント
+     */
+    public MouseEvent getMouseEvent() {
+        return mouseEvent;
+    }
+
+    /**
+     * クリックの引き金になったマウスイベントをセットします。
+     * @param mouseEvent マウスイベント
+     */
+    public void setMouseEvent(MouseEvent mouseEvent) {
+        this.mouseEvent = mouseEvent;
     }
 
     /**

@@ -35,6 +35,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.JComponent;
@@ -45,7 +46,7 @@ import com.hironytic.moltonf.model.StoryEvent;
  * ストーリー中のイベントの表示を担当するビュー
  */
 @SuppressWarnings("serial")
-public class StoryEventView extends JComponent implements MoltonfView {
+public class StoryEventView extends JComponent implements MoltonfView, Selectable {
     
     /** ビューの左の余白 */
     private static final float VIEW_PADDING_LEFT = 16;
@@ -234,5 +235,46 @@ public class StoryEventView extends JComponent implements MoltonfView {
         super.setFont(font);
         
         eventMessageComponent.setFont(font);
+    }
+
+    /**
+     * 範囲選択オブジェクトをセットします。
+     * @param rangeSelector 範囲選択オブジェクト
+     */
+    public void setRangeSelector(RangeSelector rangeSelector) {
+        eventMessageComponent.setRangeSelector(rangeSelector);
+    }
+    
+    /**
+     * @see com.hironytic.moltonf.view.Selectable#clearSelection()
+     */
+    @Override
+    public void clearSelection() {
+        eventMessageComponent.clearSelection();
+    }
+
+    /**
+     * @see com.hironytic.moltonf.view.Selectable#selectRange(java.awt.geom.Point2D, java.awt.geom.Point2D)
+     */
+    @Override
+    public void selectRange(Point2D startPt, Point2D endPt) {
+        if (startPt.getY() > endPt.getY()){
+            Point2D tempPt = endPt;
+            endPt = startPt;
+            startPt = tempPt;
+        }
+        
+        Rectangle2D messageBounds = eventMessageComponent.getBounds();
+        
+        // メッセージ領域外なら選択しない
+        if (startPt.getY() > messageBounds.getMaxY() ||
+                endPt.getY() < messageBounds.getMinY()) {
+            clearSelection();
+            return;
+        }
+        
+        Point2D eventMessageStartPt = ViewUtilities.convertPoint(this, startPt, eventMessageComponent);
+        Point2D eventMessageEndPt = ViewUtilities.convertPoint(this, endPt, eventMessageComponent);
+        eventMessageComponent.selectRange(eventMessageStartPt, eventMessageEndPt);
     }
 }

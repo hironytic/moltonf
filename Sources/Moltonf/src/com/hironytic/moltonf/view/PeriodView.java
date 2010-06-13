@@ -33,6 +33,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Dimension2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.List;
@@ -99,6 +100,9 @@ public class PeriodView extends JComponent implements MoltonfView {
     
     /** 強調表示設定 */
     private List<HighlightSetting> highlightSettingList;
+
+    /** 範囲選択用オブジェクト */
+    private RangeSelector rangeSelector = new PeriodViewRangeSelector();
     
     private MessageComponent nextDayLink;   // TODO: MoltonfView できちんと実装すれば持つ必要ない
     
@@ -369,6 +373,7 @@ public class PeriodView extends JComponent implements MoltonfView {
                 storyEventView.setStoryEvent(storyEvent);
                 storyEventView.setAreaWidth(500); // TODO:
                 storyEventView.setFont(getFont());
+                storyEventView.setRangeSelector(rangeSelector);
                 EventFamily eventFamily = storyEvent.getEventFamily();
                 if (isMatchFilterOfEvent(eventFamily)) {
                     isVisible = true;
@@ -399,23 +404,24 @@ public class PeriodView extends JComponent implements MoltonfView {
         add(nextDayLink);
     }
     
-//    /**
-//     * 指定された位置にある可視の子コンポーネントを返します。
-//     * @param x X座標
-//     * @param y Y座標
-//     * @return 表示されている子コンポーネント。
-//     *         その位置に可視の子コンポーネントが見つからなければ null を返します。
-//     */
-//    private Component getVisibleChildComponentAt(int x, int y) {
-//        int componentCount = getComponentCount();
-//        for (int ix = 0; ix < componentCount; ++ix) {
-//            Component comp = getComponent(ix);
-//            if (comp.isVisible() && comp.contains(x - comp.getX(), y - comp.getY())) {
-//                return comp;
-//            }
-//        }
-//        return null;
-//    }
+    /**
+     * 指定された位置にある可視の子コンポーネントのインデックスを返します。
+     * @param point 位置
+     * @return 子コンポーネントのインデックス。
+     *         その位置に可視の子コンポーネントが見つからなければ -1 を返します。
+     */
+    private int getVisibleChildComponentIndexAt(Point2D point) {
+        int componentCount = getComponentCount();
+        for (int ix = 0; ix < componentCount; ++ix) {
+            Component comp = getComponent(ix);
+            if (comp.isVisible() &&
+                    comp.contains((int)(point.getX() - comp.getX()),
+                                  (int)(point.getY() - comp.getY()))) {
+                return ix;
+            }
+        }
+        return -1;
+    }
     
     /**
      * フィルタリング状態を再構成します。
@@ -548,5 +554,116 @@ public class PeriodView extends JComponent implements MoltonfView {
         g2d.setColor(BG_COLOR);
         g2d.fill(paintRect);
         g2d.setColor(oldColor);
+    }
+    
+    /**
+     * PeriodView 用の範囲選択用オブジェクトの実装
+     */
+    private class PeriodViewRangeSelector implements RangeSelector {
+        /** 開始点の子コンポーネントのインデックス */
+        private int startChildIndex = -1;
+        
+        /** 開始点の座標。PeriodView の座標系です。*/
+        private Point2D startPt = null;
+        
+        /** 終了点の子コンポーネントのインデックス */
+        private int endChildIndex = -1;
+        
+        /** 終了点の座標。PeriodView の座標系です。*/
+        private Point2D endPt = null;
+        
+        public PeriodViewRangeSelector() {
+        }
+
+        /* (non-Javadoc)
+         * @see com.hironytic.moltonf.view.RangeSelector#beginDragging(javax.swing.JComponent, java.awt.geom.Point2D)
+         */
+        @Override
+        public void beginDragging(JComponent component, Point2D pt) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        /* (non-Javadoc)
+         * @see com.hironytic.moltonf.view.RangeSelector#isSelected()
+         */
+        @Override
+        public boolean isSelected() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        private void doClearSelection() {
+            if (startChildIndex < 0 || endChildIndex < 0) {
+                return;
+            }
+            
+            int startIx = (startChildIndex < endChildIndex) ? startChildIndex : endChildIndex;
+            int endIx = (startChildIndex < endChildIndex) ? endChildIndex : startChildIndex;
+            for (int ix = startIx; ix <= endIx; ++ix) {
+                Component child = getComponent(ix);
+                if (child instanceof Selectable) {
+                    Selectable selectableChild = (Selectable)child;
+                    selectableChild.clearSelection();
+                }
+            }
+        }
+        
+        /**
+         * @see com.hironytic.moltonf.view.RangeSelector#selectFrom(javax.swing.JComponent, java.awt.geom.Point2D)
+         */
+        @Override
+        public void selectFrom(JComponent component, Point2D pt) {
+            doClearSelection();
+            
+            startPt = ViewUtilities.convertPoint(component, pt, PeriodView.this);
+            startChildIndex = getVisibleChildComponentIndexAt(startPt);
+            endPt = null;
+            endChildIndex = -1;
+        }
+
+        /**
+         * @see com.hironytic.moltonf.view.RangeSelector#selectTo(javax.swing.JComponent, java.awt.geom.Point2D)
+         */
+        @Override
+        public void selectTo(JComponent component, Point2D pt) {
+            doClearSelection(); // TODO: 毎回全部クリアしないでもうちょっと効率よくできるはず
+            
+            if (startPt == null) {
+                return;
+            }
+            
+            endPt = ViewUtilities.convertPoint(component, pt, PeriodView.this);
+            endChildIndex = getVisibleChildComponentIndexAt(endPt);
+            
+            doSelectChildren();
+        }
+        
+        private void doSelectChildren() {
+            if (startChildIndex < 0 || endChildIndex < 0) {
+                return;
+            }
+            
+            int startIx = (startChildIndex < endChildIndex) ? startChildIndex : endChildIndex;
+            int endIx = (startChildIndex < endChildIndex) ? endChildIndex : startChildIndex;
+            for (int ix = startIx; ix <= endIx; ++ix) {
+                Component child = getComponent(ix);
+                if (child instanceof Selectable) {
+                    Selectable selectableChild = (Selectable)child;
+                    Point2D childStart = ViewUtilities.convertPoint(PeriodView.this, startPt, child);
+                    Point2D childEnd = ViewUtilities.convertPoint(PeriodView.this, endPt, child);
+                    selectableChild.selectRange(childStart, childEnd);
+                }
+            }
+        }
+        
+    }
+    
+    /**
+     * 範囲選択オブジェクトを返します。
+     * @return 範囲選択オブジェクト
+     */
+    public RangeSelector getRangeSelector() {
+        return rangeSelector;
     }
 }

@@ -25,7 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
-import java.awt.Point;
+import java.awt.geom.Point2D;
 
 import javax.swing.JComponent;
 
@@ -39,21 +39,21 @@ public interface RangeSelector {
      * @param component コンポーネント
      * @param pt 開始点。第1引数で指定したコンポーネントの座標系で指定します。
      */
-    public void selectFrom(JComponent component, Point pt);
+    public void selectFrom(JComponent component, Point2D pt);
     
     /**
      * 指定したコンポーネントのある点を選択範囲の終了点にします。
      * @param component コンポーネント
      * @param pt 終了点。第1引数で指定したコンポーネントの座標系で指定します。
      */
-    public void selectTo(JComponent component, Point pt);
+    public void selectTo(JComponent component, Point2D pt);
     
     /**
      * マウスドラッグによる範囲選択を開始します。
      * @param component
      * @param pt
      */
-    public void beginDragging(JComponent component, Point pt);
+    public void beginDragging(JComponent component, Point2D pt);
     
     /**
      * 選択範囲があるかどうかを返します。
