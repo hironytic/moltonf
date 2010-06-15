@@ -607,6 +607,8 @@ public class PeriodView extends JComponent implements MoltonfView {
                     selectableChild.clearSelection();
                 }
             }
+            startPt = null;
+            startChildIndex = -1;
         }
         
         /**
@@ -627,25 +629,22 @@ public class PeriodView extends JComponent implements MoltonfView {
          */
         @Override
         public void selectTo(JComponent component, Point2D pt) {
-            doClearSelection(); // TODO: 毎回全部クリアしないでもうちょっと効率よくできるはず
-            
             if (startPt == null) {
                 return;
             }
             
+            int prevEndChildIndex = endChildIndex;
+            
             endPt = ViewUtilities.convertPoint(component, pt, PeriodView.this);
             endChildIndex = getVisibleChildComponentIndexAt(endPt);
             
-            doSelectChildren();
-        }
-        
-        private void doSelectChildren() {
-            if (startChildIndex < 0 || endChildIndex < 0) {
-                return;
+            int startIx = (-1 == prevEndChildIndex) ? startChildIndex : prevEndChildIndex;
+            int endIx = endChildIndex;
+            if (startIx > endIx) {
+                int tempIx = endIx;
+                endIx = startIx;
+                startIx = tempIx;
             }
-            
-            int startIx = (startChildIndex < endChildIndex) ? startChildIndex : endChildIndex;
-            int endIx = (startChildIndex < endChildIndex) ? endChildIndex : startChildIndex;
             for (int ix = startIx; ix <= endIx; ++ix) {
                 Component child = getComponent(ix);
                 if (child instanceof Selectable) {
@@ -656,7 +655,6 @@ public class PeriodView extends JComponent implements MoltonfView {
                 }
             }
         }
-        
     }
     
     /**
