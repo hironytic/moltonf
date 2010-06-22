@@ -54,10 +54,4 @@ public interface RangeSelector {
      * @param pt
      */
     public void beginDragging(JComponent component, Point2D pt);
-    
-    /**
-     * 選択範囲があるかどうかを返します。
-     * @return 選択範囲があれば true を返します。
-     */
-    public boolean isSelected();
 }

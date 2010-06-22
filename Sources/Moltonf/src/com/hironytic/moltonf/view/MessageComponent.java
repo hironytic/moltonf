@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.AWTEvent;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -55,8 +56,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
-import javax.swing.event.MouseInputAdapter;
-import javax.swing.event.MouseInputListener;
 
 import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.model.HighlightSetting;
@@ -315,19 +314,7 @@ public class MessageComponent extends JComponent implements Selectable {
     public MessageComponent() {
         lineHeightFactor = 1.3f; /* TODO: G国なら1.5f */
         
-        MouseInputListener mouseInputListener = new MouseInputAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                MessageComponent.this.mouseClicked(e);
-            }
-            
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                MessageComponent.this.mouseMoved(e);
-            }
-        };
-        addMouseListener(mouseInputListener);
-        addMouseMotionListener(mouseInputListener);
+        enableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
 
     /**
@@ -655,11 +642,82 @@ public class MessageComponent extends JComponent implements Selectable {
     }
     
     /**
-     * マウスカーソルが動いたときにリスナーから呼ばれます。
-     * @param e マウスイベント
+     * マウスイベントを処理している間の情報
      */
-    private void mouseMoved(MouseEvent e) {
-        HitResult hitResult = hitTest(e.getX(), e.getY());
+    private static class MouseEventProcessingContext {
+        /** 対象のマウスイベント */
+        private MouseEvent event;
+        
+        /** 範囲選択の処理を行うかどうか */
+        private boolean isProcessRangeSelection = true;
+
+        public MouseEventProcessingContext(MouseEvent event) {
+            this.event = event;
+        }
+        
+        public MouseEvent getEvent() {
+            return event;
+        }
+
+        public boolean isProcessRangeSelection() {
+            return isProcessRangeSelection;
+        }
+
+        public void setProcessRangeSelection(boolean isProcessRangeSelection) {
+            this.isProcessRangeSelection = isProcessRangeSelection;
+        }
+    }
+    
+    /**
+     * @see javax.swing.JComponent#processMouseEvent(java.awt.event.MouseEvent)
+     */
+    @Override
+    protected void processMouseEvent(MouseEvent e) {
+        processMouseRelatedEvent(e);
+        super.processMouseEvent(e);
+    }
+
+    /**
+     * @see javax.swing.JComponent#processMouseMotionEvent(java.awt.event.MouseEvent)
+     */
+    @Override
+    protected void processMouseMotionEvent(MouseEvent e) {
+        processMouseRelatedEvent(e);
+        super.processMouseMotionEvent(e);
+    }
+
+    /**
+     * マウスに関連するイベントを処理します。
+     * @param e
+     */
+    private void processMouseRelatedEvent(MouseEvent e) {
+        MouseEventProcessingContext ctx = new MouseEventProcessingContext(e);
+        int eventId = e.getID();
+        if (eventId == MouseEvent.MOUSE_MOVED) {
+            mouseMoved(ctx);
+        } else if (eventId == MouseEvent.MOUSE_CLICKED) {
+            mouseClicked(ctx);
+        }
+        
+        if (ctx.isProcessRangeSelection()) {
+            if (rangeSelector != null) {
+                RangeSelectionGesture rsGesture = ViewUtilities.getRangeSelectionGesture(e);
+                if (rsGesture == RangeSelectionGesture.SET_START_POSITION) {
+                    rangeSelector.selectFrom(this, e.getPoint());
+                } else if (rsGesture == RangeSelectionGesture.SET_END_POSITION) {
+                    rangeSelector.selectTo(this, e.getPoint());
+                }
+            }
+        }
+    }
+    
+    /**
+     * マウスカーソルが動いたときの処理
+     * @param ctx 処理コンテキスト
+     */
+    private void mouseMoved(MouseEventProcessingContext ctx) {
+        MouseEvent event = ctx.getEvent();
+        HitResult hitResult = hitTest(event.getX(), event.getY());
         HitArea hitArea = hitResult.getHitArea();
         if (hitArea == HitArea.LINK) {
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -674,24 +732,15 @@ public class MessageComponent extends JComponent implements Selectable {
      * マウスがクリックされたときにリスナーから呼ばれます。
      * @param e マウスイベント
      */
-    private void mouseClicked(MouseEvent e) {
-        HitResult hitResult = hitTest(e.getX(), e.getY());
+    private void mouseClicked(MouseEventProcessingContext ctx) {
+        MouseEvent event = ctx.getEvent();
+        HitResult hitResult = hitTest(event.getX(), event.getY());
         HitArea hitArea = hitResult.getHitArea();
         
         // リンクのクリックか？
         if (hitArea == HitArea.LINK){
-            fireLinkClicked(hitResult.getHitLinkInfo().getLink(), e);
-            return;
-        }
-        
-        // 範囲選択か？
-        if (rangeSelector != null) {
-            RangeSelectionGesture rsGesture = ViewUtilities.getRangeSelectionGesture(e);
-            if (rsGesture == RangeSelectionGesture.SET_START_POSITION) {
-                rangeSelector.selectFrom(this, e.getPoint());
-            } else if (rsGesture == RangeSelectionGesture.SET_END_POSITION) {
-                rangeSelector.selectTo(this, e.getPoint());
-            }
+            fireLinkClicked(hitResult.getHitLinkInfo().getLink(), event);
+            ctx.setProcessRangeSelection(false);
         }
     }
     

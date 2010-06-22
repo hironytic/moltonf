@@ -405,25 +405,6 @@ public class PeriodView extends JComponent implements MoltonfView {
     }
     
     /**
-     * 指定された位置にある可視の子コンポーネントのインデックスを返します。
-     * @param point 位置
-     * @return 子コンポーネントのインデックス。
-     *         その位置に可視の子コンポーネントが見つからなければ -1 を返します。
-     */
-    private int getVisibleChildComponentIndexAt(Point2D point) {
-        int componentCount = getComponentCount();
-        for (int ix = 0; ix < componentCount; ++ix) {
-            Component comp = getComponent(ix);
-            if (comp.isVisible() &&
-                    comp.contains((int)(point.getX() - comp.getX()),
-                                  (int)(point.getY() - comp.getY()))) {
-                return ix;
-            }
-        }
-        return -1;
-    }
-    
-    /**
      * フィルタリング状態を再構成します。
      */
     private void rebuildFilter() {
@@ -584,15 +565,30 @@ public class PeriodView extends JComponent implements MoltonfView {
             
         }
 
-        /* (non-Javadoc)
-         * @see com.hironytic.moltonf.view.RangeSelector#isSelected()
+        /**
+         * 指定された位置にある子コンポーネントのインデックスを返します。
+         * @param point 位置
+         * @return 子コンポーネントのインデックス。
+         *         その位置に可視の子コンポーネントが見つからなければ -1 を返します。
          */
-        @Override
-        public boolean isSelected() {
-            // TODO Auto-generated method stub
-            return false;
+        private int getChildComponent(Point2D point) {
+            // コンポーネントは上から順に並んでいるという前提
+            int lastItemIndex = -1;
+            int componentCount = getComponentCount();
+            for (int ix = 0; ix < componentCount; ++ix) {
+                Component comp = getComponent(ix);
+                if (comp.isVisible()) {
+                    lastItemIndex = ix;
+                    if (comp.getY() + comp.getHeight() >= point.getY()) {
+                        return ix;
+                    }
+                }
+            }
+            
+            // 見つからなければ最後のアイテムで
+            return lastItemIndex;
         }
-
+        
         private void doClearSelection() {
             if (startChildIndex < 0 || endChildIndex < 0) {
                 return;
@@ -619,7 +615,7 @@ public class PeriodView extends JComponent implements MoltonfView {
             doClearSelection();
             
             startPt = ViewUtilities.convertPoint(component, pt, PeriodView.this);
-            startChildIndex = getVisibleChildComponentIndexAt(startPt);
+            startChildIndex = getChildComponent(startPt);
             endPt = null;
             endChildIndex = -1;
         }
@@ -636,7 +632,7 @@ public class PeriodView extends JComponent implements MoltonfView {
             int prevEndChildIndex = endChildIndex;
             
             endPt = ViewUtilities.convertPoint(component, pt, PeriodView.this);
-            endChildIndex = getVisibleChildComponentIndexAt(endPt);
+            endChildIndex = getChildComponent(endPt);
             
             int startIx = (-1 == prevEndChildIndex) ? startChildIndex : prevEndChildIndex;
             int endIx = endChildIndex;
