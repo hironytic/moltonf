@@ -25,9 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
-import java.awt.geom.Point2D;
-
-import javax.swing.JComponent;
+import java.awt.event.MouseEvent;
 
 /**
  * 範囲選択を司るオブジェクトが実装するインタフェース
@@ -35,23 +33,8 @@ import javax.swing.JComponent;
 public interface RangeSelector {
 
     /**
-     * 指定したコンポーネントのある点を選択範囲の開始点にします。
-     * @param component コンポーネント
-     * @param pt 開始点。第1引数で指定したコンポーネントの座標系で指定します。
+     * 範囲選択に関するマウスイベントを処理します。
+     * @param e
      */
-    public void selectFrom(JComponent component, Point2D pt);
-    
-    /**
-     * 指定したコンポーネントのある点を選択範囲の終了点にします。
-     * @param component コンポーネント
-     * @param pt 終了点。第1引数で指定したコンポーネントの座標系で指定します。
-     */
-    public void selectTo(JComponent component, Point2D pt);
-    
-    /**
-     * マウスドラッグによる範囲選択を開始します。
-     * @param component
-     * @param pt
-     */
-    public void beginDragging(JComponent component, Point2D pt);
+    public void processMouseRelatedEvent(MouseEvent e);
 }

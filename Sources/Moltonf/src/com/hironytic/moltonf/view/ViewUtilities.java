@@ -26,7 +26,6 @@
 package com.hironytic.moltonf.view;
 
 import java.awt.Component;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
 import javax.swing.SwingUtilities;
@@ -44,36 +43,5 @@ public class ViewUtilities {
      */
     public static Point2D convertPoint(Component source, Point2D aPoint, Component destination) {
         return SwingUtilities.convertPoint(source, (int)aPoint.getX(), (int)aPoint.getY(), destination);
-    }
-    
-    /** 範囲選択のための動作 */
-    public enum RangeSelectionGesture {
-        /** 範囲選択のための動作ではない */
-        NONE,
-        
-        /** 選択の開始位置をセット */
-        SET_START_POSITION,
-        
-        /** 選択の終了位置をセット */
-        SET_END_POSITION,
-    }
-    
-    /**
-     * マウスイベントに対応する範囲選択のための動作があれば返します。
-     * @param event マウスイベント
-     * @return 範囲選択のための動作。動作がなければ RangeSelectionGesture.NONE が返ります。
-     */
-    public static RangeSelectionGesture getRangeSelectionGesture(MouseEvent event) {
-        int eventId = event.getID();
-        if (eventId == MouseEvent.MOUSE_CLICKED) {
-            if (event.getButton() == MouseEvent.BUTTON1) {
-                if (event.isShiftDown()) {
-                    return RangeSelectionGesture.SET_END_POSITION;
-                } else {
-                    return RangeSelectionGesture.SET_START_POSITION;
-                }
-            }
-        }
-        return RangeSelectionGesture.NONE;
     }
 }

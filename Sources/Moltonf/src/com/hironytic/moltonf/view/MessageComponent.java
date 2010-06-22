@@ -61,7 +61,6 @@ import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.model.HighlightSetting;
 import com.hironytic.moltonf.model.Link;
 import com.hironytic.moltonf.model.MessageRange;
-import com.hironytic.moltonf.view.ViewUtilities.RangeSelectionGesture;
 import com.hironytic.moltonf.view.event.LinkClickListener;
 import com.hironytic.moltonf.view.event.LinkClickedEvent;
 
@@ -699,15 +698,8 @@ public class MessageComponent extends JComponent implements Selectable {
             mouseClicked(ctx);
         }
         
-        if (ctx.isProcessRangeSelection()) {
-            if (rangeSelector != null) {
-                RangeSelectionGesture rsGesture = ViewUtilities.getRangeSelectionGesture(e);
-                if (rsGesture == RangeSelectionGesture.SET_START_POSITION) {
-                    rangeSelector.selectFrom(this, e.getPoint());
-                } else if (rsGesture == RangeSelectionGesture.SET_END_POSITION) {
-                    rangeSelector.selectTo(this, e.getPoint());
-                }
-            }
+        if (ctx.isProcessRangeSelection() && rangeSelector != null) {
+            rangeSelector.processMouseRelatedEvent(e);
         }
     }
     

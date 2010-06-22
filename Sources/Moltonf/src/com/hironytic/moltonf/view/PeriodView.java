@@ -32,6 +32,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -556,13 +557,21 @@ public class PeriodView extends JComponent implements MoltonfView {
         public PeriodViewRangeSelector() {
         }
 
-        /* (non-Javadoc)
-         * @see com.hironytic.moltonf.view.RangeSelector#beginDragging(javax.swing.JComponent, java.awt.geom.Point2D)
+        /**
+         * @see com.hironytic.moltonf.view.RangeSelector#processMouseRelatedEvent(java.awt.event.MouseEvent)
          */
         @Override
-        public void beginDragging(JComponent component, Point2D pt) {
-            // TODO Auto-generated method stub
-            
+        public void processMouseRelatedEvent(MouseEvent event) {
+            int eventId = event.getID();
+            if (eventId == MouseEvent.MOUSE_CLICKED) {
+                if (event.getButton() == MouseEvent.BUTTON1) {
+                    if (event.isShiftDown()) {
+                        selectTo((JComponent)event.getSource(), event.getPoint());
+                    } else {
+                        selectFrom((JComponent)event.getSource(), event.getPoint());
+                    }
+                }
+            }
         }
 
         /**
@@ -589,6 +598,9 @@ public class PeriodView extends JComponent implements MoltonfView {
             return lastItemIndex;
         }
         
+        /**
+         * 選択範囲を消去します。
+         */
         private void doClearSelection() {
             if (startChildIndex < 0 || endChildIndex < 0) {
                 return;
@@ -608,10 +620,11 @@ public class PeriodView extends JComponent implements MoltonfView {
         }
         
         /**
-         * @see com.hironytic.moltonf.view.RangeSelector#selectFrom(javax.swing.JComponent, java.awt.geom.Point2D)
+         * 指定したコンポーネントのある点を選択範囲の開始点にします。
+         * @param component コンポーネント
+         * @param pt 開始点。第1引数で指定したコンポーネントの座標系で指定します。
          */
-        @Override
-        public void selectFrom(JComponent component, Point2D pt) {
+        private void selectFrom(JComponent component, Point2D pt) {
             doClearSelection();
             
             startPt = ViewUtilities.convertPoint(component, pt, PeriodView.this);
@@ -621,10 +634,11 @@ public class PeriodView extends JComponent implements MoltonfView {
         }
 
         /**
-         * @see com.hironytic.moltonf.view.RangeSelector#selectTo(javax.swing.JComponent, java.awt.geom.Point2D)
+         * 指定したコンポーネントのある点を選択範囲の終了点にします。
+         * @param component コンポーネント
+         * @param pt 終了点。第1引数で指定したコンポーネントの座標系で指定します。
          */
-        @Override
-        public void selectTo(JComponent component, Point2D pt) {
+        private void selectTo(JComponent component, Point2D pt) {
             if (startPt == null) {
                 return;
             }
