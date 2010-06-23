@@ -31,7 +31,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -39,10 +38,10 @@ import java.awt.geom.Area;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.ImageObserver;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +49,6 @@ import java.util.List;
 import javax.swing.JComponent;
 
 import com.hironytic.moltonf.model.HighlightSetting;
-import com.hironytic.moltonf.model.Link;
 import com.hironytic.moltonf.model.MessageRange;
 import com.hironytic.moltonf.model.Talk;
 import com.hironytic.moltonf.model.TalkType;
@@ -60,7 +58,7 @@ import com.hironytic.moltonf.util.TimePart;
  * 発言の表示を担当するビュー
  */
 @SuppressWarnings("serial")
-public class TalkView extends JComponent implements MoltonfView {
+public class TalkView extends JComponent implements MoltonfView, Selectable {
 
     /** ビューの左の余白 */
     private static final float VIEW_PADDING_LEFT = 16;
@@ -456,5 +454,56 @@ public class TalkView extends JComponent implements MoltonfView {
         
         talkInfoComponent.setFont(font);
         talkMessageComponent.setFont(font);
+    }
+
+    /**
+     * 範囲選択オブジェクトをセットします。
+     * @param rangeSelector 範囲選択オブジェクト
+     */
+    public void setRangeSelector(RangeSelector rangeSelector) {
+        talkInfoComponent.setRangeSelector(rangeSelector);
+        talkMessageComponent.setRangeSelector(rangeSelector);
+    }
+    
+    /**
+     * @see com.hironytic.moltonf.view.Selectable#clearSelection()
+     */
+    @Override
+    public void clearSelection() {
+        talkInfoComponent.clearSelection();
+        talkMessageComponent.clearSelection();
+    }
+
+    /**
+     * @see com.hironytic.moltonf.view.Selectable#selectRange(java.awt.geom.Point2D, java.awt.geom.Point2D)
+     */
+    @Override
+    public void selectRange(Point2D startPt, Point2D endPt) {
+        if (startPt.getY() > endPt.getY()){
+            Point2D tempPt = endPt;
+            endPt = startPt;
+            startPt = tempPt;
+        }
+        
+        Rectangle2D infoBounds = talkInfoComponent.getBounds();
+        Rectangle2D messageBounds = talkMessageComponent.getBounds();
+        
+        if (startPt.getY() > infoBounds.getMaxY() ||
+                endPt.getY() < infoBounds.getMinY()) {
+            talkInfoComponent.clearSelection();
+        } else {
+            Point2D infoStartPt = ViewUtilities.convertPoint(this, startPt, talkInfoComponent);
+            Point2D infoEndPt = ViewUtilities.convertPoint(this, endPt, talkInfoComponent);
+            talkInfoComponent.selectRange(infoStartPt, infoEndPt);
+        }
+
+        if (startPt.getY() > messageBounds.getMaxY() ||
+                endPt.getY() < messageBounds.getMinY()) {
+            talkMessageComponent.clearSelection();
+        } else {
+            Point2D messageStartPt = ViewUtilities.convertPoint(this, startPt, talkMessageComponent);
+            Point2D messageEndPt = ViewUtilities.convertPoint(this, endPt, talkMessageComponent);
+            talkMessageComponent.selectRange(messageStartPt, messageEndPt);
+        }
     }
 }

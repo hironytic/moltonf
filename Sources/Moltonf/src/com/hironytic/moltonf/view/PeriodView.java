@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonf.view;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
@@ -134,6 +135,8 @@ public class PeriodView extends JComponent implements MoltonfView {
         contentPanel.add(this);
         scrollPane = new ScrollPane(this);
         scrollPane.setViewportView(contentPanel);
+        
+        enableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
 
     /**
@@ -361,6 +364,7 @@ public class PeriodView extends JComponent implements MoltonfView {
                 talkView.setAreaWidth(500); //TODO:
                 talkView.setHighlightSettingList(highlightSettingList);
                 talkView.setFont(getFont());
+                talkView.setRangeSelector(rangeSelector);
                 TalkType talkType = talk.getTalkType();
                 Avatar speaker = talk.getSpeaker();
                 if (isMatchFilterOfTalk(talkType) && isMatchFilterOfSpeaker(speaker)) {
@@ -666,12 +670,30 @@ public class PeriodView extends JComponent implements MoltonfView {
             }
         }
     }
+
+    /**
+     * @see javax.swing.JComponent#processMouseEvent(java.awt.event.MouseEvent)
+     */
+    @Override
+    protected void processMouseEvent(MouseEvent e) {
+        processMouseRelatedEvent(e);
+        super.processMouseEvent(e);
+    }
+
+    /**
+     * @see javax.swing.JComponent#processMouseMotionEvent(java.awt.event.MouseEvent)
+     */
+    @Override
+    protected void processMouseMotionEvent(MouseEvent e) {
+        processMouseRelatedEvent(e);
+        super.processMouseMotionEvent(e);
+    }
     
     /**
-     * 範囲選択オブジェクトを返します。
-     * @return 範囲選択オブジェクト
+     * マウスに関連するイベントを処理します。
+     * @param event マウス関連のイベント
      */
-    public RangeSelector getRangeSelector() {
-        return rangeSelector;
+    private void processMouseRelatedEvent(MouseEvent event) {
+        rangeSelector.processMouseRelatedEvent(event);
     }
 }
