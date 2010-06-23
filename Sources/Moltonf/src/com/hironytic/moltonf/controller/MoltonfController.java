@@ -171,7 +171,7 @@ public class MoltonfController {
             
             mainFrame.setLocationByPlatform(true);
             mainFrame.pack();
-            mainFrame.setBounds(100, 100, 600, 400);    //TODO: アプリ設定
+            mainFrame.setSize(600, 600);    // TODO: アプリ設定 mainFrame.setBounds() になるか？
             mainFrame.setVisible(true);
             
         } catch (Exception e) {
