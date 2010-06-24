@@ -915,11 +915,6 @@ public class MessageComponent extends JComponent implements Selectable {
                 LineLayout lineLayout = lineLayouts.get(lineLayoutIndex);
                 TextLayout textLayout = lineLayout.getTextLayout();
                 if (textLayout != null) {
-                    // 文字列の描画
-                    g2.setPaintMode();
-                    textLayout.draw(g2, messageAreaRect.x,
-                        lineLayout.getTop() + textLayout.getAscent());
-                    
                     // 選択範囲の描画
                     if (startOfSelectedRange != null && endOfSelectedRange != null) {
                         if (startOfSelectedRange.getLineLayoutIndex() <= lineLayoutIndex &&
@@ -951,6 +946,11 @@ public class MessageComponent extends JComponent implements Selectable {
                             g2.setColor(oldColor);
                         }
                     }
+                    
+                    // 文字列の描画
+                    g2.setPaintMode();
+                    textLayout.draw(g2, messageAreaRect.x,
+                        lineLayout.getTop() + textLayout.getAscent());
                 }
             }
         }
