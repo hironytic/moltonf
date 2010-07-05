@@ -33,6 +33,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
@@ -578,6 +579,11 @@ public class PeriodView extends JComponent implements MoltonfView {
             } else if (eventId == MouseEvent.MOUSE_DRAGGED) {
                 if (SwingUtilities.isLeftMouseButton(event) || SwingUtilities.isRightMouseButton(event)) {
                     selectTo((JComponent)event.getSource(), event.getPoint());
+                    
+                    // TODO: ちょっと雑すぎる？
+                    Point2D point = ViewUtilities.convertPoint((JComponent)event.getSource(), event.getPoint(), PeriodView.this);
+                    Rectangle rect = new Rectangle((int)point.getX(), (int)point.getY(), 1, 1);
+                    scrollRectToVisible(rect);
                 }
             }
         }
