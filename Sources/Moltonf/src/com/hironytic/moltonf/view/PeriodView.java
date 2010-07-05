@@ -567,13 +567,17 @@ public class PeriodView extends JComponent implements MoltonfView {
         @Override
         public void processMouseRelatedEvent(MouseEvent event) {
             int eventId = event.getID();
-            if (eventId == MouseEvent.MOUSE_CLICKED) {
-                if (event.getButton() == MouseEvent.BUTTON1) {
+            if (eventId == MouseEvent.MOUSE_PRESSED) {
+                if (SwingUtilities.isLeftMouseButton(event) || SwingUtilities.isRightMouseButton(event)) {
                     if (event.isShiftDown()) {
                         selectTo((JComponent)event.getSource(), event.getPoint());
                     } else {
                         selectFrom((JComponent)event.getSource(), event.getPoint());
                     }
+                }
+            } else if (eventId == MouseEvent.MOUSE_DRAGGED) {
+                if (SwingUtilities.isLeftMouseButton(event) || SwingUtilities.isRightMouseButton(event)) {
+                    selectTo((JComponent)event.getSource(), event.getPoint());
                 }
             }
         }
