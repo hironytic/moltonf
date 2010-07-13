@@ -935,7 +935,7 @@ public class MessageComponent extends JComponent implements Selectable {
                             Color oldColor = g2.getColor();
                             Composite oldComposite = g2.getComposite();
                             g2.setPaintMode();
-                            g2.setColor(new Color(0x55BBff));   // TODO: 選択範囲の色。どこで定義する？
+                            g2.setColor(new Color(0x69acfd));   // TODO: 選択範囲の色。どこで定義する？
                             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)); // TODO: 選択範囲のアルファ値。どこで定義する？
                             float tx = messageAreaRect.x;
                             float ty = lineLayout.getTop() + textLayout.getAscent();
