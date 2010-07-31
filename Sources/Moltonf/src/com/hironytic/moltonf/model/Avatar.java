@@ -82,6 +82,12 @@ public interface Avatar {
     public Image getFaceIconImage();
     
     /**
+     * 役職を返します。
+     * @return 役職
+     */
+    public Role getRole();
+    
+    /**
      * このオブジェクトが属する Story をセットします。
      * @param story このオブジェクトが属する Story
      */
@@ -122,4 +128,10 @@ public interface Avatar {
      * @param faceIconImage セットしたい顔アイコン画像の値
      */
     public void setFaceIconImage(Image faceIconImage);
+    
+    /**
+     * 役職をセットします。
+     * @param role セットしたい役職の値
+     */
+    public void setRole(Role role);
 }

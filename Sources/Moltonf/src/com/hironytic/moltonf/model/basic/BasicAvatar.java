@@ -29,6 +29,7 @@ import java.awt.Image;
 import java.net.URI;
 
 import com.hironytic.moltonf.model.Avatar;
+import com.hironytic.moltonf.model.Role;
 import com.hironytic.moltonf.model.Story;
 
 /**
@@ -36,7 +37,7 @@ import com.hironytic.moltonf.model.Story;
  */
 public class BasicAvatar implements Avatar {
 
-    /** このオブジェクトが属する Story */    
+    /** このオブジェクトが属する Story */
     private Story story;
     
     /** 省略名 */
@@ -56,6 +57,9 @@ public class BasicAvatar implements Avatar {
     
     /** 短い名前 */
     private String shortName;
+    
+    /** 役職 */
+    private Role role;
     
     /**
      * コンストラクタ
@@ -134,6 +138,15 @@ public class BasicAvatar implements Avatar {
     }
     
     /**
+     * 役職を返します。
+     * @return 役職
+     */
+    @Override
+    public Role getRole() {
+        return role;
+    }
+    
+    /**
      * このオブジェクトが属する Story をセットします。
      * @param story このオブジェクトが属する Story
      */
@@ -194,6 +207,15 @@ public class BasicAvatar implements Avatar {
     @Override
     public void setFaceIconImage(Image faceIconImage) {
         this.faceIconImage = faceIconImage;
+    }
+    
+    /**
+     * 役職をセットします。
+     * @param role セットしたい役職の値
+     */
+    @Override
+    public void setRole(Role role) {
+        this.role = role;
     }
     
     /**

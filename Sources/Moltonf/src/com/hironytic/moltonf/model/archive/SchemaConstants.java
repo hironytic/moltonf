@@ -95,8 +95,8 @@ public class SchemaConstants {
     /** avatarId 属性の QName */
     public static final QName NAME_AVATAR_ID = new QName("avatarId");
     
-    /** fullName 属性の QName */
-    //public static final QName NAME_FULL_NAME = new QName("fullName");     // 既に定義されているので省略
+//    /** fullName 属性の QName */
+//    public static final QName NAME_FULL_NAME = new QName("fullName");     // 既に定義されているので省略
     
     /** shortName 属性の QName */
     public static final QName NAME_SHORT_NAME = new QName("shortName");
@@ -234,8 +234,8 @@ public class SchemaConstants {
     /** 発言種別：青発言 */
     public static final String VAL_TALK_TYPE_GRAVE = "grave";
     
-    /** avatarId 属性の QName */
-    //public static final QName NAME_AVATAR_ID = new QName("avatarId");     // 既に定義されているので省略
+//    /** avatarId 属性の QName */
+//    public static final QName NAME_AVATAR_ID = new QName("avatarId");     // 既に定義されているので省略
     
     /** time 属性の QName */
     public static final QName NAME_TIME = new QName("time");
@@ -248,4 +248,43 @@ public class SchemaConstants {
 
     /** li 要素の QName */
     public static final QName NAME_LI = new QName(NS_ARCHIVE, "li");
+
+    /* 
+     * --------------------------------------------------
+     * playerInfo
+     * --------------------------------------------------
+     */
+
+    /** playerInfo 要素の QName */
+    public static final QName NAME_PLAYER_INFO = new QName(NS_ARCHIVE, "playerInfo");
+    
+//    /** avatarId 属性の QName */
+//    public static final QName NAME_AVATAR_ID = new QName("avatarId");     // 既に定義されているので省略
+    
+    /** role 要素の QName */
+    public static final QName NAME_ROLE = new QName("role");
+    
+    /** 役職：村人 */
+    public static final String VAL_ROLE_INNOCENT = "innocent";
+    
+    /** 役職：狼 */
+    public static final String VAL_ROLE_WOLF = "wolf";
+    
+    /** 役職：占い師 */
+    public static final String VAL_ROLE_SEER = "seer";
+    
+    /** 役職：霊能者 */
+    public static final String VAL_ROLE_SHAMAN = "shaman";
+    
+    /** 役職：狂人 */
+    public static final String VAL_ROLE_MADMAN = "madman";
+    
+    /** 役職：狩人 */
+    public static final String VAL_ROLE_HUNTER = "hunter";
+    
+    /** 役職：共有者 */
+    public static final String VAL_ROLE_FRATER = "frater";
+    
+    /** 役職：ハムスター人間 */
+    public static final String VAL_ROLE_HAMSTER = "hamster";
 }

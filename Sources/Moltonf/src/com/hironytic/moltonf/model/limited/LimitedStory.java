@@ -59,6 +59,9 @@ public class LimitedStory implements Story {
     /** この Story に含まれる StoryPeriod のリスト */
     private List<StoryPeriod> periods;
  
+    /** 登場人物のリスト */
+    private List<Avatar> avatarList;
+
     /**
      * コンストラクタ
      * @param baseStory 元になる Story
@@ -79,6 +82,12 @@ public class LimitedStory implements Story {
         for (int ix = 0; ix <= this.currentPeriod; ++ix) {
             this.periods.add(new LimitedStoryPeriod(this, basePeriods.get(ix)));
         }
+        
+        List<Avatar> baseAvatarList = this.baseStory.getAvatarList();
+        this.avatarList = new ArrayList<Avatar>(baseAvatarList.size());
+        for (Avatar baseAvatar : baseAvatarList) {
+            this.avatarList.add(new LimitedAvatar(this, baseAvatar));
+        }
     }
     
     /**
@@ -86,7 +95,7 @@ public class LimitedStory implements Story {
      */
     @Override
     public List<Avatar> getAvatarList() {
-        return baseStory.getAvatarList();
+        return avatarList;
     }
 
     /**
@@ -121,13 +130,13 @@ public class LimitedStory implements Story {
         return baseStory.getVillageFullName();
     }
 
-    /* (non-Javadoc)
+    /**
      * @see com.hironytic.moltonf.model.Story#getVillageState()
      */
     @Override
     public VillageState getVillageState() {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO: 制限されている範囲とは関係なく、baseStory のを返しているけどいいかな？
+        return baseStory.getVillageState();
     }
 
     /**
@@ -176,5 +185,15 @@ public class LimitedStory implements Story {
     @Override
     public void setVillageState(VillageState villageState) {
         throw new MoltonfException("Don't set village state.", new UnsupportedOperationException("Modification is not allowed."));
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "LimitedStory [currentPeriod=" + currentPeriod + ", periods="
+                + periods + ", targetAvatar=" + targetAvatar + ", baseStory="
+                + baseStory + "]";
     }
 }

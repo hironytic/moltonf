@@ -47,6 +47,7 @@ import com.hironytic.moltonf.Moltonf;
 import com.hironytic.moltonf.MoltonfException;
 import com.hironytic.moltonf.model.Avatar;
 import com.hironytic.moltonf.model.EventFamily;
+import com.hironytic.moltonf.model.Role;
 import com.hironytic.moltonf.model.Story;
 import com.hironytic.moltonf.model.StoryElement;
 import com.hironytic.moltonf.model.StoryEvent;
@@ -444,7 +445,8 @@ public class ArchivedStoryLoader {
         storyEvent.setStoryPeriod(period);
         storyEvent.setEventFamily(eventFamily);
 
-        List<String> messageLines = new ArrayList<String>();        
+        List<String> messageLines = new ArrayList<String>();
+        QName storyEventElemName = staxReader.getName();
         
         // 子ノード
         while (staxReader.hasNext()) {
@@ -455,6 +457,9 @@ public class ArchivedStoryLoader {
                 QName elemName = staxReader.getName();
                 if (SchemaConstants.NAME_LI.equals(elemName)) {
                     messageLines.add(loadLi());
+                } else if (SchemaConstants.NAME_PLAYER_LIST.equals(storyEventElemName) &&
+                        SchemaConstants.NAME_PLAYER_INFO.equals(elemName)) {
+                    loadPlayerInfo();
                 } else {
                     skipElement();
                 }
@@ -463,6 +468,72 @@ public class ArchivedStoryLoader {
         
         storyEvent.setMessageLines(messageLines);
         return storyEvent;
+    }
+    
+    /**
+     * playerInfo 要素以下を読み込みます。
+     * このメソッドが呼ばれたとき staxReader は playerInfo 要素の START_ELEMENT にいることが前提です。
+     * @throws XMLStreamException 読み込み時にエラーが発生した場合
+     */
+    private void loadPlayerInfo() throws XMLStreamException {
+        // playerInfo のうち、role 属性で示される役職を読み込んで
+        // avatarId 属性で示されるアバターの Avatar オブジェクトに役職をセットする
+        
+        String avatarId = null;
+        String roleString = null;
+        
+        // 属性
+        for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
+            QName attrName = staxReader.getAttributeName(ix);
+            if (SchemaConstants.NAME_AVATAR_ID.equals(attrName)) {
+                avatarId = staxReader.getAttributeValue(ix);
+            } else if (SchemaConstants.NAME_ROLE.equals(attrName)) {
+                roleString = staxReader.getAttributeValue(ix);
+            }
+            if (avatarId != null && roleString != null) {
+                break;
+            }
+        }
+        
+        if (avatarId != null && roleString != null) {
+            // スキーマとして avatarList が先に登場することが保証されているので
+            // 正しいデータならこの時点で avatarMap は作成済み。
+            Avatar avatar = avatarMap.get(avatarId);
+            if (avatar != null) {
+                avatar.setRole(toRole(roleString));
+            }
+        }
+        
+        skipElement();
+    }
+    
+    /**
+     * 役職の値文字列を Role に変換します。
+     * @param roleString 役職の値文字列 (role 属性の値)
+     * @return Role。該当するものがなければ null。
+     */
+    private Role toRole(String roleString) {
+        Role role = null;
+        if (SchemaConstants.VAL_ROLE_INNOCENT.equals(roleString)) {
+            role = Role.INNOCENT;
+        } else if (SchemaConstants.VAL_ROLE_WOLF.equals(roleString)) {
+            role = Role.WOLF;
+        } else if (SchemaConstants.VAL_ROLE_SEER.equals(roleString)) {
+            role = Role.SEER;
+        } else if (SchemaConstants.VAL_ROLE_SHAMAN.equals(roleString)) {
+            role = Role.SHAMAN;
+        } else if (SchemaConstants.VAL_ROLE_MADMAN.equals(roleString)) {
+            role = Role.MADMAN;
+        } else if (SchemaConstants.VAL_ROLE_HUNTER.equals(roleString)) {
+            role = Role.HUNTER;
+        } else if (SchemaConstants.VAL_ROLE_FRATER.equals(roleString)) {
+            role = Role.FRATER;
+        } else if (SchemaConstants.VAL_ROLE_HAMSTER.equals(roleString)) {
+            role = Role.HAMSTER;
+        } else {
+            Moltonf.getLogger().warning("invalid role : role=\"" + roleString + "\"");
+        }
+        return role;
     }
     
     /**
