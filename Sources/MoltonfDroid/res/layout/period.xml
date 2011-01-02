@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/story_bg"
+    >
+    <ListView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@id/android:list" android:divider="@color/story_divider" android:background="@color/story_bg" android:choiceMode="none"></ListView>
+    <TextView android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@id/android:empty" android:text="@string/no_period_data" android:background="@color/story_bg"></TextView>
+</LinearLayout>

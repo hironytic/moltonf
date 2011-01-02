@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="story_bg">#000000</color>
+    <color name="story_divider">#888888</color>
+    <color name="talk_bg_public">#ffffff</color>
+    <color name="talk_text_public">#000000</color>
+    <color name="talk_bg_wolf">#ff7777</color>
+    <color name="talk_text_wolf">#000000</color>
+    <color name="talk_bg_private">#939393</color>
+    <color name="talk_text_private">#000000</color>
+    <color name="talk_bg_grave">#9fb7cf</color>
+    <color name="talk_text_grave">#000000</color>
+    <color name="talk_time_info_text">#888888</color>
+    <color name="talk_speaker_info_text">#ffffff</color>
+    <color name="story_event_announce_text">#dddddd</color>
+    <color name="story_event_order_text">#ff4444</color>
+    <color name="story_event_extra_text">#888888</color>
+</resources>
