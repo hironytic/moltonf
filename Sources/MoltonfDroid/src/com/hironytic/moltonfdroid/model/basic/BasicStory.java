@@ -1,7 +1,7 @@
 /*
  * Moltonf
  *
- * Copyright (c) 2010 Hironori Ichimiya <hiron@hironytic.com>
+ * Copyright (c) 2010,2011 Hironori Ichimiya <hiron@hironytic.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -31,6 +31,7 @@ import java.util.List;
 import com.hironytic.moltonfdroid.model.Avatar;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
+import com.hironytic.moltonfdroid.model.VillageState;
 
 /**
  * ストーリーの情報を保持するクラス。
@@ -46,9 +47,8 @@ public class BasicStory implements Story {
     /** 村の完全名 */
     private String villageFullName;
 
-// TODO: village state
-//    /** 村の状態 */
-//    private VillageState villageState;
+    /** 村の状態 */
+    private VillageState villageState;
     
     /** 墓アイコン画像への URI */
     private URI graveIconUri;
@@ -91,15 +91,14 @@ public class BasicStory implements Story {
         return villageFullName;
     }
 
-// TODO: village state
-//    /**
-//     * 村の状態を返します。
-//     * @return 村の状態
-//     */
-//    @Override
-//    public VillageState getVillageState() {
-//        return villageState;
-//    }
+    /**
+     * 村の状態を返します。
+     * @return 村の状態
+     */
+    @Override
+    public VillageState getVillageState() {
+        return villageState;
+    }
     
     /**
      * 墓アイコン画像の URI を取得します。
@@ -147,15 +146,14 @@ public class BasicStory implements Story {
         this.villageFullName = villageFullName;
     }
 
-// TODO: village state
-//    /**
-//     * 村の状態をセットします。
-//     * @param villageState セットしたい村の状態
-//     */
-//    @Override
-//    public void setVillageState(VillageState villageState) {
-//        this.villageState = villageState;
-//    }
+    /**
+     * 村の状態をセットします。
+     * @param villageState セットしたい村の状態
+     */
+    @Override
+    public void setVillageState(VillageState villageState) {
+        this.villageState = villageState;
+    }
 
     /**
      * 墓アイコン画像の URIをセットします。

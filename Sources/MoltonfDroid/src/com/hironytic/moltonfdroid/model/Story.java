@@ -1,7 +1,7 @@
 /*
  * Moltonf
  *
- * Copyright (c) 2010 Hironori Ichimiya <hiron@hironytic.com>
+ * Copyright (c) 2010,2011 Hironori Ichimiya <hiron@hironytic.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -52,12 +52,11 @@ public interface Story {
      */
     public String getVillageFullName();
 
-// TODO: village state
-//    /**
-//     * 村の状態を返します。
-//     * @return 村の状態
-//     */
-//    public VillageState getVillageState();
+    /**
+     * 村の状態を返します。
+     * @return 村の状態
+     */
+    public VillageState getVillageState();
     
     /**
      * 墓アイコン画像の URI を取得します。
@@ -90,12 +89,11 @@ public interface Story {
      */
     public void setVillageFullName(String villageFullName);
 
-// TODO: village state
-//    /**
-//     * 村の状態をセットします。
-//     * @param villageState セットしたい村の状態
-//     */
-//    public void setVillageState(VillageState villageState);
+    /**
+     * 村の状態をセットします。
+     * @param villageState セットしたい村の状態
+     */
+    public void setVillageState(VillageState villageState);
 
     /**
      * 墓アイコン画像の URIをセットします。

@@ -25,6 +25,7 @@
 
 package com.hironytic.moltonfdroid;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,10 +33,12 @@ import java.util.List;
 import com.hironytic.moltonfdroid.R;
 import com.hironytic.moltonfdroid.model.Avatar;
 import com.hironytic.moltonfdroid.model.EventFamily;
+import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryEvent;
 import com.hironytic.moltonfdroid.model.Talk;
 import com.hironytic.moltonfdroid.model.TalkType;
+import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
 import com.hironytic.moltonfdroid.model.basic.BasicAvatar;
 import com.hironytic.moltonfdroid.model.basic.BasicStoryEvent;
 import com.hironytic.moltonfdroid.model.basic.BasicTalk;
@@ -43,6 +46,7 @@ import com.hironytic.moltonfdroid.util.TimePart;
 
 import android.app.ListActivity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.widget.ListAdapter;
 
 /**
@@ -55,32 +59,40 @@ public class PeriodActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.period);
 
-        List<StoryElement> elemList = new ArrayList<StoryElement>();
-
-        StoryEvent event = new BasicStoryEvent();
-        event.setEventFamily(EventFamily.ANNOUNCE);
-        event.setMessageLines(Arrays.asList("昼間は人間のふりをして、夜に正体を現すという人狼。", "その人狼が、この村に紛れ込んでいるという噂が広がった。", "", "村人達は半信半疑ながらも、村はずれの宿に集められることになった。"));
-        elemList.add(event);
+        File externalStorageDir = Environment.getExternalStorageDirectory();
+        File moltonfDir = new File(externalStorageDir, "MoltonfDroid");
+        File archiveFile = new File(moltonfDir, "jin_wolff_01999_small.xml");
+        Story story = new ArchivedStory(archiveFile);
         
-        Avatar gerd = new BasicAvatar();
-        gerd.setAvatarId("gerd");
-        gerd.setFullName("楽天家 ゲルト");
+        List<StoryElement> elemList = story.getPeriods().get(0).getStoryElements();
         
-        Talk talk = new BasicTalk();
-        TimePart timePart = new TimePart(23, 38, 12, 0);
-        talk.setTime(timePart);
-        talk.setSpeaker(gerd);
-        talk.setMessageLines(Arrays.asList("人狼なんているわけないじゃん。みんな大げさだなあ"));
-        talk.setTalkType(TalkType.PUBLIC);
-        elemList.add(talk);
         
-        talk = new BasicTalk();
-        timePart = new TimePart(23, 52, 10, 0);
-        talk.setTime(timePart);
-        talk.setSpeaker(gerd);
-        talk.setMessageLines(Arrays.asList("議題をどうぞです。", "■1.おもな参加時間帯", "■2.仮/本決定時間の希望", "■3.投票ＣＯの可否", "□4.自己紹介"));
-        talk.setTalkType(TalkType.WOLF);
-        elemList.add(talk);
+//        List<StoryElement> elemList = new ArrayList<StoryElement>();
+//
+//        StoryEvent event = new BasicStoryEvent();
+//        event.setEventFamily(EventFamily.ANNOUNCE);
+//        event.setMessageLines(Arrays.asList("昼間は人間のふりをして、夜に正体を現すという人狼。", "その人狼が、この村に紛れ込んでいるという噂が広がった。", "", "村人達は半信半疑ながらも、村はずれの宿に集められることになった。"));
+//        elemList.add(event);
+//        
+//        Avatar gerd = new BasicAvatar();
+//        gerd.setAvatarId("gerd");
+//        gerd.setFullName("楽天家 ゲルト");
+//        
+//        Talk talk = new BasicTalk();
+//        TimePart timePart = new TimePart(23, 38, 12, 0);
+//        talk.setTime(timePart);
+//        talk.setSpeaker(gerd);
+//        talk.setMessageLines(Arrays.asList("人狼なんているわけないじゃん。みんな大げさだなあ"));
+//        talk.setTalkType(TalkType.PUBLIC);
+//        elemList.add(talk);
+//        
+//        talk = new BasicTalk();
+//        timePart = new TimePart(23, 52, 10, 0);
+//        talk.setTime(timePart);
+//        talk.setSpeaker(gerd);
+//        talk.setMessageLines(Arrays.asList("議題をどうぞです。", "■1.おもな参加時間帯", "■2.仮/本決定時間の希望", "■3.投票ＣＯの可否", "□4.自己紹介"));
+//        talk.setTalkType(TalkType.WOLF);
+//        elemList.add(talk);
         
         ListAdapter adapter = new StoryElementListAdapter(getApplicationContext(), elemList);
         setListAdapter(adapter);
