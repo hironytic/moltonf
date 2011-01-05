@@ -27,6 +27,8 @@ package com.hironytic.moltonfdroid.model;
 
 import java.net.URI;
 
+import com.hironytic.moltonfdroid.util.BitmapHolder;
+
 /**
  * 登場人物の情報を保持するインタフェース。
  */
@@ -74,12 +76,11 @@ public interface Avatar {
      */
     public URI getFaceIconUri();
     
-// TODO: face icon image
-//    /**
-//     * 顔アイコン画像を返します。
-//     * @return 顔アイコン画像
-//     */
-//    public Image getFaceIconImage();
+    /**
+     * 顔アイコン画像を保持するオブジェクトを返します。
+     * @return 顔アイコン画像を保持するオブジェクト
+     */
+    public BitmapHolder getFaceIconHolder();
     
     /**
      * 役職を返します。
@@ -123,13 +124,6 @@ public interface Avatar {
      */
     public void setFaceIconUri(URI faceIconUri);
 
-// TODO: face icon image
-//    /**
-//     * 顔アイコン画像をセットします。
-//     * @param faceIconImage セットしたい顔アイコン画像の値
-//     */
-//    public void setFaceIconImage(Image faceIconImage);
-    
     /**
      * 役職をセットします。
      * @param role セットしたい役職の値

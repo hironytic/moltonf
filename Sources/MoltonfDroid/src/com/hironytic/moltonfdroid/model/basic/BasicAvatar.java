@@ -30,6 +30,7 @@ import java.net.URI;
 import com.hironytic.moltonfdroid.model.Avatar;
 import com.hironytic.moltonfdroid.model.Role;
 import com.hironytic.moltonfdroid.model.Story;
+import com.hironytic.moltonfdroid.util.BitmapHolder;
 
 /**
  * 登場人物の情報を保持するクラスです。
@@ -48,9 +49,8 @@ public class BasicAvatar implements Avatar {
     /** 顔アイコン画像への URI */
     private URI faceIconUri;
 
-// TODO: face icon image
-//    /** 顔アイコン画像 */
-//    private Image faceIconImage;
+    /** 顔アイコン画像ホルダー */
+    private BitmapHolder faceIconHolder = new BitmapHolder();
     
     /** フルネーム */
     private String fullName;
@@ -128,15 +128,14 @@ public class BasicAvatar implements Avatar {
         return faceIconUri;
     }
 
-// TODO: face icon image
-//    /**
-//     * 顔アイコン画像を返します。
-//     * @return 顔アイコン画像
-//     */
-//    @Override
-//    public Image getFaceIconImage() {
-//        return faceIconImage;
-//    }
+    /**
+     * 顔アイコン画像を保持するオブジェクトを返します。
+     * @return 顔アイコン画像ホルダー
+     */
+    @Override
+    public BitmapHolder getFaceIconHolder() {
+        return faceIconHolder;
+    }
     
     /**
      * 役職を返します。
@@ -201,16 +200,6 @@ public class BasicAvatar implements Avatar {
         this.faceIconUri = faceIconUri;
     }
 
-// TODO: face icon image
-//    /**
-//     * 顔アイコン画像をセットします。
-//     * @param faceIconImage セットしたい顔アイコン画像の値
-//     */
-//    @Override
-//    public void setFaceIconImage(Image faceIconImage) {
-//        this.faceIconImage = faceIconImage;
-//    }
-    
     /**
      * 役職をセットします。
      * @param role セットしたい役職の値

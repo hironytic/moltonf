@@ -32,6 +32,7 @@ import com.hironytic.moltonfdroid.model.Avatar;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
 import com.hironytic.moltonfdroid.model.VillageState;
+import com.hironytic.moltonfdroid.util.BitmapHolder;
 
 /**
  * ストーリーの情報を保持するクラス。
@@ -53,9 +54,10 @@ public class BasicStory implements Story {
     /** 墓アイコン画像への URI */
     private URI graveIconUri;
 
-// TODO: grave icon image
-//    /** 墓アイコン画像 */
-//    private Image graveIconImage;
+    /**
+     * 墓アイコン画像ホルダー
+     */
+    private BitmapHolder graveIconHolder = new BitmapHolder();
     
     /**
      * コンストラクタ
@@ -109,16 +111,15 @@ public class BasicStory implements Story {
         return graveIconUri;
     }
 
-// TODO: grave icon image
-//    /**
-//     * 墓アイコン画像を取得します。
-//     * @return 墓アイコン画像
-//     */
-//    @Override
-//    public Image getGraveIconImage() {
-//        return graveIconImage;
-//    }
-
+    /**
+     * 墓アイコン画像を保持するオブジェクトを取得します。
+     * @return 墓アイコン画像ホルダー
+     */
+    @Override
+    public BitmapHolder getGraveIconHolder() {
+        return graveIconHolder;
+    }
+    
     /**
      * このストーリーに含まれる StoryPeriod をセットします。
      * @param periods セットしたい StoryPeriod のリスト
@@ -164,16 +165,6 @@ public class BasicStory implements Story {
         this.graveIconUri = graveIconUri;
     }
 
-// TODO: grave icon image
-//    /**
-//     * 墓アイコン画像をセットします。
-//     * @param graveIconImage 墓アイコン画像
-//     */
-//    @Override
-//    public void setGraveIconImage(Image graveIconImage) {
-//        this.graveIconImage = graveIconImage;
-//    }
-    
     /**
      * @see java.lang.Object#toString()
      */

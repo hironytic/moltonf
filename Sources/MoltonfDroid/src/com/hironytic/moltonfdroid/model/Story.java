@@ -28,6 +28,8 @@ package com.hironytic.moltonfdroid.model;
 import java.net.URI;
 import java.util.List;
 
+import com.hironytic.moltonfdroid.util.BitmapHolder;
+
 /**
  * ストーリーの情報を保持するインタフェースです。
  * 通常、ストーリーは1回のプレイデータ全体に相当します。
@@ -64,12 +66,11 @@ public interface Story {
      */
     public URI getGraveIconUri();
 
-// TODO: grave icon image
-//    /**
-//     * 墓アイコン画像を取得します。
-//     * @return 墓アイコン画像
-//     */
-//    public Image getGraveIconImage();
+    /**
+     * 墓アイコン画像を保持するオブジェクトを取得します。
+     * @return 墓アイコン画像ホルダー
+     */
+    public BitmapHolder getGraveIconHolder();
     
     /**
      * このストーリーに含まれる StoryPeriod をセットします。
@@ -100,11 +101,4 @@ public interface Story {
      * @param graveIconUri 墓アイコン画像の URI
      */
     public void setGraveIconUri(URI graveIconUri);
-
-// TODO: grave icon image
-//    /**
-//     * 墓アイコン画像をセットします。
-//     * @param graveIconImage 墓アイコン画像
-//     */
-//    public void setGraveIconImage(Image graveIconImage);
 }
