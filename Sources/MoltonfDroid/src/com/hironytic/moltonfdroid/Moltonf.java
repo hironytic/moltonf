@@ -28,10 +28,11 @@ package com.hironytic.moltonfdroid;
 import com.hironytic.moltonfdroid.util.Logger;
 
 /**
- * アプリケーション共通メソッド
+ * Moltonf アプリケーション全体で共有する処理
  */
 public class Moltonf {
-
+    private Moltonf() {}
+    
     /** ロガー */
     private static Logger logger = new Logger("com.hironytic.moltonfdroid");
     
