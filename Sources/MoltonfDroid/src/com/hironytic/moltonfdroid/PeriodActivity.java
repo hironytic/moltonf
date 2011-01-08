@@ -26,28 +26,16 @@
 package com.hironytic.moltonfdroid;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import com.hironytic.moltonfdroid.R;
-import com.hironytic.moltonfdroid.model.Avatar;
-import com.hironytic.moltonfdroid.model.EventFamily;
-import com.hironytic.moltonfdroid.model.Story;
-import com.hironytic.moltonfdroid.model.StoryElement;
-import com.hironytic.moltonfdroid.model.StoryEvent;
-import com.hironytic.moltonfdroid.model.Talk;
-import com.hironytic.moltonfdroid.model.TalkType;
-import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
-import com.hironytic.moltonfdroid.model.basic.BasicAvatar;
-import com.hironytic.moltonfdroid.model.basic.BasicStoryEvent;
-import com.hironytic.moltonfdroid.model.basic.BasicTalk;
-import com.hironytic.moltonfdroid.util.TimePart;
 
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.ListAdapter;
+
+import com.hironytic.moltonfdroid.model.Story;
+import com.hironytic.moltonfdroid.model.StoryElement;
+import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
 
 /**
  * 1 単位期間のストーリーを表示する Activity
@@ -63,6 +51,9 @@ public class PeriodActivity extends ListActivity {
         File moltonfDir = new File(externalStorageDir, "MoltonfDroid");
         File archiveFile = new File(moltonfDir, "jin_wolff_01999_small.xml");
         Story story = new ArchivedStory(archiveFile);
+
+        LoadStoryImageTask loadStoryImageTask = new LoadStoryImageTask();
+        loadStoryImageTask.execute(story);
         
         List<StoryElement> elemList = story.getPeriods().get(0).getStoryElements();
         

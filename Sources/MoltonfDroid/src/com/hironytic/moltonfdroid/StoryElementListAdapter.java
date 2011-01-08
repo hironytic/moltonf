@@ -29,6 +29,8 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -36,11 +38,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryEvent;
 import com.hironytic.moltonfdroid.model.Talk;
+import com.hironytic.moltonfdroid.util.BitmapHolder;
+import com.hironytic.moltonfdroid.util.Proc1;
 import com.hironytic.moltonfdroid.util.TimePart;
 
 /**
@@ -53,22 +58,34 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
     
     /** リソース */
     private Resources res;
+    
+    /** デフォルトの顔アイコン */
+    private Bitmap defaultFaceIcon;
 
     /**
      * 発言を示すアイテムのビュー情報
      */
-    private static class TalkItemViews {
+    private static class TalkItemViewInfo {
         /** 発言に燗する情報を表示するビュー */
         public TextView infoView;
         
+        /** 顔アイコンを表示するビュー */
+        public ImageView faceIconView;
+        
         /** メッセージを表示するビュー */
         public TextView messageView;
+        
+        /** 顔アイコンを要求したビットマップホルダー */
+        public BitmapHolder faceBitmapHolder;
+        
+        /** 顔アイコンの要求を受け取るプロシージャ */
+        public Proc1<Bitmap> faceBitmapRequestProc;
     }
     
     /**
      * ストーリー中のイベントを示すアイテムのビュー情報
      */
-    private static class EventItemViews {
+    private static class EventItemViewInfo {
         /** メッセージを表示するビュー */
         public TextView messageView;
     }
@@ -83,6 +100,7 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
 
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         res = context.getResources();
+        defaultFaceIcon = BitmapFactory.decodeResource(res, R.drawable.default_face);
     }
 
     /**
@@ -95,62 +113,91 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
         View retView = convertView;
         if (item instanceof Talk) {
             Talk talkItem = (Talk)item;
-            TalkItemViews talkItemViews;
-            if (retView == null || !(retView.getTag() instanceof TalkItemViews)) {
+            TalkItemViewInfo talkItemViewInfo;
+            if (retView == null || !(retView.getTag() instanceof TalkItemViewInfo)) {
                 retView = inflater.inflate(R.layout.listitem_talk, null);
-                talkItemViews = new TalkItemViews();
-                talkItemViews.infoView = (TextView)retView.findViewById(R.id.talk_info);
-                talkItemViews.messageView = (TextView)retView.findViewById(R.id.talk_message);
-                retView.setTag(talkItemViews);
+                talkItemViewInfo = new TalkItemViewInfo();
+                talkItemViewInfo.infoView = (TextView)retView.findViewById(R.id.talk_info);
+                talkItemViewInfo.faceIconView = (ImageView)retView.findViewById(R.id.face_icon);
+                talkItemViewInfo.messageView = (TextView)retView.findViewById(R.id.talk_message);
+                retView.setTag(talkItemViewInfo);
             } else {
-                talkItemViews = (TalkItemViews)retView.getTag();
+                talkItemViewInfo = (TalkItemViewInfo)retView.getTag();
             }
             
-            talkItemViews.infoView.setText(makeTalkInfo(talkItem));
-            talkItemViews.messageView.setText(makeMessageSequence(talkItem));
+            // 情報テキスト
+            talkItemViewInfo.infoView.setText(makeTalkInfo(talkItem));
+            
+            // メッセージ
+            talkItemViewInfo.messageView.setText(makeMessageSequence(talkItem));
+            
+            // 吹き出しの色と顔アイコン
+            BitmapHolder faceBitmapHolder = talkItem.getSpeaker().getFaceIconHolder();
             switch (talkItem.getTalkType()) {
             case PUBLIC:
-                talkItemViews.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_public));
-                talkItemViews.messageView.setTextColor(res.getColor(R.color.talk_text_public));
+                talkItemViewInfo.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_public));
+                talkItemViewInfo.messageView.setTextColor(res.getColor(R.color.talk_text_public));
                 break;
             case PRIVATE:
-                talkItemViews.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_private));
-                talkItemViews.messageView.setTextColor(res.getColor(R.color.talk_text_private));
+                talkItemViewInfo.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_private));
+                talkItemViewInfo.messageView.setTextColor(res.getColor(R.color.talk_text_private));
                 break;
             case WOLF:
-                talkItemViews.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_wolf));
-                talkItemViews.messageView.setTextColor(res.getColor(R.color.talk_text_wolf));
+                talkItemViewInfo.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_wolf));
+                talkItemViewInfo.messageView.setTextColor(res.getColor(R.color.talk_text_wolf));
                 break;
             case GRAVE:
-                talkItemViews.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_grave));
-                talkItemViews.messageView.setTextColor(res.getColor(R.color.talk_text_grave));
+                talkItemViewInfo.messageView.setBackgroundColor(res.getColor(R.color.talk_bg_grave));
+                talkItemViewInfo.messageView.setTextColor(res.getColor(R.color.talk_text_grave));
+                faceBitmapHolder = talkItem.getStory().getGraveIconHolder();
                 break;
             }
+            // 使いまわした前のビューが顔画像を要求中かもしれないので
+            // 要求をキャンセル。
+            if (talkItemViewInfo.faceBitmapHolder != null) {
+                talkItemViewInfo.faceBitmapHolder.cancelRequest(talkItemViewInfo.faceBitmapRequestProc);
+            }
+            // デフォルト画像に変更しておく
+            talkItemViewInfo.faceIconView.setImageBitmap(defaultFaceIcon);
+
+            // 実際の顔画像を要求
+            final ImageView faceIconView = talkItemViewInfo.faceIconView;
+            talkItemViewInfo.faceBitmapHolder = faceBitmapHolder;
+            talkItemViewInfo.faceBitmapRequestProc = new Proc1<Bitmap>() {
+                @Override
+                public void perform(Bitmap arg) {
+                    faceIconView.setImageBitmap(arg);
+                }
+            };
+            talkItemViewInfo.faceBitmapHolder.requestBitmap(talkItemViewInfo.faceBitmapRequestProc);
         } else if (item instanceof StoryEvent) {
             StoryEvent eventItem = (StoryEvent)item;
-            EventItemViews eventItemViews;
-            if (retView == null || !(retView.getTag() instanceof EventItemViews)) {
+            EventItemViewInfo eventItemViewInfo;
+            if (retView == null || !(retView.getTag() instanceof EventItemViewInfo)) {
                 retView = inflater.inflate(R.layout.listitem_story_event, null);
-                eventItemViews = new EventItemViews();
-                eventItemViews.messageView = (TextView)retView.findViewById(R.id.story_event_message);
-                retView.setTag(eventItemViews);
+                eventItemViewInfo = new EventItemViewInfo();
+                eventItemViewInfo.messageView = (TextView)retView.findViewById(R.id.story_event_message);
+                retView.setTag(eventItemViewInfo);
             } else {
-                eventItemViews = (EventItemViews)retView.getTag();
+                eventItemViewInfo = (EventItemViewInfo)retView.getTag();
             }
             
-            eventItemViews.messageView.setText(makeMessageSequence(eventItem));
+            // メッセージ
+            eventItemViewInfo.messageView.setText(makeMessageSequence(eventItem));
+            
+            // メッセージの色
             switch (eventItem.getEventFamily()) {
             case ANNOUNCE:
-                eventItemViews.messageView.setBackgroundResource(R.drawable.announce_frame);
-                eventItemViews.messageView.setTextColor(res.getColor(R.color.story_event_announce_text));
+                eventItemViewInfo.messageView.setBackgroundResource(R.drawable.announce_frame);
+                eventItemViewInfo.messageView.setTextColor(res.getColor(R.color.story_event_announce_text));
                 break;
             case ORDER:
-                eventItemViews.messageView.setBackgroundResource(R.drawable.order_frame);
-                eventItemViews.messageView.setTextColor(res.getColor(R.color.story_event_order_text));
+                eventItemViewInfo.messageView.setBackgroundResource(R.drawable.order_frame);
+                eventItemViewInfo.messageView.setTextColor(res.getColor(R.color.story_event_order_text));
                 break;
             case EXTRA:
-                eventItemViews.messageView.setBackgroundResource(R.drawable.extra_frame);
-                eventItemViews.messageView.setTextColor(res.getColor(R.color.story_event_extra_text));
+                eventItemViewInfo.messageView.setBackgroundResource(R.drawable.extra_frame);
+                eventItemViewInfo.messageView.setTextColor(res.getColor(R.color.story_event_extra_text));
                 break;
             }
         }
