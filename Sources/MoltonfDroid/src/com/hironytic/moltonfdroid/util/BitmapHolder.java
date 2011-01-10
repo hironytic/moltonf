@@ -96,4 +96,12 @@ public class BitmapHolder {
             requestList = null;
         }
     }
+    
+    /**
+     * 画像を保持しているかどうかを返します。
+     * @return 画像を保持しているなら true、そうでなければ false
+     */
+    public boolean hasBitmap() {
+        return (bitmap != null);
+    }
 }

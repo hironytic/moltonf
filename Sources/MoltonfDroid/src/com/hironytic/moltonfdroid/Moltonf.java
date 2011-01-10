@@ -25,10 +25,13 @@
 
 package com.hironytic.moltonfdroid;
 
+import java.io.File;
+
 import android.app.Application;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Environment;
 
 import com.hironytic.moltonfdroid.util.Logger;
 
@@ -36,37 +39,23 @@ import com.hironytic.moltonfdroid.util.Logger;
  * Moltonf アプリケーション全体で共有する処理
  */
 public class Moltonf extends Application {
+    private static final String LOGGER_TAG = "MoltonfDroid";
+    private static final String WORK_DIR_NAME = "MoltonfDroid";
+        
     /** 唯一のアプリケーションオブジェクト */
     private static Moltonf app = null;
     
     /** ロガー */
-    private Logger logger = new Logger("MoltonfDroid");
+    private Logger logger = new Logger(LOGGER_TAG);
     
     /** バージョン文字列 */
     private String versionString = null;
-
+    
     /**
      * コンストラクタ
      */
     public Moltonf() {
         app = this;
-    }
-    
-    /**
-     * Moltonf アプリケーション用のログ出力用オブジェクトを返します。
-     * @return Logger オブジェクト
-     */
-    public static Logger getLogger() {
-        return app.logger;
-    }
-
-    /**
-     * Moltonf アプリケーションのバージョン文字列を得ます。
-     * @param context アプリケーションのコンテキスト
-     * @return バージョン文字列
-     */
-    public static String getVersionString() {
-        return app.versionString;
     }
 
     /**
@@ -84,6 +73,45 @@ public class Moltonf extends Application {
             versionString = packageInfo.versionName;
         } catch (NameNotFoundException ex) {
             versionString = "";
+        }
+    }
+
+    /**
+     * MoltonfDroid アプリケーション用のログ出力用オブジェクトを返します。
+     * @return Logger オブジェクト
+     */
+    public static Logger getLogger() {
+        return app.logger;
+    }
+
+    /**
+     * MoltonfDroid アプリケーションのバージョン文字列を得ます。
+     * @param context アプリケーションのコンテキスト
+     * @return バージョン文字列
+     */
+    public static String getVersionString() {
+        return app.versionString;
+    }
+    
+    /**
+     * MoltonfDroid アプリケーションの扱うファイルを格納しているディレクトリを返します。
+     * @return アプリケーションの扱うファイルを格納しているディレクトリ
+     *          取得できなければ null を返します。
+     */
+    public static File getWorkDir() {
+        try {
+            File sdcardDir = Environment.getExternalStorageDirectory();
+            File moltonfDroidDir = new File(sdcardDir, WORK_DIR_NAME);
+            if (!moltonfDroidDir.exists()) {
+                if (sdcardDir.canWrite()) {
+                    moltonfDroidDir.mkdir();
+                } else {
+                    return null;
+                }
+            }
+            return moltonfDroidDir;
+        } catch (SecurityException ex) {
+            return null;
         }
     }
 }
