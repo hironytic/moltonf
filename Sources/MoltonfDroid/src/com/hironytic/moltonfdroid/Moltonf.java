@@ -25,22 +25,65 @@
 
 package com.hironytic.moltonfdroid;
 
+import android.app.Application;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+
 import com.hironytic.moltonfdroid.util.Logger;
 
 /**
  * Moltonf アプリケーション全体で共有する処理
  */
-public class Moltonf {
-    private Moltonf() {}
+public class Moltonf extends Application {
+    /** 唯一のアプリケーションオブジェクト */
+    private static Moltonf app = null;
     
     /** ロガー */
-    private static Logger logger = new Logger("com.hironytic.moltonfdroid");
+    private Logger logger = new Logger("MoltonfDroid");
+    
+    /** バージョン文字列 */
+    private String versionString = null;
+
+    /**
+     * コンストラクタ
+     */
+    public Moltonf() {
+        app = this;
+    }
     
     /**
      * Moltonf アプリケーション用のログ出力用オブジェクトを返します。
      * @return Logger オブジェクト
      */
     public static Logger getLogger() {
-        return logger;
+        return app.logger;
+    }
+
+    /**
+     * Moltonf アプリケーションのバージョン文字列を得ます。
+     * @param context アプリケーションのコンテキスト
+     * @return バージョン文字列
+     */
+    public static String getVersionString() {
+        return app.versionString;
+    }
+
+    /**
+     * アプリケーションが作られたときに呼び出されます。
+     */
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        logger = new Logger("MoltonfDroid");
+
+        try {
+            String packageName = getPackageName();
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA);
+            versionString = packageInfo.versionName;
+        } catch (NameNotFoundException ex) {
+            versionString = "";
+        }
     }
 }

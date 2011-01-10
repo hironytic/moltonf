@@ -50,7 +50,7 @@ import com.hironytic.moltonfdroid.util.Proc1;
  */
 public class HttpAccess {
 
-    private static final String USER_AGENT = "MoltonfDroid/0.0.0";   // TODO:
+    private static final String USER_AGENT_FORMAT = "MoltonfDroid/%s (hiron@hironytic.com)";
     
     /**
      * コンストラクタ
@@ -62,7 +62,7 @@ public class HttpAccess {
      * 指定した URI のデータを GET メソッドで取得するための InputStream を返します。
      * @param uri データの URI
      * @param getProc 取得したデータを処理するコールバック
-     * @throws MoltonfException エラー発生時
+     * @throws MoltonfException エラー発生時USER_AGENT_FORMAT
      */
     public static void doGet(URI uri, Proc1<InputStream> getProc) throws MoltonfException {
         HttpGet httpGet = new HttpGet(uri);
@@ -94,12 +94,14 @@ public class HttpAccess {
      * @return HttpClient
      */
     private static HttpClient createHttpClient() {
+        String userAgent = String.format(USER_AGENT_FORMAT, Moltonf.getVersionString());
+        
         HttpClient httpClient = null;
         if (Build.VERSION.SDK_INT >= 8) {
             try {
                 Class<?> clazz = Class.forName("android.net.http.AndroidHttpClient");
                 Method method = clazz.getMethod("newInstance", new Class[]{String.class});
-                httpClient = (HttpClient)method.invoke(null, new Object[]{USER_AGENT});
+                httpClient = (HttpClient)method.invoke(null, new Object[]{userAgent});
                 HttpParams params = httpClient.getParams();
                 HttpClientParams.setRedirecting(params, true);  // リダイレクトを follow するようにしておく            
             } catch (Exception ex) {
@@ -109,7 +111,7 @@ public class HttpAccess {
         if (httpClient == null) {
             httpClient = new DefaultHttpClient();
             HttpParams params = httpClient.getParams();
-            HttpProtocolParams.setUserAgent(params, USER_AGENT);
+            HttpProtocolParams.setUserAgent(params, userAgent);
             
             // 以下の設定は AndroidHttpClient に合わせてある
             HttpConnectionParams.setStaleCheckingEnabled(params, false);
