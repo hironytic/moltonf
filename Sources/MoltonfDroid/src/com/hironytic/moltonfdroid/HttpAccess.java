@@ -50,7 +50,7 @@ import com.hironytic.moltonfdroid.util.Proc1;
  */
 public class HttpAccess {
 
-    private static final String USER_AGENT_FORMAT = "MoltonfDroid/%s (hiron@hironytic.com)";
+    private static final String USER_AGENT_FORMAT = "MoltonfDroid/%s (http://moltonf.hironytic.com/, moltonf@hironytic.com)";
     
     /**
      * コンストラクタ
