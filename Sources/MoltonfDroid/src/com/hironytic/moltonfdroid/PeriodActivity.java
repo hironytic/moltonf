@@ -47,8 +47,7 @@ public class PeriodActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.period);
 
-        File externalStorageDir = Environment.getExternalStorageDirectory();
-        File moltonfDir = new File(externalStorageDir, "MoltonfDroid");
+        File moltonfDir = Moltonf.getWorkDir();
         File archiveFile = new File(moltonfDir, "jin_wolff_01999_small.xml");
         Story story = new ArchivedStory(archiveFile);
 
