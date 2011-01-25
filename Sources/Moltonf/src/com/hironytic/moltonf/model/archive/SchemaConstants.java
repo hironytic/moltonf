@@ -251,6 +251,15 @@ public class SchemaConstants {
 
     /* 
      * --------------------------------------------------
+     * rawdata
+     * --------------------------------------------------
+     */
+
+    /** rawdata 要素の QName */
+    public static final QName NAME_RAWDATA = new QName(NS_ARCHIVE, "rawdata");
+
+    /* 
+     * --------------------------------------------------
      * playerInfo
      * --------------------------------------------------
      */

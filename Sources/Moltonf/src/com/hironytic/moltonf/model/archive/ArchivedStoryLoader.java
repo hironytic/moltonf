@@ -600,21 +600,47 @@ public class ArchivedStoryLoader {
             if (eventType == XMLStreamReader.END_ELEMENT) {
                 break;
             } else if (eventType == XMLStreamReader.START_ELEMENT) {
-// TODO: rawData 対応
-//                QName elemName = staxReader.getName();
-//                if (SchemaConstants.NAME_RAW_DATA.equals(elemName)) {
-//                    
-//                } else {
+                QName elemName = staxReader.getName();
+                if (SchemaConstants.NAME_RAWDATA.equals(elemName)) {
+                    loadRawdata(buf);
+                } else {
                     skipElement();
-//                }
+                }
             } else if (eventType == XMLStreamReader.CHARACTERS) {
-                buf.append(staxReader.getText());
+                String text = staxReader.getText();
+                // 全角チルダ(U+FF5E, FULLWIDTH TILDE)と波ダッシュ(U+301C, WAVE DASH)の変換。やるならここ
+                //text = text.replace('\uff5e', '\u301c');
+                //text = text.replace('\u301c', '\uff5e');
+                buf.append(text);
             }
         }
         
         return buf.toString();
     }
 
+    /**
+     * rawdata要素以下を読み込んで、引数の StringBuilder に追加します。
+     * @param buf 結果の文字列をここに追加します。
+     * @throws XMLStreamException 読み込み中にエラーが発生した場合
+     */
+    private void loadRawdata(StringBuilder buf) throws XMLStreamException {
+        // 子ノード
+        while (staxReader.hasNext()) {
+            int eventType = staxReader.next();
+            if (eventType == XMLStreamReader.END_ELEMENT) {
+                break;
+            } else if (eventType == XMLStreamReader.START_ELEMENT) {
+                skipElement();
+            } else if (eventType == XMLStreamReader.CHARACTERS) {
+                String text = staxReader.getText();
+                // 全角チルダ(U+FF5E, FULLWIDTH TILDE)と波ダッシュ(U+301C, WAVE DASH)の変換。やるならここ
+                //text = text.replace('\uff5e', '\u301c');
+                //text = text.replace('\u301c', '\uff5e');
+                buf.append(text);
+            }
+        }
+    }
+    
     /**
      * 時刻文字列を解析します。
      * @param timeString 時刻文字列
