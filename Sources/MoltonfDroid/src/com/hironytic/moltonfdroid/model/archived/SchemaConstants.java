@@ -248,6 +248,15 @@ public class SchemaConstants {
 
     /** li 要素の QName */
     public static final QName NAME_LI = new QName(NS_ARCHIVE, "li");
+    
+    /* 
+     * --------------------------------------------------
+     * rawdata
+     * --------------------------------------------------
+     */
+
+    /** rawdata 要素の QName */
+    public static final QName NAME_RAWDATA = new QName(NS_ARCHIVE, "rawdata");
 
     /* 
      * --------------------------------------------------

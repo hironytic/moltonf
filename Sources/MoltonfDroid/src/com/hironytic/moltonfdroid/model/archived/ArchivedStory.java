@@ -588,21 +588,49 @@ public class ArchivedStory extends BasicStory implements Story {
             if (eventType == XmlPullParser.END_TAG) {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
-// TODO: rawData 対応
-//                QName elemName = staxReader.getName();
-//                if (SchemaConstants.NAME_RAW_DATA.equals(elemName)) {
-//                    
-//                } else {
+                QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
+                if (SchemaConstants.NAME_RAWDATA.equals(elemName)) {
+                    loadRawdata(staxReader, buf);
+                } else {
                     skipElement(staxReader);
-//                }
+                }
             } else if (eventType == XmlPullParser.TEXT) {
-                buf.append(staxReader.getText());
+                String text = staxReader.getText();
+                // 全角チルダ(U+FF5E, FULLWIDTH TILDE)と波ダッシュ(U+301C, WAVE DASH)の変換。やるならここ
+                //text = text.replace('\uff5e', '\u301c');
+                //text = text.replace('\u301c', '\uff5e');
+                buf.append(text);
             }
         }
         
         return buf.toString();
     }
 
+    /**
+     * rawdata要素以下を読み込んで、引数の StringBuilder に追加します。
+     * @param staxReader XML パーサ
+     * @param buf 結果の文字列をここに追加します。
+     * @throws XmlPullParserException 読み込み中にエラーが発生した場合
+     * @throws IOException 読み込み中にエラーが発生した場合
+     */
+    private void loadRawdata(XmlPullParser staxReader, StringBuilder buf) throws XmlPullParserException, IOException {
+        
+        // 子ノード
+        for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
+            if (eventType == XmlPullParser.END_TAG) {
+                break;
+            } else if (eventType == XmlPullParser.START_TAG) {
+                skipElement(staxReader);
+            } else if (eventType == XmlPullParser.TEXT) {
+                String text = staxReader.getText();
+                // 全角チルダ(U+FF5E, FULLWIDTH TILDE)と波ダッシュ(U+301C, WAVE DASH)の変換。やるならここ
+                //text = text.replace('\uff5e', '\u301c');
+                //text = text.replace('\u301c', '\uff5e');
+                buf.append(text);
+            }
+        }
+    }
+    
     /**
      * 時刻文字列を解析します。
      * @param timeString 時刻文字列
