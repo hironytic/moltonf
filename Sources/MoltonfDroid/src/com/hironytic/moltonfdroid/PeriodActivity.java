@@ -26,13 +26,15 @@
 package com.hironytic.moltonfdroid;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ListActivity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.widget.ListAdapter;
 
+import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
@@ -53,40 +55,24 @@ public class PeriodActivity extends ListActivity {
 
         LoadStoryImageTask loadStoryImageTask = new LoadStoryImageTask();
         loadStoryImageTask.execute(story);
-        
+
+        // TODO: 必ず 0 ってわけでもないはず。
         List<StoryElement> elemList = story.getPeriods().get(0).getStoryElements();
+
+        // TODO: 強調表示設定はアプリ設定か
+        List<HighlightSetting> highlightSettingList = new ArrayList<HighlightSetting>();
+        HighlightSetting hlSetting;
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("【.*?】");    hlSetting.setHighlightColor(Color.RED);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("★");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("☆");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("●");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("○");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("▼");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("▽");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("■");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
         
-        
-//        List<StoryElement> elemList = new ArrayList<StoryElement>();
-//
-//        StoryEvent event = new BasicStoryEvent();
-//        event.setEventFamily(EventFamily.ANNOUNCE);
-//        event.setMessageLines(Arrays.asList("昼間は人間のふりをして、夜に正体を現すという人狼。", "その人狼が、この村に紛れ込んでいるという噂が広がった。", "", "村人達は半信半疑ながらも、村はずれの宿に集められることになった。"));
-//        elemList.add(event);
-//        
-//        Avatar gerd = new BasicAvatar();
-//        gerd.setAvatarId("gerd");
-//        gerd.setFullName("楽天家 ゲルト");
-//        
-//        Talk talk = new BasicTalk();
-//        TimePart timePart = new TimePart(23, 38, 12, 0);
-//        talk.setTime(timePart);
-//        talk.setSpeaker(gerd);
-//        talk.setMessageLines(Arrays.asList("人狼なんているわけないじゃん。みんな大げさだなあ"));
-//        talk.setTalkType(TalkType.PUBLIC);
-//        elemList.add(talk);
-//        
-//        talk = new BasicTalk();
-//        timePart = new TimePart(23, 52, 10, 0);
-//        talk.setTime(timePart);
-//        talk.setSpeaker(gerd);
-//        talk.setMessageLines(Arrays.asList("議題をどうぞです。", "■1.おもな参加時間帯", "■2.仮/本決定時間の希望", "■3.投票ＣＯの可否", "□4.自己紹介"));
-//        talk.setTalkType(TalkType.WOLF);
-//        elemList.add(talk);
-        
-        ListAdapter adapter = new StoryElementListAdapter(getApplicationContext(), elemList);
+        ListAdapter adapter = new StoryElementListAdapter(getApplicationContext(), elemList, highlightSettingList);
         setListAdapter(adapter);
-        
-        
     }
 }

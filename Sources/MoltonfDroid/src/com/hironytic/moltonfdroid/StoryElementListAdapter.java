@@ -26,6 +26,8 @@
 package com.hironytic.moltonfdroid;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -41,6 +43,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryEvent;
 import com.hironytic.moltonfdroid.model.Talk;
@@ -62,6 +65,9 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
     /** デフォルトの顔アイコン */
     private Bitmap defaultFaceIcon;
 
+    /** 強調表示設定のリスト */
+    private List<HighlightSetting> highlightSettingList;
+    
     /**
      * 発言を示すアイテムのビュー情報
      */
@@ -95,12 +101,13 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
      * @param context 現在のコンテキスト
      * @param objects 表示するオブジェクトのリスト
      */
-    public StoryElementListAdapter(Context context, List<StoryElement> objects) {
+    public StoryElementListAdapter(Context context, List<StoryElement> objects, List<HighlightSetting> highlightSettingList) {
         super(context, 0, objects);
 
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         res = context.getResources();
         defaultFaceIcon = BitmapFactory.decodeResource(res, R.drawable.default_face);
+        this.highlightSettingList = highlightSettingList;
     }
 
     /**
@@ -217,7 +224,24 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
             if (!isFirstLine) {
                 buf.append("\n");
             }
+            int lineStart = buf.length();
             buf.append(line);
+            
+            if (highlightSettingList != null) {
+                for (HighlightSetting highlightSetting : highlightSettingList) {
+                    if (!highlightSetting.isValid()) {
+                        continue;
+                    }
+                    
+                    Pattern pattern = highlightSetting.getPattern();
+                    Matcher matcher = pattern.matcher(line);
+                    while (matcher.find()) {
+                        buf.setSpan(new ForegroundColorSpan(highlightSetting.getHighlightColor()),
+                                matcher.start() + lineStart, matcher.end() + lineStart, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                }
+            }
+            
             isFirstLine = false;
         }
         
