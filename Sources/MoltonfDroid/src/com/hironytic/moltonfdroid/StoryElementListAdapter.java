@@ -42,6 +42,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.AbsListView;
 
 import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.model.StoryElement;
@@ -54,7 +55,7 @@ import com.hironytic.moltonfdroid.util.TimePart;
 /**
  * ストーリー要素の一覧のためのアダプタクラス
  */
-public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
+public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implements AbsListView.RecyclerListener {
 
     /** ビューを生成するためのオブジェクト */
     private LayoutInflater inflater;
@@ -111,6 +112,50 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
     }
 
     /**
+     * @see android.widget.AbsListView.RecyclerListener#onMovedToScrapHeap(android.view.View)
+     */
+    @Override
+    public void onMovedToScrapHeap(View view) {
+        Object tag = view.getTag();
+        if (tag instanceof TalkItemViewInfo) {
+            TalkItemViewInfo talkItemViewInfo = (TalkItemViewInfo)tag;
+
+            // ビューが顔画像を要求中かもしれないので要求をキャンセル。
+            if (talkItemViewInfo.faceBitmapHolder != null) {
+                talkItemViewInfo.faceBitmapHolder.cancelRequest(talkItemViewInfo.faceBitmapRequestProc);
+                talkItemViewInfo.faceBitmapHolder = null;
+            }
+        }        
+    }
+
+    private static int VIEW_TYPE_TALK = 0;
+    private static int VIEW_TYPE_STORY_EVENT = 1;
+    private static int NUM_VIEW_TYPE = 2;
+    
+    /**
+     * @see android.widget.BaseAdapter#getViewTypeCount()
+     */
+    @Override
+    public int getViewTypeCount() {
+        return NUM_VIEW_TYPE;
+    }
+
+    /**
+     * @see android.widget.BaseAdapter#getItemViewType(int)
+     */
+    @Override
+    public int getItemViewType(int position) {
+        StoryElement item = this.getItem(position);
+        if (item instanceof Talk) {
+            return VIEW_TYPE_TALK;
+        } else if (item instanceof StoryEvent) {
+            return VIEW_TYPE_STORY_EVENT;
+        }
+        
+        return IGNORE_ITEM_VIEW_TYPE;
+    }
+
+    /**
      * @see android.widget.ArrayAdapter#getView(int, android.view.View, android.view.ViewGroup)
      */
     @Override
@@ -131,7 +176,7 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
             } else {
                 talkItemViewInfo = (TalkItemViewInfo)retView.getTag();
             }
-            
+
             // 情報テキスト
             talkItemViewInfo.infoView.setText(makeTalkInfo(talkItem));
             
@@ -159,11 +204,7 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> {
                 faceBitmapHolder = talkItem.getStory().getGraveIconHolder();
                 break;
             }
-            // 使いまわした前のビューが顔画像を要求中かもしれないので
-            // 要求をキャンセル。
-            if (talkItemViewInfo.faceBitmapHolder != null) {
-                talkItemViewInfo.faceBitmapHolder.cancelRequest(talkItemViewInfo.faceBitmapRequestProc);
-            }
+            
             // デフォルト画像に変更しておく
             talkItemViewInfo.faceIconView.setImageBitmap(defaultFaceIcon);
 

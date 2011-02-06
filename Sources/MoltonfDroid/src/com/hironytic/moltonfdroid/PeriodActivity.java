@@ -32,7 +32,6 @@ import java.util.List;
 import android.app.ListActivity;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.ListAdapter;
 
 import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.model.Story;
@@ -43,6 +42,7 @@ import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
  * 1 単位期間のストーリーを表示する Activity
  */
 public class PeriodActivity extends ListActivity {
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,8 @@ public class PeriodActivity extends ListActivity {
         hlSetting = new HighlightSetting(); hlSetting.setPatternString("■");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
         hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
         
-        ListAdapter adapter = new StoryElementListAdapter(getApplicationContext(), elemList, highlightSettingList);
+        StoryElementListAdapter adapter = new StoryElementListAdapter(getApplicationContext(), elemList, highlightSettingList);
+        getListView().setRecyclerListener(adapter);
         setListAdapter(adapter);
     }
 }
