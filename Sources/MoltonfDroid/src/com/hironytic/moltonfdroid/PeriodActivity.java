@@ -76,4 +76,20 @@ public class PeriodActivity extends ListActivity {
         getListView().setRecyclerListener(adapter);
         setListAdapter(adapter);
     }
+
+    /**
+     * @see android.app.Activity#onDestroy()
+     */
+    @Override
+    protected void onDestroy() {
+        StoryElementListAdapter adapter = (StoryElementListAdapter)getListAdapter();
+        setListAdapter(null);
+        getListView().setRecyclerListener(null);
+        adapter.destroy();
+
+        // TODO: loadStoryImageTask もキャンセルしないといけない
+        
+        super.onDestroy();
+    }
+    
 }

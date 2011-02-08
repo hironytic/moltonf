@@ -26,6 +26,8 @@
 package com.hironytic.moltonfdroid;
 
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,10 +41,10 @@ import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.AbsListView;
 
 import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.model.StoryElement;
@@ -69,10 +71,19 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implemen
     /** 強調表示設定のリスト */
     private List<HighlightSetting> highlightSettingList;
     
+    /** ビュー情報 */
+    private final Map<View, ViewInfo> viewInfoMap = new WeakHashMap<View, ViewInfo>();
+    
+    /**
+     * 各ビューの情報
+     */
+    private static class ViewInfo {
+    }
+    
     /**
      * 発言を示すアイテムのビュー情報
      */
-    private static class TalkItemViewInfo {
+    private static class TalkItemViewInfo extends ViewInfo {
         /** 発言に燗する情報を表示するビュー */
         public TextView infoView;
         
@@ -92,7 +103,7 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implemen
     /**
      * ストーリー中のイベントを示すアイテムのビュー情報
      */
-    private static class EventItemViewInfo {
+    private static class EventItemViewInfo extends ViewInfo {
         /** メッセージを表示するビュー */
         public TextView messageView;
     }
@@ -112,13 +123,31 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implemen
     }
 
     /**
+     * これ以上このオブジェクトを利用しないときに呼び出します。
+     */
+    public void destroy() {
+        // 画像を要求中のものがあれば要求をキャンセル
+        for (ViewInfo viewInfo : viewInfoMap.values()) {
+            if (viewInfo instanceof TalkItemViewInfo) {
+                TalkItemViewInfo talkItemViewInfo = (TalkItemViewInfo)viewInfo;
+                if (talkItemViewInfo.faceBitmapHolder != null) {
+                    talkItemViewInfo.faceBitmapHolder.cancelRequest(talkItemViewInfo.faceBitmapRequestProc);
+                    talkItemViewInfo.faceBitmapHolder = null;
+                }
+            }        
+        }
+        
+        viewInfoMap.clear();
+    }    
+    
+    /**
      * @see android.widget.AbsListView.RecyclerListener#onMovedToScrapHeap(android.view.View)
      */
     @Override
     public void onMovedToScrapHeap(View view) {
-        Object tag = view.getTag();
-        if (tag instanceof TalkItemViewInfo) {
-            TalkItemViewInfo talkItemViewInfo = (TalkItemViewInfo)tag;
+        ViewInfo viewInfo = viewInfoMap.get(view);
+        if (viewInfo instanceof TalkItemViewInfo) {
+            TalkItemViewInfo talkItemViewInfo = (TalkItemViewInfo)viewInfo;
 
             // ビューが顔画像を要求中かもしれないので要求をキャンセル。
             if (talkItemViewInfo.faceBitmapHolder != null) {
@@ -163,18 +192,19 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implemen
         StoryElement item = this.getItem(position);
         
         View retView = convertView;
+        ViewInfo viewInfo = viewInfoMap.get(retView);
         if (item instanceof Talk) {
             Talk talkItem = (Talk)item;
             TalkItemViewInfo talkItemViewInfo;
-            if (retView == null || !(retView.getTag() instanceof TalkItemViewInfo)) {
+            if (retView == null || !(viewInfo instanceof TalkItemViewInfo)) {
                 retView = inflater.inflate(R.layout.listitem_talk, null);
                 talkItemViewInfo = new TalkItemViewInfo();
                 talkItemViewInfo.infoView = (TextView)retView.findViewById(R.id.talk_info);
                 talkItemViewInfo.faceIconView = (ImageView)retView.findViewById(R.id.face_icon);
                 talkItemViewInfo.messageView = (TextView)retView.findViewById(R.id.talk_message);
-                retView.setTag(talkItemViewInfo);
+                viewInfoMap.put(retView, talkItemViewInfo);
             } else {
-                talkItemViewInfo = (TalkItemViewInfo)retView.getTag();
+                talkItemViewInfo = (TalkItemViewInfo)viewInfo;
             }
 
             // 情報テキスト
@@ -221,13 +251,13 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implemen
         } else if (item instanceof StoryEvent) {
             StoryEvent eventItem = (StoryEvent)item;
             EventItemViewInfo eventItemViewInfo;
-            if (retView == null || !(retView.getTag() instanceof EventItemViewInfo)) {
+            if (retView == null || !(viewInfo instanceof EventItemViewInfo)) {
                 retView = inflater.inflate(R.layout.listitem_story_event, null);
                 eventItemViewInfo = new EventItemViewInfo();
                 eventItemViewInfo.messageView = (TextView)retView.findViewById(R.id.story_event_message);
-                retView.setTag(eventItemViewInfo);
+                viewInfoMap.put(retView, eventItemViewInfo);
             } else {
-                eventItemViewInfo = (EventItemViewInfo)retView.getTag();
+                eventItemViewInfo = (EventItemViewInfo)viewInfo;
             }
             
             // メッセージ
