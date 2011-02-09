@@ -68,11 +68,17 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
         
         // 墓アイコン画像
         loadImage(story.getGraveIconHolder(), "grave", story.getGraveIconUri());
+        if (isCancelled()) {
+            return null;
+        }
         
         // アバターのアイコン画像
         List<Avatar> avatarList = story.getAvatarList();
         for (Avatar avatar : avatarList) {
             loadImage(avatar.getFaceIconHolder(), avatar.getAvatarId(), avatar.getFaceIconUri());
+            if (isCancelled()) {
+                return null;
+            }
         }
 
         return null;

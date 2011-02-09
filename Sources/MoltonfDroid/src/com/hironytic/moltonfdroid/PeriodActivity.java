@@ -43,7 +43,14 @@ import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
  */
 public class PeriodActivity extends ListActivity {
     
-    /** Called when the activity is first created. */
+    /**
+     * ストーリー中の画像を読み込むためのタスク
+     */
+    private LoadStoryImageTask loadStoryImageTask;
+    
+    /**
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +60,7 @@ public class PeriodActivity extends ListActivity {
         File archiveFile = new File(moltonfDir, "jin_wolff_01999_small.xml");
         Story story = new ArchivedStory(archiveFile);
 
-        LoadStoryImageTask loadStoryImageTask = new LoadStoryImageTask();
+        loadStoryImageTask = new LoadStoryImageTask();
         loadStoryImageTask.execute(story);
 
         // TODO: 必ず 0 ってわけでもないはず。
@@ -87,7 +94,7 @@ public class PeriodActivity extends ListActivity {
         getListView().setRecyclerListener(null);
         adapter.destroy();
 
-        // TODO: loadStoryImageTask もキャンセルしないといけない
+        loadStoryImageTask.cancel(true);
         
         super.onDestroy();
     }
