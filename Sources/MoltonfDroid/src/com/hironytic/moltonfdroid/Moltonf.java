@@ -42,12 +42,6 @@ public class Moltonf extends Application {
     private static final String LOGGER_TAG = "MoltonfDroid";
     private static final String WORK_DIR_NAME = "MoltonfDroid";
         
-    /** 唯一のアプリケーションオブジェクト */
-    private static Moltonf app = null;
-    
-    /** ロガー */
-    private Logger logger = new Logger(LOGGER_TAG);
-    
     /** バージョン文字列 */
     private String versionString = null;
     
@@ -55,7 +49,6 @@ public class Moltonf extends Application {
      * コンストラクタ
      */
     public Moltonf() {
-        app = this;
     }
 
     /**
@@ -64,8 +57,6 @@ public class Moltonf extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        logger = new Logger("MoltonfDroid");
 
         try {
             String packageName = getPackageName();
@@ -81,7 +72,7 @@ public class Moltonf extends Application {
      * @return Logger オブジェクト
      */
     public static Logger getLogger() {
-        return app.logger;
+    	return new Logger(LOGGER_TAG);
     }
 
     /**
@@ -89,8 +80,8 @@ public class Moltonf extends Application {
      * @param context アプリケーションのコンテキスト
      * @return バージョン文字列
      */
-    public static String getVersionString() {
-        return app.versionString;
+    public String getVersionString() {
+        return versionString;
     }
     
     /**
@@ -98,7 +89,7 @@ public class Moltonf extends Application {
      * @return アプリケーションの扱うファイルを格納しているディレクトリ
      *          取得できなければ null を返します。
      */
-    public static File getWorkDir() {
+    public File getWorkDir() {
         try {
             File sdcardDir = Environment.getExternalStorageDirectory();
             File moltonfDroidDir = new File(sdcardDir, WORK_DIR_NAME);

@@ -56,11 +56,13 @@ public class PeriodActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.period);
 
-        File moltonfDir = Moltonf.getWorkDir();
+        Moltonf app = (Moltonf)getApplication();
+        
+        File moltonfDir = app.getWorkDir();
         File archiveFile = new File(moltonfDir, "jin_wolff_01999_small.xml");
         Story story = new ArchivedStory(archiveFile);
 
-        loadStoryImageTask = new LoadStoryImageTask();
+        loadStoryImageTask = new LoadStoryImageTask(app);
         loadStoryImageTask.execute(story);
 
         // TODO: 必ず 0 ってわけでもないはず。
