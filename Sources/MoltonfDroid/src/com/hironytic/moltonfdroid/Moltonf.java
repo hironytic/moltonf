@@ -34,6 +34,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
 
 import com.hironytic.moltonfdroid.util.Logger;
+import com.hironytic.moltonfdroid.util.ObjectBank;
 
 /**
  * Moltonf アプリケーション全体で共有する処理
@@ -44,6 +45,9 @@ public class Moltonf extends Application {
         
     /** バージョン文字列 */
     private String versionString = null;
+    
+    /** 同一アプリケーション内のオブジェクトの受け渡しのために一時的にオブジェクトを預ける場所 */
+    private final ObjectBank objectBank = new ObjectBank();
     
     /**
      * コンストラクタ
@@ -82,6 +86,14 @@ public class Moltonf extends Application {
      */
     public String getVersionString() {
         return versionString;
+    }
+
+    /**
+     * 同一アプリケーション内のオブジェクトの引き渡しに用いる ObjectBank を返します。
+     * @return ObjectBank オブジェクト
+     */
+    public ObjectBank getObjectBank() {
+        return objectBank;
     }
     
     /**

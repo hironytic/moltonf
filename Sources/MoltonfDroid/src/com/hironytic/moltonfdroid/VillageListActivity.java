@@ -30,8 +30,14 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hironytic.moltonfdroid.model.Story;
+import com.hironytic.moltonfdroid.model.StoryPeriod;
+import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
+
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -106,11 +112,69 @@ public class VillageListActivity extends ListActivity {
     protected void onListItemClick(ListView listView, View v, int position, long id) {
         super.onListItemClick(listView, v, position, id);
         
-        ArchiveFileItem file = (ArchiveFileItem)listView.getItemAtPosition(position);
-        Moltonf.getLogger().info(file.toString());
+        ArchiveFileItem item = (ArchiveFileItem)listView.getItemAtPosition(position);
+        Moltonf.getLogger().info(item.toString());
         
-        Intent intent = new Intent(this, PeriodActivity.class);
-        startActivity(intent);
+        LoadArchivedStoryTask loadTask = new LoadArchivedStoryTask();
+        loadTask.execute(item.getArchiveFile());
+    }
+
+    /**
+     * アーカイブファイルを読み込んでStoryを生成するタスク
+     */
+    private class LoadArchivedStoryTask extends AsyncTask<File, Void, Object> {
+        /** 読み込み中に表示するプログレスダイアログ */
+        private ProgressDialog progressDialog;
+        
+        /**
+         * @see android.os.AsyncTask#doInBackground(Params[])
+         */
+        @Override
+        protected Object doInBackground(File... params) {
+            try {
+                File archiveFile = params[0];
+                Story story = new ArchivedStory(archiveFile);
+                return story;
+            } catch (MoltonfException ex) {
+                return ex;
+            }
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPreExecute()
+         */
+        @Override
+        protected void onPreExecute() {
+            String message = getString(R.string.loading_archived_story);
+            progressDialog = ProgressDialog.show(VillageListActivity.this, "", message);
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
+        @Override
+        protected void onPostExecute(Object result) {
+            progressDialog.dismiss();
+
+            if (result instanceof Story) {
+                Story story = (Story)result;
+                List<StoryPeriod> periodList = story.getPeriods();
+                if (periodList.size() <= 0) {
+                    // TODO: Periodが1つも含まれていない
+                } else {
+                    StoryPeriod period = story.getPeriods().get(0);
+                    
+                    // ObjectBank へ送って、チケットIDをPeriodActivityへ引き渡す
+                    Moltonf app = (Moltonf)getApplication();
+                    int ticketID = app.getObjectBank().putObject(period);
+                    Intent intent = new Intent(VillageListActivity.this, PeriodActivity.class);
+                    intent.putExtra(PeriodActivity.EXTRA_KEY_PERIOD_TICKET_ID, ticketID);
+                    startActivity(intent);
+                }
+            } else if (result instanceof MoltonfException) {
+                // TODO: MoltonfException が発生したとき
+            }
+        }
     }
     
 }
