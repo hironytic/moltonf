@@ -81,7 +81,7 @@ public class PeriodActivity extends ListActivity {
         hlSetting = new HighlightSetting(); hlSetting.setPatternString("■");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
         hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
         
-        StoryElementListAdapter adapter = new StoryElementListAdapter(getApplicationContext(), elemList, highlightSettingList);
+        StoryElementListAdapter adapter = new StoryElementListAdapter(this, elemList, highlightSettingList);
         getListView().setRecyclerListener(adapter);
         setListAdapter(adapter);
     }
