@@ -48,6 +48,23 @@ public class BasicStoryPeriod implements StoryPeriod {
     public BasicStoryPeriod() {
         
     }
+
+    /**
+     * データの準備ができているかどうかを調べます。
+     * このクラスの実装では常に true を返します。
+     * @return 準備ができているなら true
+     */
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    /**
+     * データの準備ができていなければ準備を行います。
+     */
+    @Override
+    public void ready() {
+    }
     
     /**
      * このオブジェクトが属する Story を取得します。

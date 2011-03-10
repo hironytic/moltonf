@@ -37,6 +37,17 @@ import com.hironytic.moltonfdroid.util.BitmapHolder;
 public interface Story {
 
     /**
+     * データの準備ができているかどうかを調べます。
+     * @return 準備ができているなら true
+     */
+    public boolean isReady();
+    
+    /**
+     * データの準備ができていなければ準備を行います。
+     */
+    public void ready();
+    
+    /**
      * このストーリーに含まれる StoryPeriod を返します。
      * @return StoryPeriod のリスト
      */
@@ -48,6 +59,13 @@ public interface Story {
      */
     public List<Avatar> getAvatarList();
 
+    /**
+     * 登場人物の識別子に対応する Avatar オブジェクトを返します。
+     * @param avatarId 識別子
+     * @return Avatar オブジェクト。対応するものがなければ null。
+     */
+    public Avatar getAvatar(String avatarId);
+    
     /**
      * 村のフルネームを返します。
      * @return 村のフルネーム

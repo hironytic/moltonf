@@ -34,6 +34,17 @@ import java.util.List;
 public interface StoryPeriod {
 
     /**
+     * データの準備ができているかどうかを調べます。
+     * @return 準備ができているなら true
+     */
+    public boolean isReady();
+    
+    /**
+     * データの準備ができていなければ準備を行います。
+     */
+    public void ready();
+    
+    /**
      * このオブジェクトが属する Story を取得します。
      * @return このオブジェクトが属する Story
      */

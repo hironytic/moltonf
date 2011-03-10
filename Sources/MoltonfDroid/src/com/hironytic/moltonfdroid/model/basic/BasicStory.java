@@ -33,6 +33,7 @@ import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
 import com.hironytic.moltonfdroid.model.VillageState;
 import com.hironytic.moltonfdroid.util.BitmapHolder;
+import com.hironytic.moltonfdroid.util.SmartUtils;
 
 /**
  * ストーリーの情報を保持するクラス。
@@ -67,6 +68,23 @@ public class BasicStory implements Story {
     }
     
     /**
+     * データの準備ができているかどうかを調べます。
+     * このクラスの実装では常に true を返します。
+     * @return 準備ができているなら true
+     */
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
+    /**
+     * データの準備ができていなければ準備を行います。
+     */
+    @Override
+    public void ready() {
+    }
+    
+    /**
      * このストーリーに含まれる StoryPeriod を返します。
      * @return StoryPeriod のリスト
      */
@@ -84,6 +102,23 @@ public class BasicStory implements Story {
         return avatarList;
     }
 
+    /**
+     * 登場人物の識別子に対応する Avatar オブジェクトを返します。
+     * @param avatarId 識別子
+     * @return Avatar オブジェクト。対応するものがなければ null。
+     */
+    @Override
+    public Avatar getAvatar(String avatarId) {
+        if (avatarList != null) {
+            for (Avatar avatar : avatarList) {
+                if (avatar != null && SmartUtils.equals(avatar.getAvatarId(), avatarId)) {
+                    return avatar;
+                }
+            }
+        }
+        return null;
+    }
+    
     /**
      * 村のフルネームを返します。
      * @return 村のフルネーム
