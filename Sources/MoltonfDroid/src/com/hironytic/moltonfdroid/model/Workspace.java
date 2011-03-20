@@ -51,8 +51,9 @@ public class Workspace {
     private static final int VALUE_VERSION_UNDEFINED = 0;
     private static final int VALUE_VERSION_1 = 1;
     
-    private static final String KEY_PACKAGE = "package"; 
+    private static final String KEY_PACKAGE = "package";
     
+    private static final String KEY_TITLE = "title";
     
     /** このワークスペースの情報を保存してあるファイル */
     private File workspaceFile;
@@ -68,6 +69,9 @@ public class Workspace {
     
     /** このワークスペースが扱うストーリー */
     private Story story;
+    
+    /** このワークスペースのタイトル */
+    private String title;
     
     /**
      * private コンストラクタ
@@ -134,7 +138,28 @@ public class Workspace {
         this.story = new PackagedStory(this.packageDir);
         isModified = true;
     }
-    
+
+    /**
+     * @return the title
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * @param title the title to set
+     */
+    public void setTitle(String title) {
+        try {
+            workspaceFileContents.put(KEY_TITLE, title);
+        } catch (JSONException ex) {
+            throw new MoltonfException(ex);
+        }
+
+        this.title = title;
+        isModified = true;
+    }
+
     /**
      * 新規作成を行います。
      * @throws MoltonfException JSON例外が発生したとき
@@ -177,6 +202,8 @@ public class Workspace {
         // ワークスペースファイルの内容を読み込み
         int version = workspaceFileContents.optInt(KEY_VERSION, VALUE_VERSION_UNDEFINED);
         if (version == VALUE_VERSION_1) {
+            title = workspaceFileContents.optString(KEY_TITLE, "");
+            
             String packageDirString = workspaceFileContents.optString(KEY_PACKAGE, null);
             if (packageDirString != null) {
                 // FIXME: MoltonfDroid/playdata 以下にあるものは相対パスにしたいな...
