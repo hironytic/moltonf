@@ -67,6 +67,7 @@ public class Workspace {
      */
     public void setWorkspaceId(long workspaceId) {
         this.workspaceId = workspaceId;
+        this.isModified = true;
     }
 
     /**
