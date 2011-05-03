@@ -152,4 +152,40 @@ public class WorkspaceManagerTest extends AndroidTestCase {
             cursor.close();
         }
     }
+
+    public void testUpdate() {
+        String titlePre = "previous title";
+        File packageDirPre = new File("/path/pre");
+        
+        Workspace ws = new Workspace();
+        ws.setTitle(titlePre);
+        ws.setPackageDir(packageDirPre);
+        
+        wsManager.save(ws);
+        long wsId = ws.getWorkspaceId();
+        
+        String titleNew = "new title";
+        File packageDirNew = new File("/path/new");
+
+        ws.setTitle(titleNew);
+        ws.setPackageDir(packageDirNew);
+        
+        wsManager.save(ws);
+        assertEquals(wsId, ws.getWorkspaceId());
+        
+        Workspace ws2 = wsManager.load(wsId);
+        assertEquals(titleNew, ws2.getTitle());
+        assertEquals(packageDirNew, ws2.getPackageDir());
+        
+        Cursor cursor = wsManager.list();
+        assertNotNull(cursor);
+        try {
+            assertTrue(cursor.moveToFirst());
+            
+            assertEquals(wsId, cursor.getLong(WorkspaceManager.LIST_COLUMN_INDEX_ID));
+            assertEquals(titleNew, cursor.getString(WorkspaceManager.LIST_COLUMN_INDEX_TITLE));
+        } finally {
+            cursor.close();
+        }
+    }
 }
