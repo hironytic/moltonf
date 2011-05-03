@@ -224,6 +224,23 @@ public class WorkspaceManager {
     }
     
     /**
+     * すべてのワークスペースのデータを削除します。
+     */
+    public void deleteAll() {
+        SQLiteDatabase db = openHelper.getWritableDatabase();
+        db.delete(TABLE_WORKSPACE, null, null);
+    }
+    
+    /** {@link #list()} で返される Cursor の ID 列のインデックス。この列の値の型 long です。*/
+    public static int LIST_COLUMN_INDEX_ID = 0;
+    
+    /** {@link #list()} で返される Cursor のタイトル列のインデックス。この列の値の型は String です。*/
+    public static int LIST_COLUMN_INDEX_TITLE = 1;
+    
+    /** {@link #list()} で返される Cursor の最終更新日列のインデックス。この列の値の型は long です。*/
+    public static int LIST_COLUMN_INDEX_UPDATED = 2;
+    
+    /**
      * ワークスペースデータの一覧を列挙する Cursor を返します。
      * @return
      */
@@ -236,7 +253,7 @@ public class WorkspaceManager {
                 null,   // selectionArgs,
                 null,   // groupBy,
                 null,   // having,
-                COLUMN_UPDATED + " DESC"    // orderBy
+                COLUMN_UPDATED + " DESC" + "," + COLUMN_ID + " DESC"    // orderBy
         );
         return cursor;
     }
