@@ -48,11 +48,18 @@ public interface Story {
     public void ready();
     
     /**
-     * このストーリーに含まれる StoryPeriod を返します。
-     * @return StoryPeriod のリスト
+     * このストーリーに含まれる StoryPeriod の数を返します。
+     * @return StoryPeriod の数
      */
-    public List<StoryPeriod> getPeriods();
+    public int getPeriodCount();
 
+    /**
+     * インデックスを指定して、このストーリーに含まれる StoryPeriod を返します。
+     * @param index インデックス
+     * @return StoryPeriod
+     */
+    public StoryPeriod getPeriod(int index);
+    
     /**
      * このストーリーに登場する人物のリストを返します。
      * @return 登場人物のリスト

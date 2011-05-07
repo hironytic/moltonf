@@ -31,9 +31,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,9 @@ public class PackagedStory extends BasicStory implements Story {
     /** 登場人物の識別子から Avatar オブジェクトを得るマップ */
     private Map<String, Avatar> avatarMap;
 
+    /** 弱参照で保持している StoryPeriod たち */
+    private WeakReference<StoryPeriod>[] weakPeriods;
+    
     /**
      * コンストラクタ
      * @param packageDir プレイデータのパッケージディレクトリ
@@ -133,16 +138,14 @@ public class PackagedStory extends BasicStory implements Story {
             // periods
             // 今のところ、ある日が存在しないといった歯抜けデータが
             // あることは考えていない。
-            List<StoryPeriod> periodList = new ArrayList<StoryPeriod>();
-            for (int day = 0; ; ++day) {
+            int day;
+            for (day = 0; ; ++day) {
                 File periodFile = new File(packageDir, String.format(FILENAME_PERIOD_FMT, day));
                 if (!periodFile.exists()) {
                     break;
                 }
-                
-                periodList.add(new PackagedStoryPeriod(periodFile));
             }
-            this.setPeriods(periodList);
+            initWeakPeriods(day);
             
             isReady = true;
             
@@ -153,6 +156,44 @@ public class PackagedStory extends BasicStory implements Story {
         } catch (IOException ex) {
             throw new MoltonfException(ex);
         }
+    }
+
+    /**
+     * weakPeriods を初期化します。
+     * @param count 要素数
+     */
+    @SuppressWarnings("unchecked")
+    private void initWeakPeriods(int count) {
+        weakPeriods = new WeakReference[count];
+        Arrays.fill(weakPeriods, null);
+    }
+    
+    /**
+     * @see com.hironytic.moltonfdroid.model.basic.BasicStory#getPeriodCount()
+     */
+    @Override
+    public int getPeriodCount() {
+        return weakPeriods.length;
+    }
+
+    /**
+     * @see com.hironytic.moltonfdroid.model.basic.BasicStory#getPeriod(int)
+     */
+    @Override
+    public StoryPeriod getPeriod(int index) {
+        StoryPeriod result = null;
+        WeakReference<StoryPeriod> wr = weakPeriods[index];
+        if (wr != null) {
+            result = wr.get();
+        }
+        if (result == null) {
+            File periodFile = new File(packageDir, String.format(FILENAME_PERIOD_FMT, index));
+            result = new PackagedStoryPeriod(periodFile);
+            wr = new WeakReference<StoryPeriod>(result);
+            weakPeriods[index] = wr;
+        }
+        
+        return result;
     }
 
     /**

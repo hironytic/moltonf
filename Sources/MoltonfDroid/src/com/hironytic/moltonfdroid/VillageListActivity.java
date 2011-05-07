@@ -158,11 +158,10 @@ public class VillageListActivity extends ListActivity {
 
             if (result instanceof Story) {
                 Story story = (Story)result;
-                List<StoryPeriod> periodList = story.getPeriods();
-                if (periodList.size() <= 0) {
+                if (story.getPeriodCount() <= 0) {
                     // TODO: Periodが1つも含まれていない
                 } else {
-                    StoryPeriod period = story.getPeriods().get(0);
+                    StoryPeriod period = story.getPeriod(0);
                     
                     // ObjectBank へ送って、チケットIDをPeriodActivityへ引き渡す
                     Moltonf app = (Moltonf)getApplication();

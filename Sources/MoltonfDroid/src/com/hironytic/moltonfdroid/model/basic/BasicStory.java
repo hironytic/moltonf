@@ -85,12 +85,19 @@ public class BasicStory implements Story {
     }
     
     /**
-     * このストーリーに含まれる StoryPeriod を返します。
-     * @return StoryPeriod のリスト
+     * @see com.hironytic.moltonfdroid.model.Story#getPeriodCount()
      */
     @Override
-    public List<StoryPeriod> getPeriods() {
-        return periods;
+    public int getPeriodCount() {
+        return periods.size();
+    }
+
+    /**
+     * @see com.hironytic.moltonfdroid.model.Story#getPeriod(int)
+     */
+    @Override
+    public StoryPeriod getPeriod(int index) {
+        return periods.get(index);
     }
 
     /**
