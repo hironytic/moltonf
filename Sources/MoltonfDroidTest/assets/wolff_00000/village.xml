@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  人狼BBSアーカイブ
+  http://jindolf.sourceforge.jp/
+-->
+
+<!DOCTYPE village SYSTEM "http://jindolf.sourceforge.jp/xml/dtd/bbsArchive-091001.dtd" >
+
+<village
+  xmlns="http://jindolf.sourceforge.jp/xml/ns/401"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://jindolf.sourceforge.jp/xml/ns/401 http://jindolf.sourceforge.jp/xml/xsd/bbsArchive-091001.xsd"
+  xml:lang="ja-JP"
+  xml:base="http://192.168.150.129/moltonf/"
+  fullName="F0 テスト用の村" vid="0"
+  commitTime="08:15:00+09:00"
+  state="gameover" isValid="true"
+  landName="人狼BBS:F国" formalName="人狼BBS:F"
+  landId="wolff" landPrefix="F"
+  locale="ja-JP" origencoding="Shift_JIS" timezone="GMT+09:00"
+  graveIconURI="plugin_wolf/img/face99.jpg"
+  generator="nobody1.0"
+>
+
+<avatarList>
+
+<avatar
+  avatarId="gerd"
+  fullName="楽天家 ゲルト" shortName="ゲルト"
+  faceIconURI="plugin_wolf/img/face01.jpg"
+/>
+
+<avatar
+  avatarId="clara"
+  fullName="司書 クララ" shortName="クララ"
+  faceIconURI="plugin_wolf/img/face19.jpg"
+/>
+
+<avatar
+  avatarId="fridel"
+  fullName="シスター フリーデル" shortName="フリーデル"
+  faceIconURI="plugin_wolf/img/face17.jpg"
+/>
+
+<avatar
+  avatarId="liesa"
+  fullName="少女 リーザ" shortName="リーザ"
+  faceIconURI="plugin_wolf/img/face09.jpg"
+/>
+
+<avatar
+  avatarId="regina"
+  fullName="宿屋の女主人 レジーナ" shortName="レジーナ"
+  faceIconURI="plugin_wolf/img/face16.jpg"
+/>
+
+<avatar
+  avatarId="dieter"
+  fullName="ならず者 ディーター" shortName="ディーター"
+  faceIconURI="plugin_wolf/img/face07.jpg"
+/>
+
+<avatar
+  avatarId="simson"
+  fullName="神父 ジムゾン" shortName="ジムゾン"
+  faceIconURI="plugin_wolf/img/face04.jpg"
+/>
+
+<avatar
+  avatarId="peter"
+  fullName="少年 ペーター" shortName="ペーター"
+  faceIconURI="plugin_wolf/img/face08.jpg"
+/>
+
+<avatar
+  avatarId="joachim"
+  fullName="青年 ヨアヒム" shortName="ヨアヒム"
+  faceIconURI="plugin_wolf/img/face13.jpg"
+/>
+
+<avatar
+  avatarId="nicolas"
+  fullName="旅人 ニコラス" shortName="ニコラス"
+  faceIconURI="plugin_wolf/img/face06.jpg"
+/>
+
+<avatar
+  avatarId="jacob"
+  fullName="農夫 ヤコブ" shortName="ヤコブ"
+  faceIconURI="plugin_wolf/img/face15.jpg"
+/>
+
+<avatar
+  avatarId="simon"
+  fullName="負傷兵 シモン" shortName="シモン"
+  faceIconURI="plugin_wolf/img/face20.jpg"
+/>
+
+<avatar
+  avatarId="erna"
+  fullName="仕立て屋 エルナ" shortName="エルナ"
+  faceIconURI="plugin_wolf/img/face18.jpg"
+/>
+
+<avatar
+  avatarId="otto"
+  fullName="パン屋 オットー" shortName="オットー"
+  faceIconURI="plugin_wolf/img/face12.jpg"
+/>
+
+<avatar
+  avatarId="moritz"
+  fullName="老人 モーリッツ" shortName="モーリッツ"
+  faceIconURI="plugin_wolf/img/face03.jpg"
+/>
+
+<avatar
+  avatarId="katharina"
+  fullName="羊飼い カタリナ" shortName="カタリナ"
+  faceIconURI="plugin_wolf/img/face11.jpg"
+/>
+
+</avatarList>
+
+</village>
+
+<!-- EOF -->

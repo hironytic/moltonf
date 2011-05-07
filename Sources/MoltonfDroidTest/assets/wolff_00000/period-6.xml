@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<period
+  type="progress" day="6"
+  nextCommitDay="--07-11+09:00" commitTime="08:15:00+09:00"
+  sourceURI="index.rb?vid=0&amp;meslog=0_progress_5&amp;mes=all"
+  loadedTime="2009-07-12T16:23:58.000+09:00"
+>
+
+<counting victim="dieter" >
+<li>司書 クララ は ならず者 ディーター に投票した。</li>
+<li>シスター フリーデル は ならず者 ディーター に投票した。</li>
+<li>宿屋の女主人 レジーナ は ならず者 ディーター に投票した。</li>
+<li>ならず者 ディーター は 仕立て屋 エルナ に投票した。</li>
+<li>神父 ジムゾン は ならず者 ディーター に投票した。</li>
+<li>青年 ヨアヒム は ならず者 ディーター に投票した。</li>
+<li>旅人 ニコラス は ならず者 ディーター に投票した。</li>
+<li>農夫 ヤコブ は ならず者 ディーター に投票した。</li>
+<li>負傷兵 シモン は ならず者 ディーター に投票した。</li>
+<li>仕立て屋 エルナ は ならず者 ディーター に投票した。</li>
+<li/>
+<li>ならず者 ディーター は村人達の手により処刑された。</li>
+<vote byWhom="clara" target="dieter" />
+<vote byWhom="fridel" target="dieter" />
+<vote byWhom="regina" target="dieter" />
+<vote byWhom="dieter" target="erna" />
+<vote byWhom="simson" target="dieter" />
+<vote byWhom="joachim" target="dieter" />
+<vote byWhom="nicolas" target="dieter" />
+<vote byWhom="jacob" target="dieter" />
+<vote byWhom="simon" target="dieter" />
+<vote byWhom="erna" target="dieter" />
+</counting>
+
+<judge byWhom="jacob" target="simon" >
+<li>農夫 ヤコブ は、負傷兵 シモン を占った。</li>
+</judge>
+
+<assault
+  byWhom="simon" target="simson"
+  xname="mes1247008501" time="08:15:00+09:00"
+ >
+<li>神父 ジムゾン ！ 今日がお前の命日だ！</li>
+</assault>
+
+<guard byWhom="erna" target="clara" >
+<li>仕立て屋 エルナ は、司書 クララ を守っている。</li>
+</guard>
+
+<murdered>
+<li>次の日の朝、神父 ジムゾン が無残な姿で発見された。</li>
+<li/>
+<avatarRef avatarId="simson" />
+</murdered>
+
+<survivor>
+<li>現在の生存者は、司書 クララ、シスター フリーデル、宿屋の女主人 レジーナ、青年 ヨアヒム、旅人 ニコラス、農夫 ヤコブ、負傷兵 シモン、仕立て屋 エルナ の 8 名。</li>
+<avatarRef avatarId="clara" />
+<avatarRef avatarId="fridel" />
+<avatarRef avatarId="regina" />
+<avatarRef avatarId="joachim" />
+<avatarRef avatarId="nicolas" />
+<avatarRef avatarId="jacob" />
+<avatarRef avatarId="simon" />
+<avatarRef avatarId="erna" />
+</survivor>
+
+<talk
+  type="grave" avatarId="otto"
+  xname="mes1247008593" time="08:16:00+09:00"
+>
+<li>6日目</li>
+</talk>
+
+</period>
+

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<period
+  type="epilogue" day="7"
+  nextCommitDay="--07-11+09:00" commitTime="08:15:00+09:00"
+  sourceURI="index.rb?vid=0&amp;meslog=0_party_6&amp;mes=all"
+  loadedTime="2009-07-12T16:23:59.000+09:00"
+>
+
+<counting victim="simon" >
+<li>司書 クララ は 負傷兵 シモン に投票した。</li>
+<li>シスター フリーデル は 負傷兵 シモン に投票した。</li>
+<li>宿屋の女主人 レジーナ は 負傷兵 シモン に投票した。</li>
+<li>青年 ヨアヒム は 負傷兵 シモン に投票した。</li>
+<li>旅人 ニコラス は 負傷兵 シモン に投票した。</li>
+<li>農夫 ヤコブ は 負傷兵 シモン に投票した。</li>
+<li>負傷兵 シモン は 仕立て屋 エルナ に投票した。</li>
+<li>仕立て屋 エルナ は 負傷兵 シモン に投票した。</li>
+<li/>
+<li>負傷兵 シモン は村人達の手により処刑された。</li>
+<vote byWhom="clara" target="simon" />
+<vote byWhom="fridel" target="simon" />
+<vote byWhom="regina" target="simon" />
+<vote byWhom="joachim" target="simon" />
+<vote byWhom="nicolas" target="simon" />
+<vote byWhom="jacob" target="simon" />
+<vote byWhom="simon" target="erna" />
+<vote byWhom="erna" target="simon" />
+</counting>
+
+<judge byWhom="jacob" target="joachim" >
+<li>農夫 ヤコブ は、青年 ヨアヒム を占った。</li>
+</judge>
+
+<noMurder>
+<li>今日は犠牲者がいないようだ。人狼は襲撃に失敗したのだろうか。</li>
+<li/>
+</noMurder>
+
+<winVillage>
+<li>全ての人狼を退治した……。人狼に怯える日々は去ったのだ！</li>
+<li/>
+</winVillage>
+
+<playerList>
+<li>楽天家 ゲルト （master）、死亡。村人だった。</li>
+<li>司書 クララ （player1）、生存。霊能者だった。</li>
+<li>シスター フリーデル （player2）、生存。共有者だった。</li>
+<li>少女 リーザ （player3）、死亡。村人だった。</li>
+<li>宿屋の女主人 レジーナ （player4）、生存。共有者だった。</li>
+<li>ならず者 ディーター （player5）、死亡。人狼だった。</li>
+<li>神父 ジムゾン （player6）、死亡。村人だった。</li>
+<li>少年 ペーター （player7）、死亡。村人だった。</li>
+<li>青年 ヨアヒム （player8）、生存。村人だった。</li>
+<li>旅人 ニコラス （player9）、生存。村人だった。</li>
+<li>農夫 ヤコブ （player10）、生存。占い師だった。</li>
+<li>負傷兵 シモン （player11）、死亡。人狼だった。</li>
+<li>仕立て屋 エルナ （player12）、生存。狩人だった。</li>
+<li>パン屋 オットー （player13）、死亡。人狼だった。</li>
+<li>老人 モーリッツ （player14）、死亡。村人だった。</li>
+<li>羊飼い カタリナ （player15）、死亡。狂人だった。</li>
+<playerInfo playerId="master" avatarId="gerd" survive="false" role="innocent" />
+<playerInfo playerId="player1" avatarId="clara" survive="true" role="shaman" />
+<playerInfo playerId="player2" avatarId="fridel" survive="true" role="frater" uri="http://192.168.150.129/wolfbbs/player2.html" />
+<playerInfo playerId="player3" avatarId="liesa" survive="false" role="innocent" uri="http://192.168.150.129/wolfbbs/player3.html" />
+<playerInfo playerId="player4" avatarId="regina" survive="true" role="frater" />
+<playerInfo playerId="player5" avatarId="dieter" survive="false" role="wolf" uri="http://192.168.150.129/wolfbbs/player5.html" />
+<playerInfo playerId="player6" avatarId="simson" survive="false" role="innocent" />
+<playerInfo playerId="player7" avatarId="peter" survive="false" role="innocent" />
+<playerInfo playerId="player8" avatarId="joachim" survive="true" role="innocent" uri="http://192.168.150.129/wolfbbs/player8.html" />
+<playerInfo playerId="player9" avatarId="nicolas" survive="true" role="innocent" />
+<playerInfo playerId="player10" avatarId="jacob" survive="true" role="seer" uri="http://192.168.150.129/wolfbbs/player10.html" />
+<playerInfo playerId="player11" avatarId="simon" survive="false" role="wolf" uri="http://192.168.150.129/wolfbbs/player11.html" />
+<playerInfo playerId="player12" avatarId="erna" survive="true" role="hunter" uri="http://192.168.150.129/wolfbbs/player12.html" />
+<playerInfo playerId="player13" avatarId="otto" survive="false" role="wolf" uri="http://192.168.150.129/wolfbbs/player13.html" />
+<playerInfo playerId="player14" avatarId="moritz" survive="false" role="innocent" uri="http://192.168.150.129/wolfbbs/player14.html" />
+<playerInfo playerId="player15" avatarId="katharina" survive="false" role="madman" uri="http://192.168.150.129/wolfbbs/player15.html" />
+</playerList>
+
+<talk
+  type="public" avatarId="jacob"
+  xname="mes1247094913" time="08:15:00+09:00"
+>
+<li>えぴです</li>
+</talk>
+
+</period>
+
