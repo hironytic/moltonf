@@ -100,7 +100,7 @@ public class PackagedStory extends BasicStory implements Story {
      * データの準備ができていなければ準備を行います。
      */
     public void ready() {
-        if (!isReady) {
+        if (isReady) {
             return;
         }
         
@@ -189,6 +189,7 @@ public class PackagedStory extends BasicStory implements Story {
         if (result == null) {
             File periodFile = new File(packageDir, String.format(FILENAME_PERIOD_FMT, index));
             result = new PackagedStoryPeriod(periodFile);
+            result.setStory(this);
             wr = new WeakReference<StoryPeriod>(result);
             weakPeriods[index] = wr;
         }
