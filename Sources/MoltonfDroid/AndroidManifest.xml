@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       android:versionCode="1"
       package="com.hironytic.moltonfdroid" android:versionName="0.1.0.1">
-    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="10"/>
+    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="15"/>
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:name="Moltonf">
@@ -16,8 +16,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
-
-
-</manifest> 
+</manifest>
