@@ -230,6 +230,10 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
                 if (!iconDir.exists()) {
                     if (isForWrite && workDir.canWrite()) {
                         iconDir.mkdir();
+                        try {
+                            (new File(iconDir, ".nomedia")).createNewFile();
+                        } catch (IOException e) {
+                        }
                     } else {
                         return null;
                     }
