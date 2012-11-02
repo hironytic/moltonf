@@ -1,7 +1,7 @@
 /*
  * Moltonf
  *
- * Copyright (c) 2010,2011 Hironori Ichimiya <hiron@hironytic.com>
+ * Copyright (c) 2012 Hironori Ichimiya <hiron@hironytic.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,30 +25,43 @@
 
 package com.hironytic.moltonfdroid;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.ListActivity;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
 
 import com.hironytic.moltonfdroid.model.HighlightSetting;
+import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
+import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
 
 /**
- * 1 単位期間のストーリーを表示する Activity
+ * ストーリーを表示するActivity
  */
-public class PeriodActivity extends ListActivity {
-    
+public class StoryActivity extends Activity {
+
     /** Period オブジェクトを受け取るためのチケット ID */
-    public static final String EXTRA_KEY_PERIOD_TICKET_ID = "PeriodTID";
+    public static final String EXTRA_KEY_ARCHIVE_FILE = "MLTArchiveFile";
+
+    /** ストーリーを表示するメインとなるリストビュー */
+    private ListView storyListView = null;
+    
+    /** 表示中のストーリー */
+    private Story story = null;
     
     /**
      * ストーリー中の画像を読み込むためのタスク
      */
-    private LoadStoryImageTask loadStoryImageTask;
+    private LoadStoryImageTask loadStoryImageTask = null;
     
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -56,27 +69,40 @@ public class PeriodActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.period);
+        setContentView(R.layout.story);
 
-        Moltonf app = (Moltonf)getApplication();
-        StoryPeriod period = null;
-        
+        // 読み込むストーリーの受け渡し
         Intent intent = getIntent();
         if (intent != null) {
-            int periodTicketID = intent.getIntExtra(EXTRA_KEY_PERIOD_TICKET_ID, 0);
-            period = (StoryPeriod)app.getObjectBank().getObject(periodTicketID);
+            File archiveFile = (File)intent.getSerializableExtra(EXTRA_KEY_ARCHIVE_FILE);
+            if (archiveFile != null) {
+                LoadArchivedStoryTask loadTask = new LoadArchivedStoryTask();
+                loadTask.execute(archiveFile);
+            }
+        }
+    }
+
+    /**
+     * ストーリーのロードが終わったら呼ばれます。
+     * @param story
+     */
+    private void onStoryLoaded(Story story) {
+        // Viewの準備
+        storyListView = (ListView)findViewById(R.id.story_list);
+        View emptyView = findViewById(R.id.story_list_empty);
+        if (emptyView != null) {
+            storyListView.setEmptyView(emptyView);
         }
         
+        this.story = story;
         
-//        File moltonfDir = app.getWorkDir();
-//        File archiveFile = new File(moltonfDir, "jin_wolff_01999_small.xml");
-//        Story story = new ArchivedStory(archiveFile);
-
-        if (period != null) {
-            loadStoryImageTask = new LoadStoryImageTask(app);
-            loadStoryImageTask.execute(period.getStory());
-    
-            // TODO: 必ず 0 ってわけでもないはず。
+        // バックグラウンドで画像を用意
+        loadStoryImageTask = new LoadStoryImageTask((Moltonf)this.getApplication());
+        loadStoryImageTask.execute(story);
+        
+        // TODO: とりあえず初日を出しとくか
+        if (story.getPeriodCount() > 0) {
+            StoryPeriod period = story.getPeriod(0);
             List<StoryElement> elemList = period.getStoryElements();
     
             // TODO: 強調表示設定はアプリ設定か
@@ -93,28 +119,77 @@ public class PeriodActivity extends ListActivity {
             hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
             
             StoryElementListAdapter adapter = new StoryElementListAdapter(this, elemList, highlightSettingList);
-            getListView().setRecyclerListener(adapter);
-            setListAdapter(adapter);
+            storyListView.setRecyclerListener(adapter);
+            storyListView.setAdapter(adapter);
         }
     }
-
+    
     /**
      * @see android.app.Activity#onDestroy()
      */
     @Override
     protected void onDestroy() {
-        StoryElementListAdapter adapter = (StoryElementListAdapter)getListAdapter();
-        setListAdapter(null);
-        getListView().setRecyclerListener(null);
-
-        if (adapter != null) {
-            adapter.destroy();
+        if (storyListView != null) {
+            StoryElementListAdapter adapter = (StoryElementListAdapter)storyListView.getAdapter();
+            storyListView.setAdapter(null);
+            storyListView.setRecyclerListener(null);
+            
+            if (adapter != null) {
+                adapter.destroy();
+            }
         }
+        
         if (loadStoryImageTask != null) {
             loadStoryImageTask.cancel(true);
         }
         
         super.onDestroy();
+    }
+
+    /**
+     * アーカイブファイルを読み込んでStoryを生成するタスク
+     */
+    private class LoadArchivedStoryTask extends AsyncTask<File, Void, Object> {
+        /** 読み込み中に表示するプログレスダイアログ */
+        private ProgressDialog progressDialog;
+        
+        /**
+         * @see android.os.AsyncTask#doInBackground(Params[])
+         */
+        @Override
+        protected Object doInBackground(File... params) {
+            try {
+                File archiveFile = params[0];
+                Story story = new ArchivedStory(archiveFile);
+                return story;
+            } catch (MoltonfException ex) {
+                return ex;
+            }
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPreExecute()
+         */
+        @Override
+        protected void onPreExecute() {
+            String message = getString(R.string.loading_archived_story);
+            progressDialog = ProgressDialog.show(StoryActivity.this, "", message);
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
+        @Override
+        protected void onPostExecute(Object result) {
+            progressDialog.dismiss();
+
+            if (result instanceof Story) {
+                Story story = (Story)result;
+                StoryActivity.this.onStoryLoaded(story);
+            } else if (result instanceof MoltonfException) {
+                // TODO: MoltonfException が発生したとき
+            }
+        }
     }
     
 }

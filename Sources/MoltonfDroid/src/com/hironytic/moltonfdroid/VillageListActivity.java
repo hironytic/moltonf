@@ -1,7 +1,7 @@
 /*
  * Moltonf
  *
- * Copyright (c) 2011 Hironori Ichimiya <hiron@hironytic.com>
+ * Copyright (c) 2011,2012 Hironori Ichimiya <hiron@hironytic.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -30,14 +30,8 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hironytic.moltonfdroid.model.Story;
-import com.hironytic.moltonfdroid.model.StoryPeriod;
-import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
-
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -114,66 +108,9 @@ public class VillageListActivity extends ListActivity {
         
         ArchiveFileItem item = (ArchiveFileItem)listView.getItemAtPosition(position);
         Moltonf.getLogger().info(item.toString());
-        
-        LoadArchivedStoryTask loadTask = new LoadArchivedStoryTask();
-        loadTask.execute(item.getArchiveFile());
+
+        Intent intent = new Intent(VillageListActivity.this, StoryActivity.class);
+        intent.putExtra(StoryActivity.EXTRA_KEY_ARCHIVE_FILE, item.getArchiveFile());
+        startActivity(intent);
     }
-
-    /**
-     * アーカイブファイルを読み込んでStoryを生成するタスク
-     */
-    private class LoadArchivedStoryTask extends AsyncTask<File, Void, Object> {
-        /** 読み込み中に表示するプログレスダイアログ */
-        private ProgressDialog progressDialog;
-        
-        /**
-         * @see android.os.AsyncTask#doInBackground(Params[])
-         */
-        @Override
-        protected Object doInBackground(File... params) {
-            try {
-                File archiveFile = params[0];
-                Story story = new ArchivedStory(archiveFile);
-                return story;
-            } catch (MoltonfException ex) {
-                return ex;
-            }
-        }
-
-        /**
-         * @see android.os.AsyncTask#onPreExecute()
-         */
-        @Override
-        protected void onPreExecute() {
-            String message = getString(R.string.loading_archived_story);
-            progressDialog = ProgressDialog.show(VillageListActivity.this, "", message);
-        }
-
-        /**
-         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-         */
-        @Override
-        protected void onPostExecute(Object result) {
-            progressDialog.dismiss();
-
-            if (result instanceof Story) {
-                Story story = (Story)result;
-                if (story.getPeriodCount() <= 0) {
-                    // TODO: Periodが1つも含まれていない
-                } else {
-                    StoryPeriod period = story.getPeriod(0);
-                    
-                    // ObjectBank へ送って、チケットIDをPeriodActivityへ引き渡す
-                    Moltonf app = (Moltonf)getApplication();
-                    int ticketID = app.getObjectBank().putObject(period);
-                    Intent intent = new Intent(VillageListActivity.this, PeriodActivity.class);
-                    intent.putExtra(PeriodActivity.EXTRA_KEY_PERIOD_TICKET_ID, ticketID);
-                    startActivity(intent);
-                }
-            } else if (result instanceof MoltonfException) {
-                // TODO: MoltonfException が発生したとき
-            }
-        }
-    }
-    
 }
