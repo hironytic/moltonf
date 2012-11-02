@@ -3,5 +3,6 @@
     <string name="app_name">Moltonf Droid</string>
     <string name="no_period_data">表示するデータがありません。</string>
     <string name="no_village_data">村データがありません。</string>
-    <string name="loading_archived_story">村データを読み込み中...</string>
+    <string name="loading_story">村データを読み込み中&#8230;</string>
+    <string name="failed_to_load_story">村データの読み込みに失敗しました。</string>
 </resources>

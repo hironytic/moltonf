@@ -37,6 +37,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.model.Story;
@@ -125,6 +126,15 @@ public class StoryActivity extends Activity {
     }
     
     /**
+     * ストーリーのロード中にエラーが発生したら呼ばれます。
+     * @param ex
+     */
+    private void onStoryLoadError(MoltonfException ex) {
+        String message = getString(R.string.failed_to_load_story);
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+    
+    /**
      * @see android.app.Activity#onDestroy()
      */
     @Override
@@ -172,7 +182,7 @@ public class StoryActivity extends Activity {
          */
         @Override
         protected void onPreExecute() {
-            String message = getString(R.string.loading_archived_story);
+            String message = getString(R.string.loading_story);
             progressDialog = ProgressDialog.show(StoryActivity.this, "", message);
         }
 
@@ -187,7 +197,8 @@ public class StoryActivity extends Activity {
                 Story story = (Story)result;
                 StoryActivity.this.onStoryLoaded(story);
             } else if (result instanceof MoltonfException) {
-                // TODO: MoltonfException が発生したとき
+                // MoltonfException が発生したとき
+                StoryActivity.this.onStoryLoadError((MoltonfException)result);
             }
         }
     }
