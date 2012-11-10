@@ -154,7 +154,7 @@ public class ArchivedStory extends BasicStory implements Story {
                         graveIconUri = new URI(graveIconUriString);
                     }
                 } catch (URISyntaxException ex) {
-                    Moltonf.getLogger().warning("graveIconUri is not valid : " + graveIconUriString, ex);
+                    Moltonf.getInstance().getLogger().warning("graveIconUri is not valid : " + graveIconUriString, ex);
                     graveIconUri = null;
                 }
                 setGraveIconUri(graveIconUri);
@@ -198,7 +198,7 @@ public class ArchivedStory extends BasicStory implements Story {
         } else if (SchemaConstants.VAL_VILLAGE_STATE_PROLOGUE.equals(villageStateString)) {
             state = VillageState.PROLOGUE;
         } else {
-            Moltonf.getLogger().warning("invalid village state : <village state=\"" + villageStateString + "\">");
+            Moltonf.getInstance().getLogger().warning("invalid village state : <village state=\"" + villageStateString + "\">");
         }
         return state;
     }
@@ -262,7 +262,7 @@ public class ArchivedStory extends BasicStory implements Story {
                         faceIconUri = new URI(faceIconUriString);
                     }
                 } catch (URISyntaxException ex) {
-                    Moltonf.getLogger().warning("faceIconUri is not valid : " + faceIconUriString, ex);
+                    Moltonf.getInstance().getLogger().warning("faceIconUri is not valid : " + faceIconUriString, ex);
                     faceIconUri = null;
                 }
                 avatar.setFaceIconUri(faceIconUri);
@@ -307,7 +307,7 @@ public class ArchivedStory extends BasicStory implements Story {
                     int day = Integer.parseInt(dayString);
                     period.setPeriodNumber(day);
                 } catch (NumberFormatException ex) {
-                    Moltonf.getLogger().warning("invalid period day: " + dayString);
+                    Moltonf.getInstance().getLogger().warning("invalid period day: " + dayString);
                 }
             }
         }
@@ -371,7 +371,7 @@ public class ArchivedStory extends BasicStory implements Story {
         } else if (SchemaConstants.VAL_PERIOD_TYPE_EPILOGUE.equals(periodTypeString)) {
             periodType = PeriodType.EPILOGUE;
         } else {
-            Moltonf.getLogger().warning("invalid village state : <period type=\"" + periodTypeString + "\">");
+            Moltonf.getInstance().getLogger().warning("invalid village state : <period type=\"" + periodTypeString + "\">");
         }
         return periodType;
     }
@@ -444,7 +444,7 @@ public class ArchivedStory extends BasicStory implements Story {
         } else if (SchemaConstants.VAL_TALK_TYPE_GRAVE.equals(talkTypeString)) {
             talkType = TalkType.GRAVE;
         } else {
-            Moltonf.getLogger().warning("invalid village state : <talk type=\"" + talkTypeString + "\">");
+            Moltonf.getInstance().getLogger().warning("invalid village state : <talk type=\"" + talkTypeString + "\">");
         }
         return talkType;
     }
@@ -551,7 +551,7 @@ public class ArchivedStory extends BasicStory implements Story {
         } else if (SchemaConstants.VAL_ROLE_HAMSTER.equals(roleString)) {
             role = Role.HAMSTER;
         } else {
-            Moltonf.getLogger().warning("invalid role : role=\"" + roleString + "\"");
+            Moltonf.getInstance().getLogger().warning("invalid role : role=\"" + roleString + "\"");
         }
         return role;
     }

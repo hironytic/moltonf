@@ -77,8 +77,7 @@ public class VillageListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.village_list);
         
-        Moltonf app = (Moltonf)getApplication();
-        File moltonfDir = app.getWorkDir();
+        File moltonfDir = Moltonf.getInstance().getWorkDir();
         File[] archiveFileList = moltonfDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
@@ -107,7 +106,7 @@ public class VillageListActivity extends ListActivity {
         super.onListItemClick(listView, v, position, id);
         
         ArchiveFileItem item = (ArchiveFileItem)listView.getItemAtPosition(position);
-        Moltonf.getLogger().info(item.toString());
+        Moltonf.getInstance().getLogger().info(item.toString());
 
         Intent intent = new Intent(VillageListActivity.this, StoryActivity.class);
         intent.putExtra(StoryActivity.EXTRA_KEY_ARCHIVE_FILE, item.getArchiveFile());

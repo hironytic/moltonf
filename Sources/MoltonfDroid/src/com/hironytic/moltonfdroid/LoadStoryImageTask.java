@@ -50,9 +50,6 @@ import android.os.AsyncTask;
  * Story 内の画像を読み込んで各 BitmapHolder にセットするタスク
  */
 public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.ProgressData, Void>{
-	/** アプリケーションオブジェクト */
-	private Moltonf app;
-	
     /** 1つの画像を読み込む度に UI スレッドを呼び出す際の引数 */
     protected static class ProgressData {
         /** 画像を格納する BitmapHolder */
@@ -66,8 +63,7 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
      * コンストラクタ
      * @param app アプリケーションオブジェクト
      */
-    public LoadStoryImageTask(Moltonf app) {
-    	this.app = app;
+    public LoadStoryImageTask() {
     }
     
     /**
@@ -131,7 +127,7 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
         
         // 読み込めなければとりにいく
         try {
-            HttpAccess.doGet(app, imageUri, new Proc1<InputStream>() {
+            HttpAccess.doGet(imageUri, new Proc1<InputStream>() {
                 @Override
                 public void perform(InputStream arg) {
                     BufferedInputStream inStream = new BufferedInputStream(arg);
@@ -157,7 +153,7 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
                                     fileOutStream.close();
                                 }
                             } catch (IOException ex) {
-                                Moltonf.getLogger().warning("failed to write downloaded image", ex);
+                                Moltonf.getInstance().getLogger().warning("failed to write downloaded image", ex);
                             }
                         }
                         
@@ -190,7 +186,7 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
                 }
             });
         } catch (MoltonfException ex) {
-            Moltonf.getLogger().warning("failed to load image", ex);
+            Moltonf.getInstance().getLogger().warning("failed to load image", ex);
         }
     }
     
@@ -223,7 +219,7 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
      */
     private File getIconFile(String fileName, boolean isForWrite) {
         try {
-            File workDir = app.getWorkDir();
+            File workDir = Moltonf.getInstance().getWorkDir();
             File iconDir = null;
             if (workDir != null) {
                 iconDir = new File(workDir, "icons");

@@ -150,7 +150,7 @@ public class StoryActivity extends Activity {
         this.story = story;
         
         // バックグラウンドで画像を用意
-        loadStoryImageTask = new LoadStoryImageTask((Moltonf)this.getApplication());
+        loadStoryImageTask = new LoadStoryImageTask();
         loadStoryImageTask.execute(story);
 
         // ActionBarにピリオド切り替えを追加

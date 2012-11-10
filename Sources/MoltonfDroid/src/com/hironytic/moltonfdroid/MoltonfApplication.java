@@ -1,7 +1,7 @@
 /*
  * Moltonf
  *
- * Copyright (c) 2010,2011 Hironori Ichimiya <hiron@hironytic.com>
+ * Copyright (c) 2011,2012 Hironori Ichimiya <hiron@hironytic.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,40 +25,30 @@
 
 package com.hironytic.moltonfdroid;
 
+import android.app.Application;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+
 /**
- * Moltonf アプリケーション固有の例外クラス
+ * Moltonfアプリケーション
  */
-@SuppressWarnings("serial")
-public class MoltonfException extends RuntimeException {
-
+public class MoltonfApplication extends Application {
+    
     /**
-     * 
+     * アプリケーションが作られたときに呼び出されます。
      */
-    public MoltonfException() {
-    }
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-    /**
-     * @param message
-     */
-    public MoltonfException(String message) {
-        super(message);
-        Moltonf.getInstance().getLogger().info("MoltonfException : " + message);
-    }
-
-    /**
-     * @param cause
-     */
-    public MoltonfException(Throwable cause) {
-        super(cause);
-        Moltonf.getInstance().getLogger().info("MoltonfException", cause);
-    }
-
-    /**
-     * @param message
-     * @param cause
-     */
-    public MoltonfException(String message, Throwable cause) {
-        super(message, cause);
-        Moltonf.getInstance().getLogger().info("MoltonfException : " + message, cause);
+        String versionString = "";
+        try {
+            String packageName = getPackageName();
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA);
+            versionString = packageInfo.versionName;
+        } catch (NameNotFoundException ex) {
+        }
+        Moltonf.getInstance().setVersionString(versionString);
     }
 }

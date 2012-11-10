@@ -27,10 +27,6 @@ package com.hironytic.moltonfdroid;
 
 import java.io.File;
 
-import android.app.Application;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
 
 import com.hironytic.moltonfdroid.util.Logger;
@@ -38,50 +34,54 @@ import com.hironytic.moltonfdroid.util.Logger;
 /**
  * Moltonf アプリケーション全体で共有する処理
  */
-public class Moltonf extends Application {
+public class Moltonf {
     private static final String LOGGER_TAG = "MoltonfDroid";
     private static final String WORK_DIR_NAME = "MoltonfDroid";
-        
+
+    private static final Moltonf theInstance = new Moltonf();
+    
     /** バージョン文字列 */
     private String versionString = null;
+    
+    /** ログ出力用オブジェクト */
+    private Logger logger = new Logger(LOGGER_TAG);
     
     /**
      * コンストラクタ
      */
-    public Moltonf() {
+    private Moltonf() {
     }
 
     /**
-     * アプリケーションが作られたときに呼び出されます。
+     * 唯一のインスタンスを得ます。
+     * @return 唯一のインスタンス
      */
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        try {
-            String packageName = getPackageName();
-            PackageInfo packageInfo = getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA);
-            versionString = packageInfo.versionName;
-        } catch (NameNotFoundException ex) {
-            versionString = "";
-        }
+    public static Moltonf getInstance() {
+        return theInstance;
     }
 
     /**
      * MoltonfDroid アプリケーション用のログ出力用オブジェクトを返します。
      * @return Logger オブジェクト
      */
-    public static Logger getLogger() {
-    	return new Logger(LOGGER_TAG);
+    public Logger getLogger() {
+        return logger;
     }
 
     /**
      * MoltonfDroid アプリケーションのバージョン文字列を得ます。
-     * @param context アプリケーションのコンテキスト
      * @return バージョン文字列
      */
     public String getVersionString() {
         return versionString;
+    }
+    
+    /**
+     * MoltonfDroid アプリケーションのバージョン文字列を設定します。
+     * @param versionString バージョン文字列
+     */
+    public void setVersionString(String versionString) {
+        this.versionString = versionString;
     }
 
     /**

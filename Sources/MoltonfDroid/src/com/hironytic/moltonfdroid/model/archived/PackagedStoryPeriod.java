@@ -151,7 +151,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                     int day = Integer.parseInt(dayString);
                     setPeriodNumber(day);
                 } catch (NumberFormatException ex) {
-                    Moltonf.getLogger().warning("invalid period day: " + dayString);
+                    Moltonf.getInstance().getLogger().warning("invalid period day: " + dayString);
                 }
             }
         }
@@ -214,7 +214,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
         } else if (SchemaConstants.VAL_PERIOD_TYPE_EPILOGUE.equals(periodTypeString)) {
             periodType = PeriodType.EPILOGUE;
         } else {
-            Moltonf.getLogger().warning("invalid village state : <period type=\"" + periodTypeString + "\">");
+            Moltonf.getInstance().getLogger().warning("invalid village state : <period type=\"" + periodTypeString + "\">");
         }
         return periodType;
     }
@@ -285,7 +285,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
         } else if (SchemaConstants.VAL_TALK_TYPE_GRAVE.equals(talkTypeString)) {
             talkType = TalkType.GRAVE;
         } else {
-            Moltonf.getLogger().warning("invalid village state : <talk type=\"" + talkTypeString + "\">");
+            Moltonf.getInstance().getLogger().warning("invalid village state : <talk type=\"" + talkTypeString + "\">");
         }
         return talkType;
     }
@@ -390,7 +390,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
         } else if (SchemaConstants.VAL_ROLE_HAMSTER.equals(roleString)) {
             role = Role.HAMSTER;
         } else {
-            Moltonf.getLogger().warning("invalid role : role=\"" + roleString + "\"");
+            Moltonf.getInstance().getLogger().warning("invalid role : role=\"" + roleString + "\"");
         }
         return role;
     }

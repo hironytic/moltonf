@@ -60,14 +60,13 @@ public class HttpAccess {
     
     /**
      * 指定した URI のデータを GET メソッドで取得するための InputStream を返します。
-     * @param app アプリケーションオブジェクト
      * @param uri データの URI
      * @param getProc 取得したデータを処理するコールバック
      * @throws MoltonfException エラー発生時USER_AGENT_FORMAT
      */
-    public static void doGet(Moltonf app, URI uri, Proc1<InputStream> getProc) throws MoltonfException {
+    public static void doGet(URI uri, Proc1<InputStream> getProc) throws MoltonfException {
         HttpGet httpGet = new HttpGet(uri);
-        HttpClient httpClient = createHttpClient(app);
+        HttpClient httpClient = createHttpClient();
         try {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             StatusLine statusLine = httpResponse.getStatusLine();
@@ -80,7 +79,7 @@ public class HttpAccess {
                     inStream.close();
                 }
             } else {
-                Moltonf.getLogger().info("HTTP GET error : " + statusLine.toString());
+                Moltonf.getInstance().getLogger().info("HTTP GET error : " + statusLine.toString());
             }
         } catch (IOException ex) {
             httpGet.abort();
@@ -92,11 +91,10 @@ public class HttpAccess {
     
     /**
      * HttpClient を生成します。
-     * @param app アプリケーションオブジェクト
      * @return HttpClient
      */
-    private static HttpClient createHttpClient(Moltonf app) {
-        String userAgent = String.format(USER_AGENT_FORMAT, app.getVersionString());
+    private static HttpClient createHttpClient() {
+        String userAgent = String.format(USER_AGENT_FORMAT, Moltonf.getInstance().getVersionString());
         
         HttpClient httpClient = null;
         if (Build.VERSION.SDK_INT >= 8) {

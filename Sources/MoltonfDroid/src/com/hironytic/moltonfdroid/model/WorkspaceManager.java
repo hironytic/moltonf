@@ -196,7 +196,7 @@ public class WorkspaceManager {
             if (affectedRowCount > 0) {
                 doInsert = false;
             } else {
-                Moltonf.getLogger().info("failed to update workspace data on db. trying insert a new row.");
+                Moltonf.getInstance().getLogger().info("failed to update workspace data on db. trying insert a new row.");
             }
         }
         if (doInsert) {
@@ -219,7 +219,7 @@ public class WorkspaceManager {
         SQLiteDatabase db = openHelper.getWritableDatabase();
         int affectedRowCount = db.delete(TABLE_WORKSPACE, COLUMN_ID + " = ?", new String[] { Long.toString(workspaceId) });
         if (affectedRowCount <= 0) {
-            Moltonf.getLogger().info("failed to delete workspace data on db.");
+            Moltonf.getInstance().getLogger().info("failed to delete workspace data on db.");
         }
     }
     

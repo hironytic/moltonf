@@ -243,7 +243,7 @@ public class PackagedStory extends BasicStory implements Story {
                         graveIconUri = new URI(graveIconUriString);
                     }
                 } catch (URISyntaxException ex) {
-                    Moltonf.getLogger().warning("graveIconUri is not valid : " + graveIconUriString, ex);
+                    Moltonf.getInstance().getLogger().warning("graveIconUri is not valid : " + graveIconUriString, ex);
                     graveIconUri = null;
                 }
                 setGraveIconUri(graveIconUri);
@@ -287,7 +287,7 @@ public class PackagedStory extends BasicStory implements Story {
         } else if (SchemaConstants.VAL_VILLAGE_STATE_PROLOGUE.equals(villageStateString)) {
             state = VillageState.PROLOGUE;
         } else {
-            Moltonf.getLogger().warning("invalid village state : <village state=\"" + villageStateString + "\">");
+            Moltonf.getInstance().getLogger().warning("invalid village state : <village state=\"" + villageStateString + "\">");
         }
         return state;
     }
@@ -351,7 +351,7 @@ public class PackagedStory extends BasicStory implements Story {
                         faceIconUri = new URI(faceIconUriString);
                     }
                 } catch (URISyntaxException ex) {
-                    Moltonf.getLogger().warning("faceIconUri is not valid : " + faceIconUriString, ex);
+                    Moltonf.getInstance().getLogger().warning("faceIconUri is not valid : " + faceIconUriString, ex);
                     faceIconUri = null;
                 }
                 avatar.setFaceIconUri(faceIconUri);
