@@ -50,7 +50,6 @@ import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
 import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
-import com.hironytic.moltonfdroid.util.Proc1;
 
 /**
  * ストーリーを表示するActivity
@@ -91,12 +90,32 @@ public class StoryActivity extends Activity {
     }
 
     /**
+     * @see android.app.Activity#onDestroy()
+     */
+    @Override
+    protected void onDestroy() {
+        if (storyListView != null) {
+            StoryElementListAdapter adapter = (StoryElementListAdapter)storyListView.getAdapter();
+            storyListView.setAdapter(null);
+            storyListView.setRecyclerListener(null);
+            
+            if (adapter != null) {
+                adapter.destroy();
+            }
+        }
+        
+        if (loadStoryImageTask != null) {
+            loadStoryImageTask.cancel(true);
+        }
+        
+        super.onDestroy();
+    }
+
+    /**
      * ピリオドの選択リストをアクションバーにセットします。（アクションバーが使える環境なら）
-     * @param adapter
-     * @param selectedListener
      */
     @TargetApi(11)
-    private void setPeriodListToActionBar(SpinnerAdapter adapter, final Proc1<Integer> selectedListener) {
+    private void setPeriodListToActionBar() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
             return;
         }
@@ -106,11 +125,11 @@ public class StoryActivity extends Activity {
         ActionBar.OnNavigationListener onNavigationListener = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long itemId) {
-                selectedListener.perform(position);
+                onStoryPeriodChange(position);
                 return true;
             }
         };
-        actionBar.setListNavigationCallbacks(adapter, onNavigationListener);
+        actionBar.setListNavigationCallbacks(makePeriodListAdapter(), onNavigationListener);
     }
     
     /**
@@ -134,29 +153,8 @@ public class StoryActivity extends Activity {
         loadStoryImageTask = new LoadStoryImageTask((Moltonf)this.getApplication());
         loadStoryImageTask.execute(story);
 
-        // ピリオド切り替え
-        int periodCount = story.getPeriodCount();
-        ArrayList<String> list = new ArrayList<String>(story.getPeriodCount());
-        for (int ix = 0; ix < periodCount; ++ix) {
-            StoryPeriod period = story.getPeriod(ix);
-            if (period.getPeriodType() == PeriodType.PROLOGUE) {
-                list.add(getString(R.string.period_list_prologue));
-            } else if (period.getPeriodType() == PeriodType.EPILOGUE) {
-                list.add(getString(R.string.period_list_epilogure));
-            } else {
-                int periodNumber = period.getPeriodNumber();
-                list.add(getString(R.string.period_list_progress_format, periodNumber));
-            }
-        }
-        Proc1<Integer> onPeriodSelected = new Proc1<Integer>() {
-            @Override
-            public void perform(Integer arg) {
-                //TODO:
-            }
-        };
-        
-        ArrayAdapter<String> periodAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);        
-        setPeriodListToActionBar(periodAdapter, onPeriodSelected);
+        // ActionBarにピリオド切り替えを追加
+        setPeriodListToActionBar();
         
         // TODO: とりあえず初日を出しとくか
         if (story.getPeriodCount() > 0) {
@@ -183,6 +181,28 @@ public class StoryActivity extends Activity {
     }
     
     /**
+     * ピリオドの一覧のSpinnerAdapterを作成します。
+     * @return
+     */
+    private SpinnerAdapter makePeriodListAdapter() {
+        int periodCount = story.getPeriodCount();
+        ArrayList<String> list = new ArrayList<String>(story.getPeriodCount());
+        for (int ix = 0; ix < periodCount; ++ix) {
+            StoryPeriod period = story.getPeriod(ix);
+            if (period.getPeriodType() == PeriodType.PROLOGUE) {
+                list.add(getString(R.string.period_list_prologue));
+            } else if (period.getPeriodType() == PeriodType.EPILOGUE) {
+                list.add(getString(R.string.period_list_epilogure));
+            } else {
+                int periodNumber = period.getPeriodNumber();
+                list.add(getString(R.string.period_list_progress_format, periodNumber));
+            }
+        }
+        ArrayAdapter<String> periodListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);        
+        return periodListAdapter;
+    }
+    
+    /**
      * ストーリーのロード中にエラーが発生したら呼ばれます。
      * @param ex
      */
@@ -192,27 +212,14 @@ public class StoryActivity extends Activity {
     }
     
     /**
-     * @see android.app.Activity#onDestroy()
+     * 表示するピリオドが変更されるときに呼ばれます。
+     * @param periodIndex ピリオドのインデックス
+     * @return
      */
-    @Override
-    protected void onDestroy() {
-        if (storyListView != null) {
-            StoryElementListAdapter adapter = (StoryElementListAdapter)storyListView.getAdapter();
-            storyListView.setAdapter(null);
-            storyListView.setRecyclerListener(null);
-            
-            if (adapter != null) {
-                adapter.destroy();
-            }
-        }
-        
-        if (loadStoryImageTask != null) {
-            loadStoryImageTask.cancel(true);
-        }
-        
-        super.onDestroy();
+    private void onStoryPeriodChange(int periodIndex) {
+        // TODO:
     }
-
+    
     /**
      * アーカイブファイルを読み込んでStoryを生成するタスク
      */
