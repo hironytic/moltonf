@@ -118,7 +118,10 @@ public class StoryActivity extends Activity {
      * @param story
      */
     private void onStoryLoaded(Story story) {
-        // Viewの準備
+        // 村の名前をタイトルにセット
+        setTitle(story.getVillageFullName());
+        
+        // ストーリーを表示するListViewの準備
         storyListView = (ListView)findViewById(R.id.story_list);
         View emptyView = findViewById(R.id.story_list_empty);
         if (emptyView != null) {
