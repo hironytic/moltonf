@@ -29,21 +29,28 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.hironytic.moltonfdroid.model.HighlightSetting;
+import com.hironytic.moltonfdroid.model.PeriodType;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
 import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
+import com.hironytic.moltonfdroid.util.Proc1;
 
 /**
  * ストーリーを表示するActivity
@@ -84,6 +91,29 @@ public class StoryActivity extends Activity {
     }
 
     /**
+     * ピリオドの選択リストをアクションバーにセットします。（アクションバーが使える環境なら）
+     * @param adapter
+     * @param selectedListener
+     */
+    @TargetApi(11)
+    private void setPeriodListToActionBar(SpinnerAdapter adapter, final Proc1<Integer> selectedListener) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            return;
+        }
+        
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        ActionBar.OnNavigationListener onNavigationListener = new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int position, long itemId) {
+                selectedListener.perform(position);
+                return true;
+            }
+        };
+        actionBar.setListNavigationCallbacks(adapter, onNavigationListener);
+    }
+    
+    /**
      * ストーリーのロードが終わったら呼ばれます。
      * @param story
      */
@@ -100,6 +130,30 @@ public class StoryActivity extends Activity {
         // バックグラウンドで画像を用意
         loadStoryImageTask = new LoadStoryImageTask((Moltonf)this.getApplication());
         loadStoryImageTask.execute(story);
+
+        // ピリオド切り替え
+        int periodCount = story.getPeriodCount();
+        ArrayList<String> list = new ArrayList<String>(story.getPeriodCount());
+        for (int ix = 0; ix < periodCount; ++ix) {
+            StoryPeriod period = story.getPeriod(ix);
+            if (period.getPeriodType() == PeriodType.PROLOGUE) {
+                list.add(getString(R.string.period_list_prologue));
+            } else if (period.getPeriodType() == PeriodType.EPILOGUE) {
+                list.add(getString(R.string.period_list_epilogure));
+            } else {
+                int periodNumber = period.getPeriodNumber();
+                list.add(getString(R.string.period_list_progress_format, periodNumber));
+            }
+        }
+        Proc1<Integer> onPeriodSelected = new Proc1<Integer>() {
+            @Override
+            public void perform(Integer arg) {
+                //TODO:
+            }
+        };
+        
+        ArrayAdapter<String> periodAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);        
+        setPeriodListToActionBar(periodAdapter, onPeriodSelected);
         
         // TODO: とりあえず初日を出しとくか
         if (story.getPeriodCount() > 0) {

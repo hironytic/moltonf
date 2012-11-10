@@ -113,6 +113,21 @@ public class SchemaConstants {
     /** period 要素の QName */
     public static final QName NAME_PERIOD = new QName(NS_ARCHIVE, "period");
     
+//    /** type 属性の QName */
+//    public static final QName NAME_TYPE = new QName("type");  // 別に定義されているので省略
+    
+    /** ピリオド種別：プロローグ */
+    public static final String VAL_PERIOD_TYPE_PROLOGUE = "prologue";
+    
+    /** ピリオド種別：進行中の日 */
+    public static final String VAL_PERIOD_TYPE_PROGRESS = "progress";
+    
+    /** ピリオド種別：エピローグ */
+    public static final String VAL_PERIOD_TYPE_EPILOGUE = "epilogue";
+
+    /** day 属性の QName */
+    public static final QName NAME_DAY = new QName("day");
+    
     /* 
      * --------------------------------------------------
      * EventAnnounceGroup の要素

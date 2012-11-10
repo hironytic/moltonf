@@ -5,4 +5,7 @@
     <string name="no_village_data">村データがありません。</string>
     <string name="loading_story">村データを読み込み中&#8230;</string>
     <string name="failed_to_load_story">村データの読み込みに失敗しました。</string>
+    <string name="period_list_prologue">プロローグ</string>
+    <string name="period_list_progress_format">%d日目</string>
+    <string name="period_list_epilogure">エピローグ</string>
 </resources>

@@ -27,6 +27,7 @@ package com.hironytic.moltonfdroid.model.basic;
 
 import java.util.List;
 
+import com.hironytic.moltonfdroid.model.PeriodType;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
@@ -41,6 +42,12 @@ public class BasicStoryPeriod implements StoryPeriod {
     
     /** このストーリーを構成する要素の一覧 */
     private List<StoryElement> storyElements;
+    
+    /** このピリオドの種別 */
+    private PeriodType periodType;
+    
+    /** このピリオドの番号 */
+    private int periodNumber;
     
     /**
      * コンストラクタ
@@ -67,6 +74,24 @@ public class BasicStoryPeriod implements StoryPeriod {
     }
     
     /**
+     * このピリオドの種類を返します。
+     * @return ピリオドの種類
+     */
+    @Override
+    public PeriodType getPeriodType() {
+        return periodType;
+    }
+
+    /**
+     * このピリオドの番号を返します。最初のピリオドが0、次のピリオドが1、…
+     * @return ピリオドの番号
+     */
+    @Override
+    public int getPeriodNumber() {
+        return periodNumber;
+    }
+    
+    /**
      * このオブジェクトが属する Story を取得します。
      * @return このオブジェクトが属する Story
      */
@@ -82,6 +107,24 @@ public class BasicStoryPeriod implements StoryPeriod {
     @Override
     public List<StoryElement> getStoryElements() {
         return storyElements;
+    }
+    
+    /**
+     * このピリオドの種別を設定します。
+     * @param periodType ピリオドの種別
+     */
+    @Override
+    public void setPeriodType(PeriodType periodType) {
+        this.periodType = periodType;
+    }
+
+    /**
+     * このピリオドの番号を返します。最初のピリオドが0、次のピリオドが1、…
+     * @param periodNumber ピリオドの番号
+     */
+    @Override
+    public void setPeriodNumber(int periodNumber) {
+        this.periodNumber = periodNumber;
     }
     
     /**

@@ -43,6 +43,18 @@ public interface StoryPeriod {
      * データの準備ができていなければ準備を行います。
      */
     public void ready();
+
+    /**
+     * このピリオドの種類を返します。
+     * @return ピリオドの種類
+     */
+    public PeriodType getPeriodType();
+
+    /**
+     * このピリオドの番号を返します。最初のピリオドが0、次のピリオドが1、…
+     * @return ピリオドの番号
+     */
+    public int getPeriodNumber();
     
     /**
      * このオブジェクトが属する Story を取得します。
@@ -55,6 +67,18 @@ public interface StoryPeriod {
      * @return ストーリーを構成している要素たち
      */
     public List<StoryElement> getStoryElements();
+
+    /**
+     * このピリオドの種類を設定します。
+     * @param periodType ピリオドの種類
+     */
+    public void setPeriodType(PeriodType periodType);
+    
+    /**
+     * このピリオドの番号を返します。最初のピリオドが0、次のピリオドが1、…
+     * @param periodNumber ピリオドの番号
+     */
+    public void setPeriodNumber(int periodNumber);
     
     /**
      * このオブジェクトが属する Story をセットします。

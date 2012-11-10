@@ -43,6 +43,7 @@ import com.hironytic.moltonfdroid.Moltonf;
 import com.hironytic.moltonfdroid.MoltonfException;
 import com.hironytic.moltonfdroid.model.Avatar;
 import com.hironytic.moltonfdroid.model.EventFamily;
+import com.hironytic.moltonfdroid.model.PeriodType;
 import com.hironytic.moltonfdroid.model.Role;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryEvent;
@@ -139,7 +140,21 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
         List<StoryElement> elementList = new ArrayList<StoryElement>();
         
         // 属性
-        // TODO:
+        for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
+            QName attrName = new QName(staxReader.getAttributeNamespace(ix), staxReader.getAttributeName(ix));
+            if (SchemaConstants.NAME_TYPE.equals(attrName)) {
+                String periodTypeString = staxReader.getAttributeValue(ix);
+                setPeriodType(toPeriodType(periodTypeString));
+            } else if (SchemaConstants.NAME_DAY.equals(attrName)) {
+                String dayString = staxReader.getAttributeValue(ix);
+                try {
+                    int day = Integer.parseInt(dayString);
+                    setPeriodNumber(day);
+                } catch (NumberFormatException ex) {
+                    Moltonf.getLogger().warning("invalid period day: " + dayString);
+                }
+            }
+        }
         
         final List<QName> eventAnnounceGroup = Arrays.asList(new QName[] {
             SchemaConstants.NAME_START_ENTRY, SchemaConstants.NAME_ON_STAGE,
@@ -183,6 +198,25 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
         }
         
         setStoryElements(elementList);
+    }
+
+    /**
+     * ピリオド種別の文字列を PeriodType に変換します。
+     * @param periodTypeString ピリオド種別の文字列 (type属性の値)
+     * @return PeriodType。該当するものがなければ null。
+     */
+    private PeriodType toPeriodType(String periodTypeString) {
+        PeriodType periodType = null;
+        if (SchemaConstants.VAL_PERIOD_TYPE_PROLOGUE.equals(periodTypeString)) {
+            periodType = PeriodType.PROLOGUE;
+        } else if (SchemaConstants.VAL_PERIOD_TYPE_PROGRESS.equals(periodTypeString)) {
+            periodType = PeriodType.PROGRESS;
+        } else if (SchemaConstants.VAL_PERIOD_TYPE_EPILOGUE.equals(periodTypeString)) {
+            periodType = PeriodType.EPILOGUE;
+        } else {
+            Moltonf.getLogger().warning("invalid village state : <period type=\"" + periodTypeString + "\">");
+        }
+        return periodType;
     }
     
     /**
