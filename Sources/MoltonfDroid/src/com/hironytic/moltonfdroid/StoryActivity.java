@@ -37,10 +37,13 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.hironytic.moltonfdroid.model.PeriodType;
@@ -113,6 +116,59 @@ public class StoryActivity extends Activity {
     }
 
     /**
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.story_option, menu);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            menu.removeItem(R.id.menu_story_select_period);
+        }            
+        
+        return menu.hasVisibleItems();
+    }
+
+    /**
+     * @see android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean result = super.onPrepareOptionsMenu(menu);
+        
+        MenuItem selectPeriodMenu = menu.findItem(R.id.menu_story_select_period);
+        if (selectPeriodMenu != null) {
+            SubMenu selectPeriodSubMenu = selectPeriodMenu.getSubMenu();
+            selectPeriodSubMenu.clear();
+            List<String> periodList = makePeriodStringList();
+            if (periodList != null) {
+                for (int ix = 0; ix < periodList.size(); ++ix) {
+                    MenuItem mi = selectPeriodSubMenu.add(R.id.menugroup_story_select_period, Menu.FIRST + ix, ix, periodList.get(ix));
+                    mi.setChecked(ix == currentPeriodIndex);
+                }
+            }
+            selectPeriodSubMenu.setGroupCheckable(R.id.menugroup_story_select_period, true, true);
+        }        
+        return result;
+    }
+    
+    /**
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getGroupId() == R.id.menugroup_story_select_period) {
+            onPeriodIndexChange(item.getItemId() - Menu.FIRST);
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
      * ピリオドの選択リストをアクションバーにセットします。（アクションバーが使える環境なら）
      */
     @TargetApi(11)
@@ -130,7 +186,22 @@ public class StoryActivity extends Activity {
                 return true;
             }
         };
-        actionBar.setListNavigationCallbacks(makePeriodListAdapter(), onNavigationListener);
+        ArrayAdapter<String> periodListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, makePeriodStringList());        
+        actionBar.setListNavigationCallbacks(periodListAdapter, onNavigationListener);
+    }
+    
+    /**
+     * アクションバー上の日の選択を更新します。
+     * @param position 選択する日
+     */
+    @TargetApi(11)
+    private void setSelectedPeriodOnActionBar(int position) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            return;
+        }
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setSelectedNavigationItem(position);
     }
     
     /**
@@ -169,12 +240,16 @@ public class StoryActivity extends Activity {
         // ActionBarにピリオド切り替えを追加
         setPeriodListToActionBar();
     }
-    
+
     /**
-     * ピリオドの一覧のSpinnerAdapterを作成します。
+     * ピリオドの一覧の選択肢を入れたリストを作ります。Storyに含まれるPeriodの順番を保ちます。
      * @return
      */
-    private SpinnerAdapter makePeriodListAdapter() {
+    private List<String> makePeriodStringList() {
+        if (story == null) {
+            return null;
+        }
+        
         int periodCount = story.getPeriodCount();
         ArrayList<String> list = new ArrayList<String>(story.getPeriodCount());
         for (int ix = 0; ix < periodCount; ++ix) {
@@ -188,8 +263,7 @@ public class StoryActivity extends Activity {
                 list.add(getString(R.string.period_list_progress_format, periodNumber));
             }
         }
-        ArrayAdapter<String> periodListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);        
-        return periodListAdapter;
+        return list;
     }
     
     /**
@@ -217,6 +291,7 @@ public class StoryActivity extends Activity {
             
             ((StoryElementListAdapter)storyListView.getAdapter()).replaceStoryElements(elemList);
             currentPeriodIndex = periodIndex;
+            setSelectedPeriodOnActionBar(periodIndex);
         }
     }
     

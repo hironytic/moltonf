@@ -8,4 +8,5 @@
     <string name="period_list_prologue">プロローグ</string>
     <string name="period_list_progress_format">%d日目</string>
     <string name="period_list_epilogure">エピローグ</string>
+    <string name="menu_story_select_period">日の切り替え</string>
 </resources>
