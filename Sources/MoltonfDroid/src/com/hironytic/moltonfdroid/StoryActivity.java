@@ -34,7 +34,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,7 +43,6 @@ import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
-import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.model.PeriodType;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
@@ -64,6 +62,9 @@ public class StoryActivity extends Activity {
     
     /** 表示中のストーリー */
     private Story story = null;
+    
+    /** 現在のピリオドのインデックス */
+    private int currentPeriodIndex = -1;
     
     /**
      * ストーリー中の画像を読み込むためのタスク
@@ -125,7 +126,7 @@ public class StoryActivity extends Activity {
         ActionBar.OnNavigationListener onNavigationListener = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long itemId) {
-                onStoryPeriodChange(position);
+                onPeriodIndexChange(position);
                 return true;
             }
         };
@@ -153,31 +154,20 @@ public class StoryActivity extends Activity {
         loadStoryImageTask = new LoadStoryImageTask();
         loadStoryImageTask.execute(story);
 
-        // ActionBarにピリオド切り替えを追加
-        setPeriodListToActionBar();
+        StoryElementListAdapter adapter = new StoryElementListAdapter(this, Moltonf.getInstance().getHighlightSettings(getApplicationContext()));
+        storyListView.setRecyclerListener(adapter);
+        storyListView.setAdapter(adapter);
         
         // TODO: とりあえず初日を出しとくか
         if (story.getPeriodCount() > 0) {
             StoryPeriod period = story.getPeriod(0);
             List<StoryElement> elemList = period.getStoryElements();
-    
-            // TODO: 強調表示設定はアプリ設定か
-            List<HighlightSetting> highlightSettingList = new ArrayList<HighlightSetting>();
-            HighlightSetting hlSetting;
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("【.*?】");    hlSetting.setHighlightColor(Color.RED);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("★");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("☆");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("●");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("○");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("▼");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("▽");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("■");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
-            hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
-            
-            StoryElementListAdapter adapter = new StoryElementListAdapter(this, elemList, highlightSettingList);
-            storyListView.setRecyclerListener(adapter);
-            storyListView.setAdapter(adapter);
+            adapter.replaceStoryElements(elemList);
+            currentPeriodIndex = 0;
         }
+        
+        // ActionBarにピリオド切り替えを追加
+        setPeriodListToActionBar();
     }
     
     /**
@@ -216,8 +206,18 @@ public class StoryActivity extends Activity {
      * @param periodIndex ピリオドのインデックス
      * @return
      */
-    private void onStoryPeriodChange(int periodIndex) {
-        // TODO:
+    private void onPeriodIndexChange(int periodIndex) {
+        if (currentPeriodIndex == periodIndex) {
+            return;
+        }
+        
+        if (story.getPeriodCount() > periodIndex) {
+            StoryPeriod period = story.getPeriod(periodIndex);
+            List<StoryElement> elemList = period.getStoryElements();
+            
+            ((StoryElementListAdapter)storyListView.getAdapter()).replaceStoryElements(elemList);
+            currentPeriodIndex = periodIndex;
+        }
     }
     
     /**

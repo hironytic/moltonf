@@ -31,10 +31,12 @@ import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -111,10 +113,9 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implemen
     /**
      * コンストラクタ
      * @param context 現在のコンテキスト
-     * @param objects 表示するオブジェクトのリスト
      */
-    public StoryElementListAdapter(Context context, List<StoryElement> objects, List<HighlightSetting> highlightSettingList) {
-        super(context, 0, objects);
+    public StoryElementListAdapter(Context context, List<HighlightSetting> highlightSettingList) {
+        super(context, 0);
 
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         res = context.getResources();
@@ -139,6 +140,23 @@ public class StoryElementListAdapter extends ArrayAdapter<StoryElement> implemen
         
         viewInfoMap.clear();
     }    
+    
+    /**
+     * 表示するStoryElementをすべて差し替えます。
+     * @param objects
+     */
+    @TargetApi(11)
+    public void replaceStoryElements(List<StoryElement> objects) {
+        clear();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            for (StoryElement element : objects) {
+                add(element);
+            }
+        } else {
+            addAll(objects);
+        }
+        notifyDataSetChanged();
+    }
     
     /**
      * @see android.widget.AbsListView.RecyclerListener#onMovedToScrapHeap(android.view.View)

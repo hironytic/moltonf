@@ -26,9 +26,14 @@
 package com.hironytic.moltonfdroid;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Environment;
 
+import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.util.Logger;
 
 /**
@@ -104,5 +109,25 @@ public class Moltonf {
         } catch (SecurityException ex) {
             return null;
         }
+    }
+
+    /**
+     * ストーリーを表示する際の強調表示設定を返します。
+     * @param context コンテキスト
+     * @return 強調表示設定のリスト
+     */
+    public List<HighlightSetting> getHighlightSettings(Context context) {
+        List<HighlightSetting> highlightSettingList = new ArrayList<HighlightSetting>();
+        HighlightSetting hlSetting;
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("【.*?】");    hlSetting.setHighlightColor(Color.RED);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("★");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("☆");    hlSetting.setHighlightColor(Color.GREEN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("●");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("○");    hlSetting.setHighlightColor(Color.MAGENTA);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("▼");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("▽");    hlSetting.setHighlightColor(Color.CYAN);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("■");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
+        hlSetting = new HighlightSetting(); hlSetting.setPatternString("□");    hlSetting.setHighlightColor(0xffffc800);   highlightSettingList.add(hlSetting);
+        return highlightSettingList;
     }
 }
