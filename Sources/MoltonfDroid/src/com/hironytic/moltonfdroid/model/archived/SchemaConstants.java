@@ -38,9 +38,30 @@ public class SchemaConstants {
     /** 名前空間接頭辞 xml */
     public static final String PREFIX_XML = "xml";
 
+    /** 名前空間接頭辞 xlink の名前空間URI */
+    public static final String NS_XLINK = "http://www.w3.org/1999/xlink";
+    
+    /** 名前空間接頭辞 xlink */
+    public static final String PREFIX_XLINK = "xlink";
+    
     /** 共通アーカイブ基盤用スキーマの名前空間URI */
     public static final String NS_ARCHIVE = "http://jindolf.sourceforge.jp/xml/ns/401";
 
+    /* 
+     * --------------------------------------------------
+     * xlink
+     * --------------------------------------------------
+     */
+    
+    /** xlink:type 属性の QName */
+    public static final QName NAME_XLINK_TYPE = new QName(NS_XLINK, "type", PREFIX_XLINK);
+    
+    /** xlink:type 属性の値 "simple" */
+    public static final String VAL_XLINK_TYPE_SIMPLE = "simple";
+    
+    /** xlink:href 属性の QName */
+    public static final QName NAME_XLINK_HREF = new QName(NS_XLINK, "href", PREFIX_XLINK);
+    
     /* 
      * --------------------------------------------------
      * village

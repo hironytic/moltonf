@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <period
+  xmlns="http://jindolf.sourceforge.jp/xml/ns/401"
+  xml:lang="ja-JP"
   type="progress" day="2"
   nextCommitDay="--07-11+09:00" commitTime="08:15:00+09:00"
   sourceURI="index.rb?vid=0&amp;meslog=0_progress_1&amp;mes=all"
