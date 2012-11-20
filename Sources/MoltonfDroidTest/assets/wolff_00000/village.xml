@@ -10,6 +10,7 @@
 <village
   xmlns="http://jindolf.sourceforge.jp/xml/ns/401"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
   xsi:schemaLocation="http://jindolf.sourceforge.jp/xml/ns/401 http://jindolf.sourceforge.jp/xml/xsd/bbsArchive-091001.xsd"
   xml:lang="ja-JP"
   xml:base="http://192.168.150.129/moltonf/"

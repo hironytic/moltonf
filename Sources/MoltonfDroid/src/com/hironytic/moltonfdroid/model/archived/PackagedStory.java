@@ -31,11 +31,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +61,6 @@ import com.hironytic.moltonfdroid.util.XmlUtils;
  */
 public class PackagedStory extends BasicStory implements Story {
     private static final String FILENAME_VILLAGE = "village.xml";
-    private static final String FILENAME_PERIOD_FMT = "period-%s.xml";
 
     /** データを読み込んでいるなら true */
     private boolean isReady = false;
@@ -77,9 +74,6 @@ public class PackagedStory extends BasicStory implements Story {
     /** 登場人物の識別子から Avatar オブジェクトを得るマップ */
     private Map<String, Avatar> avatarMap;
 
-    /** 弱参照で保持している StoryPeriod たち */
-    private WeakReference<StoryPeriod>[] weakPeriods;
-    
     /**
      * コンストラクタ
      * @param packageDir プレイデータのパッケージディレクトリ
@@ -121,7 +115,7 @@ public class PackagedStory extends BasicStory implements Story {
                     if (eventType == XmlPullParser.START_TAG) {
                         QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
                         if (SchemaConstants.NAME_VILLAGE.equals(elemName)) {
-                            loadVillageElement(staxReader);
+                            loadVillageElement(staxReader, villageFile);
                         } else {
                             throw new MoltonfException("Not a bbs play-data archive.");
                         }
@@ -134,19 +128,7 @@ public class PackagedStory extends BasicStory implements Story {
                     // ignore
                 }
             }
-            
-            // periods
-            // 今のところ、ある日が存在しないといった歯抜けデータが
-            // あることは考えていない。
-            int day;
-            for (day = 0; ; ++day) {
-                File periodFile = new File(packageDir, String.format(FILENAME_PERIOD_FMT, day));
-                if (!periodFile.exists()) {
-                    break;
-                }
-            }
-            initWeakPeriods(day);
-            
+                        
             isReady = true;
             
         } catch (XmlPullParserException ex) {
@@ -156,45 +138,6 @@ public class PackagedStory extends BasicStory implements Story {
         } catch (IOException ex) {
             throw new MoltonfException(ex);
         }
-    }
-
-    /**
-     * weakPeriods を初期化します。
-     * @param count 要素数
-     */
-    @SuppressWarnings("unchecked")
-    private void initWeakPeriods(int count) {
-        weakPeriods = new WeakReference[count];
-        Arrays.fill(weakPeriods, null);
-    }
-    
-    /**
-     * @see com.hironytic.moltonfdroid.model.basic.BasicStory#getPeriodCount()
-     */
-    @Override
-    public int getPeriodCount() {
-        return weakPeriods.length;
-    }
-
-    /**
-     * @see com.hironytic.moltonfdroid.model.basic.BasicStory#getPeriod(int)
-     */
-    @Override
-    public StoryPeriod getPeriod(int index) {
-        StoryPeriod result = null;
-        WeakReference<StoryPeriod> wr = weakPeriods[index];
-        if (wr != null) {
-            result = wr.get();
-        }
-        if (result == null) {
-            File periodFile = new File(packageDir, String.format(FILENAME_PERIOD_FMT, index));
-            result = new PackagedStoryPeriod(periodFile);
-            result.setStory(this);
-            wr = new WeakReference<StoryPeriod>(result);
-            weakPeriods[index] = wr;
-        }
-        
-        return result;
     }
 
     /**
@@ -211,10 +154,11 @@ public class PackagedStory extends BasicStory implements Story {
      * village 要素以下を読み込みます。
      * このメソッドが呼ばれたとき staxReader は village 要素の START_TAG にいることが前提です。
      * @param staxReader XML パーサ
+     * @param villageFle 読み込み中のvillage.xmlのファイルパス
      * @throws XmlPullParserException 読み込み中にエラーが発生した場合
      * @throws IOException 読み込み中にエラーが発生した場合
      */
-    private void loadVillageElement(XmlPullParser staxReader) throws XmlPullParserException, IOException {
+    private void loadVillageElement(XmlPullParser staxReader, File villageFile) throws XmlPullParserException, IOException {
         // 属性
         for (int ix = 0; ix < staxReader.getAttributeCount(); ++ix) {
             QName attrName = new QName(staxReader.getAttributeNamespace(ix), staxReader.getAttributeName(ix));
@@ -260,8 +204,10 @@ public class PackagedStory extends BasicStory implements Story {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
                 if (SchemaConstants.NAME_AVATAR_LIST.equals(elemName)) {
                     setAvatarList(loadAvatarList(staxReader));
-//                } else if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
-//                    periodList.add(loadPeriod(staxReader));
+                } else if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
+                    StoryPeriod period = PackagedStoryPeriod.loadVillagePeriod(villageFile, staxReader);
+                    period.setStory(this);
+                    periodList.add(period);
                 } else {
                     XmlUtils.skipElement(staxReader);
                 }

@@ -31,6 +31,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,15 +64,29 @@ import com.hironytic.moltonfdroid.util.XmlUtils;
  * 一つ分の period を表す StoryPeriod。
  */
 public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod {
-
+    private static final String FILENAME_PERIOD_FMT = "period-%s.xml";
+    
     /** データを読み込んでいるなら true */
     private boolean isReady = false;
     
     /** periodデータのファイル */
-    private File periodFile;
+    private File periodFile = null;
+
+    private PackagedStoryPeriod() {
+    }
     
-    public PackagedStoryPeriod(File periodFile) {
-        this.periodFile = periodFile;
+    /**
+     * village.xmlのperiod要素を読み込んでPackagedStoryPeriodオブジェクトを生成します。
+     * @param villageFile village.xmlのファイルパス
+     * @param staxReader period要素を読み取ろうとしているところのXmlPullParser
+     * @return PackagedStoryPeriod オブジェクト
+     * @throws XmlPullParserException 読み込み中にエラーが発生した場合
+     * @throws IOException 読み込み中にエラーが発生した場合
+     */
+    public static PackagedStoryPeriod loadVillagePeriod(File villageFile, XmlPullParser staxReader) throws XmlPullParserException, IOException {
+        PackagedStoryPeriod period = new PackagedStoryPeriod();
+        period.loadPeriod(staxReader, true, villageFile);
+        return period;
     }
     
     /**
@@ -105,7 +120,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                     if (eventType == XmlPullParser.START_TAG) {
                         QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
                         if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
-                            loadPeriod(staxReader);
+                            loadPeriod(staxReader, false, null);
                         } else {
                             throw new MoltonfException("Not a bbs play-data archive.");
                         }
@@ -133,10 +148,12 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
      * period 要素以下を読み込みます。
      * このメソッドが呼ばれたとき staxReader は period 要素の START_ELEMENT にいることが前提です。
      * @param staxReader XML パーサ
+     * @param isVillage village.xmlをパーズ中ならtrueを指定
+     * @param villageFile village.xmlをパーズ中ならここにファイルパスを指定。そうでないならnullを指定
      * @throws XmlPullParserException 読み込み中にエラーが発生した場合
      * @throws IOException 読み込み中にエラーが発生した場合
      */
-    private void loadPeriod(XmlPullParser staxReader) throws XmlPullParserException, IOException {
+    private void loadPeriod(XmlPullParser staxReader, boolean isVillage, File villageFile) throws XmlPullParserException, IOException {
         List<StoryElement> elementList = new ArrayList<StoryElement>();
         
         // 属性
@@ -153,51 +170,75 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 } catch (NumberFormatException ex) {
                     Moltonf.getInstance().getLogger().warning("invalid period day: " + dayString);
                 }
+            } else if (isVillage) {
+                if (SchemaConstants.NAME_XLINK_HREF.equals(attrName)) {
+                    String periodFilePath = staxReader.getAttributeValue(ix);
+                    URI periodFileURI = villageFile.getParentFile().toURI().resolve(periodFilePath);
+                    this.periodFile = new File(periodFileURI);
+                }
             }
         }
-        
-        final List<QName> eventAnnounceGroup = Arrays.asList(new QName[] {
-            SchemaConstants.NAME_START_ENTRY, SchemaConstants.NAME_ON_STAGE,
-            SchemaConstants.NAME_START_MIRROR, SchemaConstants.NAME_OPEN_ROLE,
-            SchemaConstants.NAME_MURDERED, SchemaConstants.NAME_START_ASSAULT,
-            SchemaConstants.NAME_SURVIVOR, SchemaConstants.NAME_COUNTING,
-            SchemaConstants.NAME_SUDDEN_DEATH, SchemaConstants.NAME_NO_MURDER,
-            SchemaConstants.NAME_WIN_VILLAGE, SchemaConstants.NAME_WIN_WOLF,
-            SchemaConstants.NAME_WIN_HAMSTER, SchemaConstants.NAME_PLAYER_LIST,
-            SchemaConstants.NAME_PANIC,
-        });
-        final List<QName> eventOrderGroup = Arrays.asList(new QName[] {
-            SchemaConstants.NAME_ASK_ENTRY, SchemaConstants.NAME_ASK_COMMIT,
-            SchemaConstants.NAME_NO_COMMENT, SchemaConstants.NAME_STAY_EPILOGUE,
-            SchemaConstants.NAME_GAME_OVER,
-        });
-        final List<QName> eventExtraGroup = Arrays.asList(new QName[] {
-            SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD,
-        });
-        
+
         // 子ノード
-        for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
-            if (eventType == XmlPullParser.END_TAG) {
-                break;
-            } else if (eventType == XmlPullParser.START_TAG) {
-                QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_TALK.equals(elemName)) {
-                    elementList.add(loadTalk(staxReader));
-                } else if (eventAnnounceGroup.contains(elemName)) {
-                    elementList.add(loadStoryEvent(staxReader, EventFamily.ANNOUNCE));
-                } else if (eventOrderGroup.contains(elemName)) {
-                    elementList.add(loadStoryEvent(staxReader, EventFamily.ORDER));
-                } else if (eventExtraGroup.contains(elemName)) {
-                    elementList.add(loadStoryEvent(staxReader, EventFamily.EXTRA));
-                } else if (SchemaConstants.NAME_ASSAULT.equals(elemName)) {
-                    elementList.add(loadAssault(staxReader));
+        if (isVillage) {
+            // village.xmlを読み込んでいるときは
+            // 子ノードはすべてスキップ
+            for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
+                if (eventType == XmlPullParser.END_TAG) {
+                    break;
                 } else {
                     XmlUtils.skipElement(staxReader);
                 }
             }
+            
+            // xlink:href が指定されてなかったらファイル名を推測
+            if (this.periodFile == null) {
+                this.periodFile = new File(villageFile.getParentFile(), String.format(FILENAME_PERIOD_FMT, getPeriodNumber()));
+            }
+        } else {
+            // period-x.xmlを読み込んでいるときは子ノードをまじめに読み込む。
+            final List<QName> eventAnnounceGroup = Arrays.asList(new QName[] {
+                SchemaConstants.NAME_START_ENTRY, SchemaConstants.NAME_ON_STAGE,
+                SchemaConstants.NAME_START_MIRROR, SchemaConstants.NAME_OPEN_ROLE,
+                SchemaConstants.NAME_MURDERED, SchemaConstants.NAME_START_ASSAULT,
+                SchemaConstants.NAME_SURVIVOR, SchemaConstants.NAME_COUNTING,
+                SchemaConstants.NAME_SUDDEN_DEATH, SchemaConstants.NAME_NO_MURDER,
+                SchemaConstants.NAME_WIN_VILLAGE, SchemaConstants.NAME_WIN_WOLF,
+                SchemaConstants.NAME_WIN_HAMSTER, SchemaConstants.NAME_PLAYER_LIST,
+                SchemaConstants.NAME_PANIC,
+            });
+            final List<QName> eventOrderGroup = Arrays.asList(new QName[] {
+                SchemaConstants.NAME_ASK_ENTRY, SchemaConstants.NAME_ASK_COMMIT,
+                SchemaConstants.NAME_NO_COMMENT, SchemaConstants.NAME_STAY_EPILOGUE,
+                SchemaConstants.NAME_GAME_OVER,
+            });
+            final List<QName> eventExtraGroup = Arrays.asList(new QName[] {
+                SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD,
+            });
+            
+            for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
+                if (eventType == XmlPullParser.END_TAG) {
+                    break;
+                } else if (eventType == XmlPullParser.START_TAG) {
+                    QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
+                    if (SchemaConstants.NAME_TALK.equals(elemName)) {
+                        elementList.add(loadTalk(staxReader));
+                    } else if (eventAnnounceGroup.contains(elemName)) {
+                        elementList.add(loadStoryEvent(staxReader, EventFamily.ANNOUNCE));
+                    } else if (eventOrderGroup.contains(elemName)) {
+                        elementList.add(loadStoryEvent(staxReader, EventFamily.ORDER));
+                    } else if (eventExtraGroup.contains(elemName)) {
+                        elementList.add(loadStoryEvent(staxReader, EventFamily.EXTRA));
+                    } else if (SchemaConstants.NAME_ASSAULT.equals(elemName)) {
+                        elementList.add(loadAssault(staxReader));
+                    } else {
+                        XmlUtils.skipElement(staxReader);
+                    }
+                }
+            }
+            
+            setStoryElements(elementList);
         }
-        
-        setStoryElements(elementList);
     }
 
     /**
