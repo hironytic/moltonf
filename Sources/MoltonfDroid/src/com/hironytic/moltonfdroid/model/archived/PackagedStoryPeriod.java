@@ -134,6 +134,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 }
             }
             
+            isReady = true;
             
         } catch (XmlPullParserException ex) {
             throw new MoltonfException(ex);

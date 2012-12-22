@@ -50,16 +50,16 @@ import com.hironytic.moltonfdroid.model.PeriodType;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
-import com.hironytic.moltonfdroid.model.archived.ArchivedStory;
+import com.hironytic.moltonfdroid.model.archived.PackagedStory;
 
 /**
  * ストーリーを表示するActivity
  */
 public class StoryActivity extends Activity {
 
-    /** Period オブジェクトを受け取るためのチケット ID */
-    public static final String EXTRA_KEY_ARCHIVE_FILE = "MLTArchiveFile";
-
+    /** ストーリーを読み込むパッケージのディレクトリ */
+    public static final String EXTRA_KEY_PACKAGE_DIR = "MLTPackageDir";
+    
     /** ストーリーを表示するメインとなるリストビュー */
     private ListView storyListView = null;
     
@@ -85,10 +85,15 @@ public class StoryActivity extends Activity {
         // 読み込むストーリーの受け渡し
         Intent intent = getIntent();
         if (intent != null) {
-            File archiveFile = (File)intent.getSerializableExtra(EXTRA_KEY_ARCHIVE_FILE);
-            if (archiveFile != null) {
-                LoadArchivedStoryTask loadTask = new LoadArchivedStoryTask();
-                loadTask.execute(archiveFile);
+            File packageDir = (File)intent.getSerializableExtra(EXTRA_KEY_PACKAGE_DIR);
+            if (packageDir != null) {
+                story = new PackagedStory(packageDir);
+                if (story.isReady()) {
+                    onStoryIsReady();
+                } else {
+                    ReadyStoryTask readyStoryTask = new ReadyStoryTask();
+                    readyStoryTask.execute();
+                }
             }
         }
     }
@@ -208,34 +213,17 @@ public class StoryActivity extends Activity {
      * ストーリーのロードが終わったら呼ばれます。
      * @param story
      */
-    private void onStoryLoaded(Story story) {
+    private void onStoryIsReady() {
         // 村の名前をタイトルにセット
         setTitle(story.getVillageFullName());
-        
-        // ストーリーを表示するListViewの準備
-        storyListView = (ListView)findViewById(R.id.story_list);
-        View emptyView = findViewById(R.id.story_list_empty);
-        if (emptyView != null) {
-            storyListView.setEmptyView(emptyView);
-        }
-        
-        this.story = story;
         
         // バックグラウンドで画像を用意
         loadStoryImageTask = new LoadStoryImageTask();
         loadStoryImageTask.execute(story);
 
-        StoryElementListAdapter adapter = new StoryElementListAdapter(this, Moltonf.getInstance().getHighlightSettings(getApplicationContext()));
-        storyListView.setRecyclerListener(adapter);
-        storyListView.setAdapter(adapter);
-        
         // TODO: とりあえず初日を出しとくか
-        if (story.getPeriodCount() > 0) {
-            StoryPeriod period = story.getPeriod(0);
-            List<StoryElement> elemList = period.getStoryElements();
-            adapter.replaceStoryElements(elemList);
-            currentPeriodIndex = 0;
-        }
+        currentPeriodIndex = -1;
+        onPeriodIndexChange(0);
         
         // ActionBarにピリオド切り替えを追加
         setPeriodListToActionBar();
@@ -276,6 +264,15 @@ public class StoryActivity extends Activity {
     }
     
     /**
+     * ストーリーピリオドのロード中にエラーが発生したら呼ばれます。
+     * @param ex
+     */
+    private void onStoryPeriodLoadError(MoltonfException ex) {
+        String message = getString(R.string.failed_to_load_story);
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
      * 表示するピリオドが変更されるときに呼ばれます。
      * @param periodIndex ピリオドのインデックス
      * @return
@@ -286,19 +283,51 @@ public class StoryActivity extends Activity {
         }
         
         if (story.getPeriodCount() > periodIndex) {
-            StoryPeriod period = story.getPeriod(periodIndex);
-            List<StoryElement> elemList = period.getStoryElements();
-            
-            ((StoryElementListAdapter)storyListView.getAdapter()).replaceStoryElements(elemList);
             currentPeriodIndex = periodIndex;
             setSelectedPeriodOnActionBar(periodIndex);
+            
+            StoryPeriod period = story.getPeriod(periodIndex);
+            if (period.isReady()) {
+                onStoryPeriodIsReady(period);
+            } else {
+                ReadyStoryPeriodTask task = new ReadyStoryPeriodTask();
+                task.execute(period);
+            }
+        }
+    }
+ 
+    /**
+     * ピリオドの準備ができたら呼ばれます。
+     */
+    private void onStoryPeriodIsReady(StoryPeriod period) {
+        StoryPeriod currentPeriod = story.getPeriod(currentPeriodIndex);
+        if (period == currentPeriod) {
+            StoryElementListAdapter adapter;
+            
+            if (storyListView == null) {
+                // ストーリーを表示するListViewの準備
+                storyListView = (ListView)findViewById(R.id.story_list);
+                View emptyView = findViewById(R.id.story_list_empty);
+                if (emptyView != null) {
+                    storyListView.setEmptyView(emptyView);
+                }
+                
+                adapter = new StoryElementListAdapter(this, Moltonf.getInstance().getHighlightSettings(getApplicationContext()));
+                storyListView.setRecyclerListener(adapter);
+                storyListView.setAdapter(adapter);
+            } else {
+                adapter = (StoryElementListAdapter)storyListView.getAdapter();
+            }
+            
+            List<StoryElement> elemList = period.getStoryElements();
+            adapter.replaceStoryElements(elemList);
         }
     }
     
     /**
-     * アーカイブファイルを読み込んでStoryを生成するタスク
+     * Storyをready状態にするタスク
      */
-    private class LoadArchivedStoryTask extends AsyncTask<File, Void, Object> {
+    private class ReadyStoryTask extends AsyncTask<Void, Void, MoltonfException> {
         /** 読み込み中に表示するプログレスダイアログ */
         private ProgressDialog progressDialog;
         
@@ -306,11 +335,56 @@ public class StoryActivity extends Activity {
          * @see android.os.AsyncTask#doInBackground(Params[])
          */
         @Override
-        protected Object doInBackground(File... params) {
+        protected MoltonfException doInBackground(Void... params) {
             try {
-                File archiveFile = params[0];
-                Story story = new ArchivedStory(archiveFile);
-                return story;
+                StoryActivity.this.story.ready();
+                return null;
+            } catch (MoltonfException ex) {
+                return ex;
+            }
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPreExecute()
+         */
+        @Override
+        protected void onPreExecute() {
+            String message = getString(R.string.loading_story);
+            progressDialog = ProgressDialog.show(StoryActivity.this, "", message);
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
+        @Override
+        protected void onPostExecute(MoltonfException result) {
+            progressDialog.dismiss();
+
+            if (result == null) {
+                StoryActivity.this.onStoryIsReady();
+            } else {
+                // MoltonfException が発生したとき
+                StoryActivity.this.onStoryLoadError(result);
+            }
+        }
+    }
+    
+    /**
+     * Storyをready状態にするタスク
+     */
+    private class ReadyStoryPeriodTask extends AsyncTask<StoryPeriod, Void, Object> {
+        /** 読み込み中に表示するプログレスダイアログ */
+        private ProgressDialog progressDialog;
+        
+        /**
+         * @see android.os.AsyncTask#doInBackground(Params[])
+         */
+        @Override
+        protected Object doInBackground(StoryPeriod... params) {
+            try {
+                StoryPeriod period = params[0];
+                period.ready();
+                return period;
             } catch (MoltonfException ex) {
                 return ex;
             }
@@ -332,12 +406,11 @@ public class StoryActivity extends Activity {
         protected void onPostExecute(Object result) {
             progressDialog.dismiss();
 
-            if (result instanceof Story) {
-                Story story = (Story)result;
-                StoryActivity.this.onStoryLoaded(story);
+            if (result instanceof StoryPeriod) {
+                StoryActivity.this.onStoryPeriodIsReady((StoryPeriod)result);
             } else if (result instanceof MoltonfException) {
                 // MoltonfException が発生したとき
-                StoryActivity.this.onStoryLoadError((MoltonfException)result);
+                StoryActivity.this.onStoryPeriodLoadError((MoltonfException)result);
             }
         }
     }

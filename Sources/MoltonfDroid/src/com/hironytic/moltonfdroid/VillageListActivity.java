@@ -43,21 +43,21 @@ import android.widget.ListView;
 public class VillageListActivity extends ListActivity {
 
     /**
-     * 村一覧に表示するアーカイブファイルのアイテム
+     * 村一覧に表示するパッケージディレクトリのアイテム
      */
-    private static class ArchiveFileItem {
-        /** アーカイブファイル */
-        private File archiveFile;
+    private static class PackageDirItem {
+        /** パッケージディレクトリ */
+        private File packageDir;
         
-        public ArchiveFileItem(File archiveFile) {
-            this.archiveFile = archiveFile;
+        public PackageDirItem(File packageDir) {
+            this.packageDir = packageDir;
         }
 
         /**
          * @return the archiveFile
          */
-        public File getArchiveFile() {
-            return archiveFile;
+        public File getPackageDir() {
+            return packageDir;
         }
 
         /**
@@ -65,7 +65,7 @@ public class VillageListActivity extends ListActivity {
          */
         @Override
         public String toString() {
-            return archiveFile.getName();
+            return packageDir.getName();
         }
     }
     
@@ -78,23 +78,22 @@ public class VillageListActivity extends ListActivity {
         setContentView(R.layout.village_list);
         
         File moltonfDir = Moltonf.getInstance().getWorkDir();
-        File[] archiveFileList = moltonfDir.listFiles(new FileFilter() {
+        File playdatasDir = new File(moltonfDir, "playdatas");
+        File[] packageDirList = playdatasDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
-                if (!pathname.isDirectory()) {
-                    if (pathname.getName().endsWith(".xml")) {
-                        return true;
-                    }
+                if (pathname.isDirectory()) {
+                    return true;
                 }
                 return false;
             }
         });
-        List<ArchiveFileItem> archiveFileItemList = new ArrayList<ArchiveFileItem>(archiveFileList.length);
-        for (File archiveFile : archiveFileList) {
-            archiveFileItemList.add(new ArchiveFileItem(archiveFile));
+        List<PackageDirItem> packageDirItemList = new ArrayList<PackageDirItem>(packageDirList.length);
+        for (File packageDir : packageDirList) {
+            packageDirItemList.add(new PackageDirItem(packageDir));
         }
         
-        ArrayAdapter<ArchiveFileItem> adapter = new ArrayAdapter<ArchiveFileItem>(this, android.R.layout.simple_list_item_1, archiveFileItemList);
+        ArrayAdapter<PackageDirItem> adapter = new ArrayAdapter<PackageDirItem>(this, android.R.layout.simple_list_item_1, packageDirItemList);
         setListAdapter(adapter);
     }
 
@@ -105,11 +104,11 @@ public class VillageListActivity extends ListActivity {
     protected void onListItemClick(ListView listView, View v, int position, long id) {
         super.onListItemClick(listView, v, position, id);
         
-        ArchiveFileItem item = (ArchiveFileItem)listView.getItemAtPosition(position);
+        PackageDirItem item = (PackageDirItem)listView.getItemAtPosition(position);
         Moltonf.getInstance().getLogger().info(item.toString());
 
         Intent intent = new Intent(VillageListActivity.this, StoryActivity.class);
-        intent.putExtra(StoryActivity.EXTRA_KEY_ARCHIVE_FILE, item.getArchiveFile());
+        intent.putExtra(StoryActivity.EXTRA_KEY_PACKAGE_DIR, item.getPackageDir());
         startActivity(intent);
     }
 }
