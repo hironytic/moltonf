@@ -221,12 +221,13 @@ public class StoryActivity extends Activity {
         loadStoryImageTask = new LoadStoryImageTask();
         loadStoryImageTask.execute(story);
 
-        // TODO: とりあえず初日を出しとくか
         currentPeriodIndex = -1;
-        onPeriodIndexChange(0);
-        
+
         // ActionBarにピリオド切り替えを追加
         setPeriodListToActionBar();
+
+        // TODO: とりあえず初日を出しとくか
+        onPeriodIndexChange(0);
     }
 
     /**
