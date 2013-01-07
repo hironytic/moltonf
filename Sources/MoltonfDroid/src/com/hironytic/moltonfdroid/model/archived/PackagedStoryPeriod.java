@@ -1,7 +1,7 @@
 /*
  * Moltonf
  *
- * Copyright (c) 2011 Hironori Ichimiya <hiron@hironytic.com>
+ * Copyright (c) 2011-2013 Hironori Ichimiya <hiron@hironytic.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -35,6 +35,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -64,8 +65,6 @@ import com.hironytic.moltonfdroid.util.XmlUtils;
  * 一つ分の period を表す StoryPeriod。
  */
 public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod {
-    private static final String FILENAME_PERIOD_FMT = "period-%s.xml";
-    
     /** データを読み込んでいるなら true */
     private boolean isReady = false;
     
@@ -194,7 +193,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
             
             // xlink:href が指定されてなかったらファイル名を推測
             if (this.periodFile == null) {
-                this.periodFile = new File(villageFile.getParentFile(), String.format(FILENAME_PERIOD_FMT, getPeriodNumber()));
+                this.periodFile = new File(villageFile.getParentFile(), String.format(Locale.US, PackageConstants.FILENAME_PERIOD_FMT, getPeriodNumber()));
             }
         } else {
             // period-x.xmlを読み込んでいるときは子ノードをまじめに読み込む。

@@ -1,7 +1,7 @@
 /*
  * Moltonf
  *
- * Copyright (c) 2011 Hironori Ichimiya <hiron@hironytic.com>
+ * Copyright (c) 2011-2013 Hironori Ichimiya <hiron@hironytic.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -60,8 +60,6 @@ import com.hironytic.moltonfdroid.util.XmlUtils;
  * @see <a href="http://wolfbbs.jp/%B6%A6%C4%CC%A5%A2%A1%BC%A5%AB%A5%A4%A5%D6%B4%F0%C8%D7%C0%B0%C8%F7%B7%D7%B2%E8.html">共通アーカイブ基盤整備計画</a>
  */
 public class PackagedStory extends BasicStory implements Story {
-    private static final String FILENAME_VILLAGE = "village.xml";
-
     /** データを読み込んでいるなら true */
     private boolean isReady = false;
     
@@ -102,7 +100,7 @@ public class PackagedStory extends BasicStory implements Story {
         
         try {
             // village
-            File villageFile = new File(packageDir, FILENAME_VILLAGE);
+            File villageFile = new File(packageDir, PackageConstants.FILENAME_VILLAGE);
             
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             factory.setValidating(false);
