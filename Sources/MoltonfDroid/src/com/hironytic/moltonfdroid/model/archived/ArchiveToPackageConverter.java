@@ -184,7 +184,7 @@ public class ArchiveToPackageConverter {
         for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
             if (eventType == XmlPullParser.END_TAG) {
                 break;
-            } else {
+            } else if (eventType == XmlPullParser.START_TAG) {
                 convertGeneralElement(staxReader, periodSerializer);
             }
         }
@@ -214,8 +214,20 @@ public class ArchiveToPackageConverter {
         for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
             if (eventType == XmlPullParser.END_TAG) {
                 break;
-            } else {
+            } else if (eventType == XmlPullParser.START_TAG) {
                 convertGeneralElement(staxReader, serializer);
+            } else if (eventType == XmlPullParser.TEXT) {
+                serializer.text(staxReader.getText());
+            } else if (eventType == XmlPullParser.CDSECT) {
+                serializer.cdsect(staxReader.getText());
+            } else if (eventType == XmlPullParser.ENTITY_REF) {
+                serializer.entityRef(staxReader.getName());
+            } else if (eventType == XmlPullParser.IGNORABLE_WHITESPACE) {
+                serializer.ignorableWhitespace(staxReader.getText());
+            } else if (eventType == XmlPullParser.PROCESSING_INSTRUCTION) {
+                serializer.processingInstruction(staxReader.getText());
+            } else if (eventType == XmlPullParser.COMMENT) {
+                serializer.comment(staxReader.getText());
             }
         }
         
