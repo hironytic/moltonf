@@ -30,12 +30,18 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hironytic.moltonfdroid.model.StoryPeriod;
+import com.hironytic.moltonfdroid.model.archived.ArchiveToPackageConverter;
+
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * 村一覧のアクティビティ
@@ -79,22 +85,33 @@ public class VillageListActivity extends ListActivity {
         
         File moltonfDir = Moltonf.getInstance().getWorkDir();
         File playdatasDir = new File(moltonfDir, "playdatas");
+        if (!playdatasDir.exists()) {
+            if (moltonfDir.canWrite()) {
+                playdatasDir.mkdir();
+            }
+        }
         File[] packageDirList = playdatasDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
                 if (pathname.isDirectory()) {
                     return true;
+                } else {
+                    if (pathname.getName().endsWith(".xml")) {
+                        return true;
+                    }
                 }
                 return false;
             }
         });
-        List<PackageDirItem> packageDirItemList = new ArrayList<PackageDirItem>(packageDirList.length);
-        for (File packageDir : packageDirList) {
-            packageDirItemList.add(new PackageDirItem(packageDir));
-        }
+        if (null != packageDirList) {
+            List<PackageDirItem> packageDirItemList = new ArrayList<PackageDirItem>(packageDirList.length);
+            for (File packageDir : packageDirList) {
+                packageDirItemList.add(new PackageDirItem(packageDir));
+            }
         
-        ArrayAdapter<PackageDirItem> adapter = new ArrayAdapter<PackageDirItem>(this, android.R.layout.simple_list_item_1, packageDirItemList);
-        setListAdapter(adapter);
+            ArrayAdapter<PackageDirItem> adapter = new ArrayAdapter<PackageDirItem>(this, android.R.layout.simple_list_item_1, packageDirItemList);
+            setListAdapter(adapter);
+        }
     }
 
     /**
@@ -107,8 +124,64 @@ public class VillageListActivity extends ListActivity {
         PackageDirItem item = (PackageDirItem)listView.getItemAtPosition(position);
         Moltonf.getInstance().getLogger().info(item.toString());
 
-        Intent intent = new Intent(VillageListActivity.this, StoryActivity.class);
-        intent.putExtra(StoryActivity.EXTRA_KEY_PACKAGE_DIR, item.getPackageDir());
-        startActivity(intent);
+        File packageDir = item.getPackageDir();
+        if (packageDir.isDirectory()) {
+            Intent intent = new Intent(VillageListActivity.this, StoryActivity.class);
+            intent.putExtra(StoryActivity.EXTRA_KEY_PACKAGE_DIR, packageDir);
+            startActivity(intent);
+        } else {
+            new ConvertArchiveToPackageTask().execute(packageDir);
+        }
+    }
+    
+    /**
+     * Storyをready状態にするタスク
+     */
+    private class ConvertArchiveToPackageTask extends AsyncTask<File, Void, Boolean> {
+        /** 読み込み中に表示するプログレスダイアログ */
+        private ProgressDialog progressDialog;
+        
+        /**
+         * @see android.os.AsyncTask#doInBackground(Params[])
+         */
+        @Override
+        protected Boolean doInBackground(File... params) {
+            try {
+                File archiveFile = params[0];
+                File parentDir = archiveFile.getParentFile();
+                if (!parentDir.canWrite()) {
+                    return Boolean.FALSE;
+                }
+                String archiveFileName = archiveFile.getName();
+                int extIndex = archiveFileName.lastIndexOf(".");
+                String packageDirName = archiveFileName.substring(0, extIndex);
+                File packageDir = new File(parentDir, packageDirName);
+                
+                ArchiveToPackageConverter converter = new ArchiveToPackageConverter();
+                converter.convert(archiveFile, packageDir);
+                return Boolean.TRUE;
+            } catch (MoltonfException ex) {
+                return Boolean.FALSE;
+            }
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPreExecute()
+         */
+        @Override
+        protected void onPreExecute() {
+            String message = "変換中";
+            progressDialog = ProgressDialog.show(VillageListActivity.this, "", message);
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
+        @Override
+        protected void onPostExecute(Boolean result) {
+            progressDialog.dismiss();
+
+            // TODO: resultみて何かする？
+        }
     }
 }
