@@ -96,9 +96,23 @@ public class WorkspaceListActivity extends ListActivity {
         setContentView(R.layout.workspace_list);
         
         // ワークスペースの一覧を更新
-        workspaceManager = new WorkspaceManager(this);
+        workspaceManager = new WorkspaceManager(getApplicationContext());
         reloadList();
     }
+
+    /**
+     * @see android.app.ListActivity#onDestroy()
+     */
+    @Override
+    protected void onDestroy() {
+        if (workspaceManager != null) {
+            workspaceManager.close();
+            workspaceManager = null;
+        }
+        
+        super.onDestroy();
+    }
+
 
     /**
      * ワークスペースの一覧を更新します。
