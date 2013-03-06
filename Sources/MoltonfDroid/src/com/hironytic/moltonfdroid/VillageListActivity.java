@@ -30,23 +30,25 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hironytic.moltonfdroid.model.StoryPeriod;
-import com.hironytic.moltonfdroid.model.archived.ArchiveToPackageConverter;
-
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import com.hironytic.moltonfdroid.model.archived.ArchiveToPackageConverter;
 
 /**
  * 村一覧のアクティビティ
  */
 public class VillageListActivity extends ListActivity {
+    
+    public static final String EXTRA_KEY_PACKAGE_DIR = "packageDir";
 
     /**
      * 村一覧に表示するパッケージディレクトリのアイテム
@@ -82,6 +84,15 @@ public class VillageListActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.village_list);
+        
+        Button cancelButton = (Button)findViewById(R.id.cancel);
+        cancelButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
         
         File moltonfDir = Moltonf.getInstance().getWorkDir();
         File playdatasDir = new File(moltonfDir, "playdatas");
@@ -126,16 +137,21 @@ public class VillageListActivity extends ListActivity {
 
         File packageDir = item.getPackageDir();
         if (packageDir.isDirectory()) {
-            Intent intent = new Intent(VillageListActivity.this, StoryActivity.class);
-            intent.putExtra(StoryActivity.EXTRA_KEY_PACKAGE_DIR, packageDir);
-            startActivity(intent);
+//            Intent intent = new Intent(VillageListActivity.this, StoryActivity.class);
+//            intent.putExtra(StoryActivity.EXTRA_KEY_PACKAGE_DIR, packageDir);
+//            startActivity(intent);
+            
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra(EXTRA_KEY_PACKAGE_DIR, packageDir);
+            setResult(RESULT_OK, resultIntent);
+            finish();
         } else {
             new ConvertArchiveToPackageTask().execute(packageDir);
         }
     }
     
     /**
-     * Storyをready状態にするタスク
+     * プレイデータアーカイブをパッケージディレクトリに変換するタスク
      */
     private class ConvertArchiveToPackageTask extends AsyncTask<File, Void, Boolean> {
         /** 読み込み中に表示するプログレスダイアログ */

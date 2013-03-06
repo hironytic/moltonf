@@ -25,14 +25,21 @@
 
 package com.hironytic.moltonfdroid;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
+import com.hironytic.moltonfdroid.model.Workspace;
 import com.hironytic.moltonfdroid.model.WorkspaceManager;
 
 /**
@@ -40,6 +47,8 @@ import com.hironytic.moltonfdroid.model.WorkspaceManager;
  */
 public class WorkspaceListActivity extends ListActivity {
 
+    private static final int REQUEST_SELECT_PACKAGE_DIR = 100;
+    
     /**
      * ワークスペース一覧に表示する1つ分のデータ
      */
@@ -113,6 +122,52 @@ public class WorkspaceListActivity extends ListActivity {
         super.onDestroy();
     }
 
+    /**
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.workspace_option, menu);
+
+        return menu.hasVisibleItems();
+    }
+
+    /**
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        boolean result = false;
+        int id = item.getItemId();
+        switch (id) {
+        case R.id.menu_workspace_new_data:
+            result = processMenuNewData();
+            break;
+        default:
+            result = super.onOptionsItemSelected(item);
+            break;
+        }
+        
+        return result;
+    }
+
+    /**
+     * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+        case REQUEST_SELECT_PACKAGE_DIR:
+            processSelectPackageDirRequest(resultCode, data);
+            break;
+        default:
+            super.onActivityResult(requestCode, resultCode, data);
+            break;
+        }
+    }
 
     /**
      * ワークスペースの一覧を更新します。
@@ -131,5 +186,38 @@ public class WorkspaceListActivity extends ListActivity {
         }
         ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(this, android.R.layout.simple_list_item_1, listItems);
         setListAdapter(adapter);
+    }
+
+    /**
+     * 新しい観戦データ作成メニューが選ばれたときの処理
+     * @return 処理したらtrue
+     */
+    private boolean processMenuNewData() {
+        // 観戦するプレイデータパッケージを選択させる
+        Intent intent = new Intent(this, VillageListActivity.class);
+        startActivityForResult(intent, REQUEST_SELECT_PACKAGE_DIR);
+        return true;
+    }
+
+    /**
+     * 観戦するプレイデータパッケージ選択から戻ってきたときの処理
+     * @param resultCode
+     * @param data
+     */
+    private void processSelectPackageDirRequest(int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        
+        File packageDir = (File)data.getSerializableExtra(VillageListActivity.EXTRA_KEY_PACKAGE_DIR);
+        String title = packageDir.getName();
+        
+        Workspace ws = new Workspace();
+        ws.setPackageDir(packageDir);
+        ws.setTitle(title);
+        
+        workspaceManager.save(ws);
+        
+        reloadList();
     }
 }
