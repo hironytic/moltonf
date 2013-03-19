@@ -88,7 +88,12 @@ public class StoryActivity extends Activity {
             long workspaceId = intent.getLongExtra(EXTRA_KEY_WORKSPACE_ID, 0);
             if (workspaceId > 0) {
                 WorkspaceManager wsManager = new WorkspaceManager(getApplicationContext());
-                workspace = wsManager.load(workspaceId);
+                try {
+                    workspace = wsManager.load(workspaceId);
+                } finally {
+                    wsManager.close();
+                }
+                
                 Story story = workspace.getStory();
                 if (story != null) {
                     if (story.isReady()) {
