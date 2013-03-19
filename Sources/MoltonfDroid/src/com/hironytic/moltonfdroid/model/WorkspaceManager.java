@@ -38,6 +38,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 
 /**
  * Moltonf ワークスペースを管理するオブジェクト
@@ -47,7 +48,7 @@ public class WorkspaceManager {
     // SQLite Database
     private static final String DB_NAME = "Workspace.db";
     private static final String TABLE_WORKSPACE = "WORKSPACE";
-    private static final String COLUMN_ID = "_id";
+    private static final String COLUMN_ID = BaseColumns._ID;
     private static final String COLUMN_DATA = "data";
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_UPDATED = "updated";
