@@ -42,7 +42,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -63,12 +62,14 @@ public class WorkspaceListActivity extends ListActivity {
     private static class WorkspaceListItem {
         private long workspaceId;
         private String title;
-        private long updated;
+// 今は使わないので消しておく
+//        private long updated;
         
         public WorkspaceListItem(Cursor cursor) {
             this.workspaceId = cursor.getLong(WorkspaceManager.LIST_COLUMN_INDEX_ID);
             this.title = cursor.getString(WorkspaceManager.LIST_COLUMN_INDEX_TITLE);
-            this.updated = cursor.getLong(WorkspaceManager.LIST_COLUMN_INDEX_UPDATED);
+// 今は使わないので消しておく
+//            this.updated = cursor.getLong(WorkspaceManager.LIST_COLUMN_INDEX_UPDATED);
         }
 
         /**
@@ -85,12 +86,13 @@ public class WorkspaceListActivity extends ListActivity {
             return title;
         }
 
-        /**
-         * @return the updated
-         */
-        public long getUpdated() {
-            return updated;
-        }
+// 今は使わないので消しておく
+//        /**
+//         * @return the updated
+//         */
+//        public long getUpdated() {
+//            return updated;
+//        }
 
         /**
          * @see java.lang.Object#toString()
@@ -202,8 +204,13 @@ public class WorkspaceListActivity extends ListActivity {
      * @see android.app.ListActivity#onListItemClick(android.widget.ListView, android.view.View, int, long)
      */
     @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+    protected void onListItemClick(ListView listView, View view, int position, long id) {
+        super.onListItemClick(listView, view, position, id);
+        
+        WorkspaceListItem item = (WorkspaceListItem)listView.getItemAtPosition(position);
+        Intent intent = new Intent(this, StoryActivity.class);
+        intent.putExtra(StoryActivity.EXTRA_KEY_WORKSPACE_ID, item.getWorkspaceId());
+        startActivity(intent);
     }
     
     /**

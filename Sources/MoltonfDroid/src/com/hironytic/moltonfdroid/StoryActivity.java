@@ -25,7 +25,6 @@
 
 package com.hironytic.moltonfdroid;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,21 +49,22 @@ import com.hironytic.moltonfdroid.model.PeriodType;
 import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
-import com.hironytic.moltonfdroid.model.archived.PackagedStory;
+import com.hironytic.moltonfdroid.model.Workspace;
+import com.hironytic.moltonfdroid.model.WorkspaceManager;
 
 /**
  * ストーリーを表示するActivity
  */
 public class StoryActivity extends Activity {
 
-    /** ストーリーを読み込むパッケージのディレクトリ */
-    public static final String EXTRA_KEY_PACKAGE_DIR = "MLTPackageDir";
+    /** 表示するワークスペースのID */
+    public static final String EXTRA_KEY_WORKSPACE_ID = "Moltonf.WorkspaceID";
     
     /** ストーリーを表示するメインとなるリストビュー */
     private ListView storyListView = null;
     
-    /** 表示中のストーリー */
-    private Story story = null;
+    /** 表示中のワークスペース */
+    private Workspace workspace = null;
     
     /** 現在のピリオドのインデックス */
     private int currentPeriodIndex = -1;
@@ -85,14 +85,18 @@ public class StoryActivity extends Activity {
         // 読み込むストーリーの受け渡し
         Intent intent = getIntent();
         if (intent != null) {
-            File packageDir = (File)intent.getSerializableExtra(EXTRA_KEY_PACKAGE_DIR);
-            if (packageDir != null) {
-                story = new PackagedStory(packageDir);
-                if (story.isReady()) {
-                    onStoryIsReady();
-                } else {
-                    ReadyStoryTask readyStoryTask = new ReadyStoryTask();
-                    readyStoryTask.execute();
+            long workspaceId = intent.getLongExtra(EXTRA_KEY_WORKSPACE_ID, 0);
+            if (workspaceId > 0) {
+                WorkspaceManager wsManager = new WorkspaceManager(getApplicationContext());
+                workspace = wsManager.load(workspaceId);
+                Story story = workspace.getStory();
+                if (story != null) {
+                    if (story.isReady()) {
+                        onStoryIsReady();
+                    } else {
+                        ReadyStoryTask readyStoryTask = new ReadyStoryTask();
+                        readyStoryTask.execute();
+                    }
                 }
             }
         }
@@ -211,9 +215,13 @@ public class StoryActivity extends Activity {
     
     /**
      * ストーリーのロードが終わったら呼ばれます。
-     * @param story
      */
     private void onStoryIsReady() {
+        Story story = workspace.getStory();
+        if (story == null) {
+            return;
+        }
+        
         // 村の名前をタイトルにセット
         setTitle(story.getVillageFullName());
         
@@ -235,6 +243,7 @@ public class StoryActivity extends Activity {
      * @return
      */
     private List<String> makePeriodStringList() {
+        Story story = workspace.getStory();
         if (story == null) {
             return null;
         }
@@ -283,6 +292,11 @@ public class StoryActivity extends Activity {
             return;
         }
         
+        Story story = workspace.getStory();
+        if (story == null) {
+            return;
+        }
+        
         if (story.getPeriodCount() > periodIndex) {
             currentPeriodIndex = periodIndex;
             setSelectedPeriodOnActionBar(periodIndex);
@@ -301,7 +315,7 @@ public class StoryActivity extends Activity {
      * ピリオドの準備ができたら呼ばれます。
      */
     private void onStoryPeriodIsReady(StoryPeriod period) {
-        StoryPeriod currentPeriod = story.getPeriod(currentPeriodIndex);
+        StoryPeriod currentPeriod = workspace.getStory().getPeriod(currentPeriodIndex);
         if (period == currentPeriod) {
             StoryElementListAdapter adapter;
             
@@ -338,7 +352,7 @@ public class StoryActivity extends Activity {
         @Override
         protected MoltonfException doInBackground(Void... params) {
             try {
-                StoryActivity.this.story.ready();
+                StoryActivity.this.workspace.getStory().ready();
                 return null;
             } catch (MoltonfException ex) {
                 return ex;

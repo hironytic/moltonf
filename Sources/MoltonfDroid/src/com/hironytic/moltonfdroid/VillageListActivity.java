@@ -48,7 +48,7 @@ import com.hironytic.moltonfdroid.model.archived.ArchiveToPackageConverter;
  */
 public class VillageListActivity extends ListActivity {
     
-    public static final String EXTRA_KEY_PACKAGE_DIR = "packageDir";
+    public static final String EXTRA_KEY_PACKAGE_DIR = "Moltonf.PackageDir";
 
     /**
      * 村一覧に表示するパッケージディレクトリのアイテム
