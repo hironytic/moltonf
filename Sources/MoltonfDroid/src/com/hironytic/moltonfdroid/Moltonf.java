@@ -31,7 +31,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Environment;
 
 import com.hironytic.moltonfdroid.model.HighlightSetting;
 import com.hironytic.moltonfdroid.util.Logger;
@@ -41,12 +40,14 @@ import com.hironytic.moltonfdroid.util.Logger;
  */
 public class Moltonf {
     private static final String LOGGER_TAG = "MoltonfDroid";
-    private static final String WORK_DIR_NAME = "MoltonfDroid";
 
     private static final Moltonf theInstance = new Moltonf();
     
     /** バージョン文字列 */
     private String versionString = null;
+    
+    /** MoltonfDroid アプリケーションの扱うファイルを格納しているディレクトリ */
+    private File workDir = null;
     
     /** ログ出力用オブジェクト */
     private Logger logger = new Logger(LOGGER_TAG);
@@ -95,20 +96,15 @@ public class Moltonf {
      *          取得できなければ null を返します。
      */
     public File getWorkDir() {
-        try {
-            File sdcardDir = Environment.getExternalStorageDirectory();
-            File moltonfDroidDir = new File(sdcardDir, WORK_DIR_NAME);
-            if (!moltonfDroidDir.exists()) {
-                if (sdcardDir.canWrite()) {
-                    moltonfDroidDir.mkdir();
-                } else {
-                    return null;
-                }
-            }
-            return moltonfDroidDir;
-        } catch (SecurityException ex) {
-            return null;
-        }
+        return workDir;
+    }
+    
+    /**
+     * MoltonfDroid アプリケーションの扱うファイルを格納しているディレクトリを設定します。
+     * @param workDir 作業ディレクトリ
+     */
+    public void setWorkDir(File workDir) {
+        this.workDir = workDir;
     }
 
     /**
