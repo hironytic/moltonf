@@ -219,12 +219,11 @@ public class LoadStoryImageTask extends AsyncTask<Story, LoadStoryImageTask.Prog
      */
     private File getIconFile(String fileName, boolean isForWrite) {
         try {
-            File workDir = Moltonf.getInstance().getWorkDir();
-            File iconDir = null;
-            if (workDir != null) {
-                iconDir = new File(workDir, "icons");
+            File iconDir = Moltonf.getInstance().getIconDir();
+            if (iconDir != null) {
+                File parentDir = iconDir.getParentFile();
                 if (!iconDir.exists()) {
-                    if (isForWrite && workDir.canWrite()) {
+                    if (isForWrite && parentDir != null && parentDir.canWrite()) {
                         iconDir.mkdir();
                         try {
                             (new File(iconDir, ".nomedia")).createNewFile();
