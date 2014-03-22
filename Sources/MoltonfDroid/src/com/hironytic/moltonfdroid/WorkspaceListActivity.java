@@ -54,7 +54,8 @@ import com.hironytic.moltonfdroid.model.WorkspaceManager;
  */
 public class WorkspaceListActivity extends ListActivity {
 
-    private static final int REQUEST_SELECT_PACKAGE_DIR = 100;
+    private static final int REQUEST_SELECT_ARCHIVE_FILE = 100;
+    private static final int REQUEST_SELECT_PACKAGE_DIR = 101;
     
     /**
      * ワークスペース一覧に表示する1つ分のデータ
@@ -252,10 +253,14 @@ public class WorkspaceListActivity extends ListActivity {
      * @return 処理したらtrue
      */
     private boolean processMenuNewData() {
-        // 観戦するプレイデータパッケージを選択させる
-        Intent intent = new Intent(this, VillageListActivity.class);
-        startActivityForResult(intent, REQUEST_SELECT_PACKAGE_DIR);
+        Intent intent = new Intent(this, FileListActivity.class);
+        startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE);
         return true;
+        
+//        // 観戦するプレイデータパッケージを選択させる
+//        Intent intent = new Intent(this, VillageListActivity.class);
+//        startActivityForResult(intent, REQUEST_SELECT_PACKAGE_DIR);
+//        return true;
     }
 
     /**
