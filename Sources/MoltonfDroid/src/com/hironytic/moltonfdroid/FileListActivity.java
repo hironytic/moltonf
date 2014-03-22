@@ -116,7 +116,8 @@ public class FileListActivity extends ListActivity {
         if (dir != null) {
             File parentFile = dir.getParentFile();
             if (parentFile != null) {
-                itemList.add(new ListItem(parentFile, "親ディレクトリへ"));   // TODO: 文字列はリソースへ
+                String displayName = getString(R.string.select_file_to_parent);
+                itemList.add(new ListItem(parentFile, displayName));
             }
             File[] fileList = dir.listFiles();
             if (fileList != null) {
