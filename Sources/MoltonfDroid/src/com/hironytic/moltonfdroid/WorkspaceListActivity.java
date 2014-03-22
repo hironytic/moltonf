@@ -31,10 +31,12 @@ import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -48,6 +50,8 @@ import android.widget.ListView;
 
 import com.hironytic.moltonfdroid.model.Workspace;
 import com.hironytic.moltonfdroid.model.WorkspaceManager;
+import com.hironytic.moltonfdroid.model.archived.ArchiveToPackageConverter;
+import com.hironytic.moltonfdroid.util.Proc1;
 
 /**
  * 
@@ -55,7 +59,6 @@ import com.hironytic.moltonfdroid.model.WorkspaceManager;
 public class WorkspaceListActivity extends ListActivity {
 
     private static final int REQUEST_SELECT_ARCHIVE_FILE = 100;
-    private static final int REQUEST_SELECT_PACKAGE_DIR = 101;
     
     /**
      * ワークスペース一覧に表示する1つ分のデータ
@@ -220,8 +223,8 @@ public class WorkspaceListActivity extends ListActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-        case REQUEST_SELECT_PACKAGE_DIR:
-            processSelectPackageDirRequest(resultCode, data);
+        case REQUEST_SELECT_ARCHIVE_FILE:
+            processSelectArchiveFileRequest(resultCode, data);
             break;
         default:
             super.onActivityResult(requestCode, resultCode, data);
@@ -253,36 +256,121 @@ public class WorkspaceListActivity extends ListActivity {
      * @return 処理したらtrue
      */
     private boolean processMenuNewData() {
+        // TODO: KitKat以降なら、OSの選択UIを使いたい
+        // プレイデータアーカイブを選択させる
         Intent intent = new Intent(this, FileListActivity.class);
         startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE);
         return true;
-        
-//        // 観戦するプレイデータパッケージを選択させる
-//        Intent intent = new Intent(this, VillageListActivity.class);
-//        startActivityForResult(intent, REQUEST_SELECT_PACKAGE_DIR);
-//        return true;
     }
 
     /**
-     * 観戦するプレイデータパッケージ選択から戻ってきたときの処理
+     * 新しい観戦データ作成メニューでアーカイブファイル選択から戻ってきたときの処理
      * @param resultCode
      * @param data
      */
-    private void processSelectPackageDirRequest(int resultCode, Intent data) {
+    private void processSelectArchiveFileRequest(int resultCode, Intent data) {
         if (resultCode != RESULT_OK) {
             return;
         }
         
-        File packageDir = (File)data.getSerializableExtra(VillageListActivity.EXTRA_KEY_PACKAGE_DIR);
-        String title = packageDir.getName();
+        File archiveFile = (File)data.getSerializableExtra(FileListActivity.EXTRA_KEY_FILE);
+        ConvertArchiveToPackageTask task = new ConvertArchiveToPackageTask();
+        task.setFinishProc(new Proc1<File>() {
+            @Override
+            public void perform(File packageDir) {
+                if (packageDir == null) {
+                    // TODO: エラー
+                    return;
+                }
+                
+                // TODO: これは村の名前をとった方がいい
+                String title = packageDir.getName();
+                
+                Workspace ws = new Workspace();
+                ws.setPackageDir(packageDir);
+                ws.setTitle(title);
+                
+                workspaceManager.save(ws);
+                
+                reloadList();
+            }
+        });
+        task.execute(archiveFile);
+    }
+    
+    /**
+     * プレイデータアーカイブをパッケージディレクトリに変換するタスク
+     */
+    private class ConvertArchiveToPackageTask extends AsyncTask<File, Void, Boolean> {
+        /** 読み込み中に表示するプログレスダイアログ */
+        private ProgressDialog progressDialog;
         
-        Workspace ws = new Workspace();
-        ws.setPackageDir(packageDir);
-        ws.setTitle(title);
+        /** 変換結果のパッケージディレクトリ */
+        private File packageDir;
+
+        /** 変換が終わったら呼ばれる処理 */
+        private Proc1<File> finishProc;
         
-        workspaceManager.save(ws);
+        public void setFinishProc(Proc1<File> finishProc) {
+            this.finishProc = finishProc;
+        }
         
-        reloadList();
+        /**
+         * @see android.os.AsyncTask#doInBackground(Params[])
+         */
+        @Override
+        protected Boolean doInBackground(File... params) {
+            try {
+                File archiveFile = params[0];
+                String archiveFileName = archiveFile.getName();
+                int extIndex = archiveFileName.lastIndexOf(".");
+                String packageDirName = archiveFileName.substring(0, extIndex);
+                
+                File playDataDir = Moltonf.getInstance().getPlayDataDir();
+                if (playDataDir == null) {
+                    return Boolean.FALSE;
+                }
+                if (!playDataDir.exists()) {
+                    if (!playDataDir.mkdir()) {
+                        return Boolean.FALSE;
+                    }
+                }
+                
+                packageDir = new File(playDataDir, packageDirName);
+                if (packageDir.exists()) {
+                    // TODO: 重複しないユニークな名前を生成
+                }
+                
+                ArchiveToPackageConverter converter = new ArchiveToPackageConverter();
+                converter.convert(archiveFile, packageDir);
+                return Boolean.TRUE;
+            } catch (MoltonfException ex) {
+                return Boolean.FALSE;
+            }
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPreExecute()
+         */
+        @Override
+        protected void onPreExecute() {
+            String message = "変換中";     // TODO: リソースへ
+            progressDialog = ProgressDialog.show(WorkspaceListActivity.this, "", message);
+        }
+
+        /**
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
+        @Override
+        protected void onPostExecute(Boolean result) {
+            progressDialog.dismiss();
+
+            if (result.booleanValue()) {
+                finishProc.perform(packageDir);
+            } else {
+                finishProc.perform(null);
+            }
+        }
     }
 
     /**
