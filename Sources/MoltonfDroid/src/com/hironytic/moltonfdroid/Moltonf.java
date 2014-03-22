@@ -41,6 +41,9 @@ import com.hironytic.moltonfdroid.util.Logger;
 public class Moltonf {
     private static final String LOGGER_TAG = "MoltonfDroid";
 
+    private static final String WORKDIR_ICONS = "icons";
+    private static final String WORKDIR_PLAYDATA = "playdata";
+    
     private static final Moltonf theInstance = new Moltonf();
     
     /** バージョン文字列 */
@@ -107,6 +110,30 @@ public class Moltonf {
         this.workDir = workDir;
     }
 
+    /**
+     * アイコンを格納するディレクトリを返します。
+     * @return アイコンを格納するディレクトリ。取得できなければnullを返します。
+     */
+    public File getIconDir() {
+        if (workDir != null) {
+            return new File(workDir, WORKDIR_ICONS);
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * プレイデータパッケージを格納するディレクトリを返します
+     * @return プレイデータパッケージを格納するディレクトリ。取得できなければnullを返します。
+     */
+    public File getPlayDataDir() {
+        if (workDir != null) {
+            return new File(workDir, WORKDIR_PLAYDATA);
+        } else {
+            return null;
+        }
+    }
+    
     /**
      * ストーリーを表示する際の強調表示設定を返します。
      * @param context コンテキスト
