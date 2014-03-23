@@ -51,7 +51,7 @@ import android.widget.ListView;
 import com.hironytic.moltonfdroid.model.Workspace;
 import com.hironytic.moltonfdroid.model.WorkspaceManager;
 import com.hironytic.moltonfdroid.model.archived.ArchiveToPackageConverter;
-import com.hironytic.moltonfdroid.util.Proc1;
+import com.hironytic.moltonfdroid.model.archived.PackagedStory;
 
 /**
  * 
@@ -274,53 +274,31 @@ public class WorkspaceListActivity extends ListActivity {
         }
         
         File archiveFile = (File)data.getSerializableExtra(FileListActivity.EXTRA_KEY_FILE);
-        ConvertArchiveToPackageTask task = new ConvertArchiveToPackageTask();
-        task.setFinishProc(new Proc1<File>() {
-            @Override
-            public void perform(File packageDir) {
-                if (packageDir == null) {
-                    // TODO: エラー
-                    return;
-                }
-                
-                // TODO: これは村の名前をとった方がいい
-                String title = packageDir.getName();
-                
-                Workspace ws = new Workspace();
-                ws.setPackageDir(packageDir);
-                ws.setTitle(title);
-                
-                workspaceManager.save(ws);
-                
-                reloadList();
-            }
-        });
+        CreateNewWorkspaceTask task = new CreateNewWorkspaceTask();
         task.execute(archiveFile);
     }
     
     /**
-     * プレイデータアーカイブをパッケージディレクトリに変換するタスク
+     * プレイデータアーカイブから新規ワークスペースを作成するタスク
      */
-    private class ConvertArchiveToPackageTask extends AsyncTask<File, Void, Boolean> {
+    private class CreateNewWorkspaceTask extends AsyncTask<File, Void, Boolean> {
         /** 読み込み中に表示するプログレスダイアログ */
         private ProgressDialog progressDialog;
         
         /** 変換結果のパッケージディレクトリ */
         private File packageDir;
+        
+        /** ワークスペースのタイトル */
+        private String workspaceTitle;
 
-        /** 変換が終わったら呼ばれる処理 */
-        private Proc1<File> finishProc;
-        
-        public void setFinishProc(Proc1<File> finishProc) {
-            this.finishProc = finishProc;
-        }
-        
         /**
          * @see android.os.AsyncTask#doInBackground(Params[])
          */
         @Override
         protected Boolean doInBackground(File... params) {
             try {
+                // アーカイブファイルからパッケージファイルに変換
+                // パッケージファイルはMoltonfのplaydataディレクトリに作成
                 File archiveFile = params[0];
                 String archiveFileName = archiveFile.getName();
                 int extIndex = archiveFileName.lastIndexOf(".");
@@ -336,13 +314,25 @@ public class WorkspaceListActivity extends ListActivity {
                     }
                 }
                 
+                int seq = 1;
                 packageDir = new File(playDataDir, packageDirName);
-                if (packageDir.exists()) {
-                    // TODO: 重複しないユニークな名前を生成
+                while (packageDir.exists()) {
+                    // 連番を付けて、ユニークな名前を生成
+                    packageDir = new File(playDataDir, String.format("%s-%d", packageDirName, seq));
+                    ++seq;
+                    if (seq > 9999) {   // まあ念のため...
+                        throw new MoltonfException("Couldn't create unique package directory");
+                    }
                 }
                 
                 ArchiveToPackageConverter converter = new ArchiveToPackageConverter();
                 converter.convert(archiveFile, packageDir);
+                
+                // 村の名前を取得
+                PackagedStory story = new PackagedStory(packageDir);
+                story.ready();
+                workspaceTitle = story.getVillageFullName();
+                
                 return Boolean.TRUE;
             } catch (MoltonfException ex) {
                 return Boolean.FALSE;
@@ -354,7 +344,7 @@ public class WorkspaceListActivity extends ListActivity {
          */
         @Override
         protected void onPreExecute() {
-            String message = "変換中";     // TODO: リソースへ
+            String message = WorkspaceListActivity.this.getString(R.string.message_creating_new_workspace);
             progressDialog = ProgressDialog.show(WorkspaceListActivity.this, "", message);
         }
 
@@ -366,9 +356,24 @@ public class WorkspaceListActivity extends ListActivity {
             progressDialog.dismiss();
 
             if (result.booleanValue()) {
-                finishProc.perform(packageDir);
+                Workspace ws = new Workspace();
+                ws.setPackageDir(packageDir);
+                ws.setTitle(workspaceTitle);
+                
+                workspaceManager.save(ws);
+                
+                reloadList();
             } else {
-                finishProc.perform(null);
+                // 作成失敗
+                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListActivity.this);
+                builder.setMessage(R.string.message_failed_to_create_new_workspace);
+                builder.setNeutralButton(R.string.ok, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 何もしない
+                    }
+                });
+                builder.show();
             }
         }
     }
