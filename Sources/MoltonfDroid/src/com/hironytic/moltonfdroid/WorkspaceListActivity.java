@@ -25,10 +25,16 @@
 
 package com.hironytic.moltonfdroid;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -36,8 +42,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -59,6 +68,7 @@ import com.hironytic.moltonfdroid.model.archived.PackagedStory;
 public class WorkspaceListActivity extends ListActivity {
 
     private static final int REQUEST_SELECT_ARCHIVE_FILE = 100;
+    private static final int REQUEST_SELECT_ARCHIVE_FILE_V19 = 101;
     
     /**
      * ワークスペース一覧に表示する1つ分のデータ
@@ -160,7 +170,12 @@ public class WorkspaceListActivity extends ListActivity {
         int id = item.getItemId();
         switch (id) {
         case R.id.menu_workspace_new_data:
-            result = processMenuNewData();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                // KitKat以降なら、OSの選択UI (Storage Access Framework) を使う
+                result = processMenuNewDataV19();
+            } else {
+                result = processMenuNewData();
+            }
             break;
         default:
             result = super.onOptionsItemSelected(item);
@@ -226,6 +241,9 @@ public class WorkspaceListActivity extends ListActivity {
         case REQUEST_SELECT_ARCHIVE_FILE:
             processSelectArchiveFileRequest(resultCode, data);
             break;
+        case REQUEST_SELECT_ARCHIVE_FILE_V19:
+            processSelectArchiveFileRequestV19(resultCode, data);
+            break;
         default:
             super.onActivityResult(requestCode, resultCode, data);
             break;
@@ -256,7 +274,6 @@ public class WorkspaceListActivity extends ListActivity {
      * @return 処理したらtrue
      */
     private boolean processMenuNewData() {
-        // TODO: KitKat以降なら、OSの選択UIを使いたい
         // プレイデータアーカイブを選択させる
         Intent intent = new Intent(this, FileListActivity.class);
         startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE);
@@ -279,9 +296,36 @@ public class WorkspaceListActivity extends ListActivity {
     }
     
     /**
+     * 新しい観戦データ作成メニューが選ばれたときの処理
+     * @return 処理したらtrue
+     */
+    @TargetApi(19)
+    private boolean processMenuNewDataV19() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("application/xml");
+        startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE_V19);
+        return true;
+    }
+    
+    /**
+     * 新しい観戦データ作成メニューでアーカイブファイル選択から戻ってきたときの処理
+     * @param resultCode
+     * @param data
+     */
+    private void processSelectArchiveFileRequestV19(int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        
+        Uri archiveUri = data.getData();
+        CreateNewWorkspaceTask task = new CreateNewWorkspaceTask();
+        task.execute(archiveUri);
+    }    
+    
+    /**
      * プレイデータアーカイブから新規ワークスペースを作成するタスク
      */
-    private class CreateNewWorkspaceTask extends AsyncTask<File, Void, Boolean> {
+    private class CreateNewWorkspaceTask extends AsyncTask<Object, Void, Boolean> {
         /** 読み込み中に表示するプログレスダイアログ */
         private ProgressDialog progressDialog;
         
@@ -295,15 +339,9 @@ public class WorkspaceListActivity extends ListActivity {
          * @see android.os.AsyncTask#doInBackground(Params[])
          */
         @Override
-        protected Boolean doInBackground(File... params) {
+        protected Boolean doInBackground(Object... params) {
             try {
-                // アーカイブファイルからパッケージファイルに変換
-                // パッケージファイルはMoltonfのplaydataディレクトリに作成
-                File archiveFile = params[0];
-                String archiveFileName = archiveFile.getName();
-                int extIndex = archiveFileName.lastIndexOf(".");
-                String packageDirName = archiveFileName.substring(0, extIndex);
-                
+                // パッケージはMoltonfのplaydataディレクトリに作成
                 File playDataDir = Moltonf.getInstance().getPlayDataDir();
                 if (playDataDir == null) {
                     return Boolean.FALSE;
@@ -313,11 +351,37 @@ public class WorkspaceListActivity extends ListActivity {
                         return Boolean.FALSE;
                     }
                 }
+
+                // 引数にはFileかUriが入ってくる
+                File archiveFile = (params[0] instanceof File) ? (File)params[0] : null;
+                Uri archiveUri = (params[0] instanceof Uri) ? (Uri)params[0] : null;
                 
+                // パッケージのディレクトリ名の元になる名前を取得
+                String packageDirName = null;
+                if (archiveFile != null) {
+                    String archiveFileName = archiveFile.getName();
+                    int extIndex = archiveFileName.lastIndexOf(".");
+                    packageDirName = archiveFileName.substring(0, extIndex);
+                } else if (archiveUri != null) {
+                    Cursor cursor = getContentResolver().query(archiveUri, null, null, null, null, null);
+                    try {
+                        cursor.moveToFirst();
+                        String displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                        int extIndex = displayName.lastIndexOf(".");
+                        packageDirName = displayName.substring(0, extIndex);
+                    } finally {
+                        cursor.close();
+                    }                    
+                }
+                if (packageDirName == null) {
+                    return Boolean.FALSE;
+                }
+
+                // パッケージディレクトリ名を決定
+                // すでに同じ名前のディレクトリが存在する場合は連番を付けて衝突を回避する。
                 int seq = 1;
                 packageDir = new File(playDataDir, packageDirName);
                 while (packageDir.exists()) {
-                    // 連番を付けて、ユニークな名前を生成
                     packageDir = new File(playDataDir, String.format("%s-%d", packageDirName, seq));
                     ++seq;
                     if (seq > 9999) {   // まあ念のため...
@@ -325,8 +389,27 @@ public class WorkspaceListActivity extends ListActivity {
                     }
                 }
                 
+                // アーカイブからパッケージに変換
                 ArchiveToPackageConverter converter = new ArchiveToPackageConverter();
-                converter.convert(archiveFile, packageDir);
+                if (archiveFile != null) {
+                    converter.convert(archiveFile, packageDir);
+                } else if (archiveUri != null) {
+                    try {
+                        InputStream inputStream = getContentResolver().openInputStream(archiveUri);
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                        try {
+                            converter.convert(reader, packageDir);
+                        } finally {
+                            try {
+                                reader.close();
+                            } catch (IOException ex) {
+                                // ignore
+                            }
+                        }
+                    } catch (FileNotFoundException ex) {
+                        throw new MoltonfException(ex);
+                    }
+                }
                 
                 // 村の名前を取得
                 PackagedStory story = new PackagedStory(packageDir);

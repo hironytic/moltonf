@@ -60,6 +60,28 @@ public class ArchiveToPackageConverter {
      * @param packageDir 変換先のパッケージディレクトリ
      */
     public void convert(File archiveFile, File packageDir) {
+        try {
+            Reader fileReader = new BufferedReader(new FileReader(archiveFile));
+            try {
+                convert(fileReader, packageDir);
+            } finally {
+                try {
+                    fileReader.close();
+                } catch (IOException ex) {
+                    // ignore
+                }
+            }
+        } catch (IOException ex) {
+            throw new MoltonfException(ex);
+        }
+    }
+
+    /**
+     * 変換を行います。
+     * @param archiveReader 変換元のアーカイブXMLのReader
+     * @param packageDir 変換先のパッケージディレクトリ
+     */
+    public void convert(Reader archiveReader, File packageDir) {
         this.packageDir = packageDir;
         
         if (!packageDir.exists()) {
@@ -73,24 +95,15 @@ public class ArchiveToPackageConverter {
             parserFactory.setValidating(false);
             parserFactory.setNamespaceAware(true);
             XmlPullParser staxReader = parserFactory.newPullParser();
-            Reader fileReader = new BufferedReader(new FileReader(archiveFile));
-            staxReader.setInput(fileReader);
-            try {
-                for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
-                    if (eventType == XmlPullParser.START_TAG) {
-                        QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                        if (SchemaConstants.NAME_VILLAGE.equals(elemName)) {
-                            convertVillageElement(staxReader);
-                        } else {
-                            throw new MoltonfException("Not a bbs play-data archive.");
-                        }
+            staxReader.setInput(archiveReader);
+            for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
+                if (eventType == XmlPullParser.START_TAG) {
+                    QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
+                    if (SchemaConstants.NAME_VILLAGE.equals(elemName)) {
+                        convertVillageElement(staxReader);
+                    } else {
+                        throw new MoltonfException("Not a bbs play-data archive.");
                     }
-                }
-            } finally {
-                try {
-                    fileReader.close();
-                } catch (IOException ex) {
-                    // ignore
                 }
             }
         } catch (XmlPullParserException ex) {
@@ -101,7 +114,7 @@ public class ArchiveToPackageConverter {
             throw new MoltonfException(ex);
         }
     }
-
+    
     /**
      * village 要素以下を変換します。
      * このメソッドが呼ばれたとき staxReader は village 要素の START_TAG にいることが前提です。
