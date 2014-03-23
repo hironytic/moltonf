@@ -25,6 +25,9 @@
 
 package com.hironytic.moltonfdroid.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * コードを簡潔に書くためのユーティリティ
  */
@@ -55,5 +58,18 @@ public class SmartUtils {
      */
     public static boolean isStringEmpty(String str) {
         return str.length() == 0;
+    }
+
+    /**
+     * リストを結合します。
+     * @param lists
+     * @return
+     */
+    public static <T> List<T> concatLists(List<T>... lists) {
+        ArrayList<T> list = new ArrayList<T>();
+        for (List<T> aList : lists) {
+            list.addAll(aList);
+        }
+        return list;
     }
 }

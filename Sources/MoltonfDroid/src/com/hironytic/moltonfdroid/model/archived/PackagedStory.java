@@ -112,7 +112,7 @@ public class PackagedStory extends BasicStory implements Story {
                 for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
                     if (eventType == XmlPullParser.START_TAG) {
                         QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                        if (SchemaConstants.NAME_VILLAGE.equals(elemName)) {
+                        if (SchemaConstants.NAME_VILLAGE.contains(elemName)) {
                             loadVillageElement(staxReader, villageFile);
                         } else {
                             throw new MoltonfException("Not a bbs play-data archive.");
@@ -200,9 +200,9 @@ public class PackagedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_AVATAR_LIST.equals(elemName)) {
+                if (SchemaConstants.NAME_AVATAR_LIST.contains(elemName)) {
                     setAvatarList(loadAvatarList(staxReader));
-                } else if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
+                } else if (SchemaConstants.NAME_PERIOD.contains(elemName)) {
                     StoryPeriod period = PackagedStoryPeriod.loadVillagePeriod(villageFile, staxReader);
                     period.setStory(this);
                     periodList.add(period);
@@ -254,7 +254,7 @@ public class PackagedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_AVATAR.equals(elemName)) {
+                if (SchemaConstants.NAME_AVATAR.contains(elemName)) {
                     avatarList.add(loadAvatar(staxReader));
                 } else {
                     XmlUtils.skipElement(staxReader);

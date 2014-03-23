@@ -99,7 +99,7 @@ public class ArchiveToPackageConverter {
             for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
                 if (eventType == XmlPullParser.START_TAG) {
                     QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                    if (SchemaConstants.NAME_VILLAGE.equals(elemName)) {
+                    if (SchemaConstants.NAME_VILLAGE.contains(elemName)) {
                         convertVillageElement(staxReader);
                     } else {
                         throw new MoltonfException("Not a bbs play-data archive.");
@@ -144,7 +144,7 @@ public class ArchiveToPackageConverter {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
+                if (SchemaConstants.NAME_PERIOD.contains(elemName)) {
                     convertPeriodElement(staxReader, villageSerializer);
                 } else {
                     convertGeneralElement(staxReader, villageSerializer);

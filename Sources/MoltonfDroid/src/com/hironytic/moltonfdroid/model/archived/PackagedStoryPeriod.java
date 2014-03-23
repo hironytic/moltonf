@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -57,6 +56,7 @@ import com.hironytic.moltonfdroid.model.basic.BasicStoryPeriod;
 import com.hironytic.moltonfdroid.model.basic.BasicTalk;
 import com.hironytic.moltonfdroid.model.basic.BasicWolfAttackTalk;
 import com.hironytic.moltonfdroid.util.QName;
+import com.hironytic.moltonfdroid.util.SmartUtils;
 import com.hironytic.moltonfdroid.util.TimePart;
 import com.hironytic.moltonfdroid.util.XmlUtils;
 
@@ -118,7 +118,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
                     if (eventType == XmlPullParser.START_TAG) {
                         QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                        if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
+                        if (SchemaConstants.NAME_PERIOD.contains(elemName)) {
                             loadPeriod(staxReader, false, null);
                         } else {
                             throw new MoltonfException("Not a bbs play-data archive.");
@@ -197,7 +197,8 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
             }
         } else {
             // period-x.xmlを読み込んでいるときは子ノードをまじめに読み込む。
-            final List<QName> eventAnnounceGroup = Arrays.asList(new QName[] {
+            @SuppressWarnings("unchecked")
+            final List<QName> eventAnnounceGroup = SmartUtils.concatLists(
                 SchemaConstants.NAME_START_ENTRY, SchemaConstants.NAME_ON_STAGE,
                 SchemaConstants.NAME_START_MIRROR, SchemaConstants.NAME_OPEN_ROLE,
                 SchemaConstants.NAME_MURDERED, SchemaConstants.NAME_START_ASSAULT,
@@ -205,23 +206,27 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 SchemaConstants.NAME_SUDDEN_DEATH, SchemaConstants.NAME_NO_MURDER,
                 SchemaConstants.NAME_WIN_VILLAGE, SchemaConstants.NAME_WIN_WOLF,
                 SchemaConstants.NAME_WIN_HAMSTER, SchemaConstants.NAME_PLAYER_LIST,
-                SchemaConstants.NAME_PANIC,
-            });
-            final List<QName> eventOrderGroup = Arrays.asList(new QName[] {
+                SchemaConstants.NAME_PANIC
+            );
+
+            @SuppressWarnings("unchecked")
+            final List<QName> eventOrderGroup = SmartUtils.concatLists(
                 SchemaConstants.NAME_ASK_ENTRY, SchemaConstants.NAME_ASK_COMMIT,
                 SchemaConstants.NAME_NO_COMMENT, SchemaConstants.NAME_STAY_EPILOGUE,
-                SchemaConstants.NAME_GAME_OVER,
-            });
-            final List<QName> eventExtraGroup = Arrays.asList(new QName[] {
-                SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD,
-            });
+                SchemaConstants.NAME_GAME_OVER
+            );
+            
+            @SuppressWarnings("unchecked")
+            final List<QName> eventExtraGroup = SmartUtils.concatLists(
+                SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD
+            );
             
             for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
                 if (eventType == XmlPullParser.END_TAG) {
                     break;
                 } else if (eventType == XmlPullParser.START_TAG) {
                     QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                    if (SchemaConstants.NAME_TALK.equals(elemName)) {
+                    if (SchemaConstants.NAME_TALK.contains(elemName)) {
                         elementList.add(loadTalk(staxReader));
                     } else if (eventAnnounceGroup.contains(elemName)) {
                         elementList.add(loadStoryEvent(staxReader, EventFamily.ANNOUNCE));
@@ -229,7 +234,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                         elementList.add(loadStoryEvent(staxReader, EventFamily.ORDER));
                     } else if (eventExtraGroup.contains(elemName)) {
                         elementList.add(loadStoryEvent(staxReader, EventFamily.EXTRA));
-                    } else if (SchemaConstants.NAME_ASSAULT.equals(elemName)) {
+                    } else if (SchemaConstants.NAME_ASSAULT.contains(elemName)) {
                         elementList.add(loadAssault(staxReader));
                     } else {
                         XmlUtils.skipElement(staxReader);
@@ -298,7 +303,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                if (SchemaConstants.NAME_LI.contains(elemName)) {
                     messageLines.add(loadLi(staxReader));
                 } else {
                     XmlUtils.skipElement(staxReader);
@@ -354,10 +359,10 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                if (SchemaConstants.NAME_LI.contains(elemName)) {
                     messageLines.add(loadLi(staxReader));
-                } else if (SchemaConstants.NAME_PLAYER_LIST.equals(storyEventElemName) &&
-                        SchemaConstants.NAME_PLAYER_INFO.equals(elemName)) {
+                } else if (SchemaConstants.NAME_PLAYER_LIST.contains(storyEventElemName) &&
+                        SchemaConstants.NAME_PLAYER_INFO.contains(elemName)) {
                     loadPlayerInfo(staxReader);
                 } else {
                     XmlUtils.skipElement(staxReader);
@@ -472,7 +477,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                if (SchemaConstants.NAME_LI.contains(elemName)) {
                     messageLines.add(loadLi(staxReader));
                 } else {
                     XmlUtils.skipElement(staxReader);
@@ -501,7 +506,7 @@ public class PackagedStoryPeriod extends BasicStoryPeriod implements StoryPeriod
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_RAWDATA.equals(elemName)) {
+                if (SchemaConstants.NAME_RAWDATA.contains(elemName)) {
                     loadRawdata(staxReader, buf);
                 } else {
                     XmlUtils.skipElement(staxReader);

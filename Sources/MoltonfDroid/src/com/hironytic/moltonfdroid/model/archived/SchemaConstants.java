@@ -25,6 +25,9 @@
 
 package com.hironytic.moltonfdroid.model.archived;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.hironytic.moltonfdroid.util.QName;
 
 /**
@@ -32,6 +35,12 @@ import com.hironytic.moltonfdroid.util.QName;
  */
 public class SchemaConstants {
 
+    private static List<QName> createArchiveQNameList(String localName) {
+        return Arrays.asList(
+                new QName(NS_ARCHIVE_501, localName),
+                new QName(NS_ARCHIVE_401, localName));
+    }
+    
     /** 名前空間接頭辞 xml の名前空間URI */
     public static final String NS_XML = "http://www.w3.org/XML/1998/namespace";
     
@@ -44,8 +53,11 @@ public class SchemaConstants {
     /** 名前空間接頭辞 xlink */
     public static final String PREFIX_XLINK = "xlink";
     
-    /** 共通アーカイブ基盤用スキーマの名前空間URI */
-    public static final String NS_ARCHIVE = "http://jindolf.sourceforge.jp/xml/ns/401";
+    /** 共通アーカイブ基盤用スキーマの名前空間URI (401) */
+    public static final String NS_ARCHIVE_401 = "http://jindolf.sourceforge.jp/xml/ns/401";
+    
+    /** 共通アーカイブ基盤用スキーマの名前空間URI (501) */
+    public static final String NS_ARCHIVE_501 = "http://jindolf.sourceforge.jp/xml/ns/501";     // 110420版以降 
 
     /* 
      * --------------------------------------------------
@@ -68,8 +80,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** village 要素の QName */
-    public static final QName NAME_VILLAGE = new QName(NS_ARCHIVE, "village");
+    /** village 要素の QName リスト */
+    public static final List<QName> NAME_VILLAGE = createArchiveQNameList("village");
 
     /** xml:base 属性の QName */
     public static final QName NAME_BASE = new QName(NS_XML, "base", PREFIX_XML);
@@ -101,8 +113,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** avatarList 要素の QName */
-    public static final QName NAME_AVATAR_LIST = new QName(NS_ARCHIVE, "avatarList");
+    /** avatarList 要素の QName リスト */
+    public static final List<QName> NAME_AVATAR_LIST = createArchiveQNameList("avatarList");
     
     /* 
      * --------------------------------------------------
@@ -110,8 +122,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** avatar 要素の QName */
-    public static final QName NAME_AVATAR = new QName(NS_ARCHIVE, "avatar");
+    /** avatar 要素の QName リスト */
+    public static final List<QName> NAME_AVATAR = createArchiveQNameList("avatar");
     
     /** avatarId 属性の QName */
     public static final QName NAME_AVATAR_ID = new QName("avatarId");
@@ -131,8 +143,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** period 要素の QName */
-    public static final QName NAME_PERIOD = new QName(NS_ARCHIVE, "period");
+    /** period 要素の QName リスト */
+    public static final List<QName> NAME_PERIOD = createArchiveQNameList("period");
     
 //    /** type 属性の QName */
 //    public static final QName NAME_TYPE = new QName("type");  // 別に定義されているので省略
@@ -155,50 +167,50 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** startEntry 要素の QName */
-    public static final QName NAME_START_ENTRY = new QName(NS_ARCHIVE, "startEntry");
+    /** startEntry 要素の QName リスト */
+    public static final List<QName> NAME_START_ENTRY = createArchiveQNameList("startEntry");
     
-    /** onStage 要素の QName */
-    public static final QName NAME_ON_STAGE = new QName(NS_ARCHIVE, "onStage");
+    /** onStage 要素の QName リスト */
+    public static final List<QName> NAME_ON_STAGE = createArchiveQNameList("onStage");
 
-    /** startMirror 要素の QName */
-    public static final QName NAME_START_MIRROR = new QName(NS_ARCHIVE, "startMirror");
+    /** startMirror 要素の QName リスト */
+    public static final List<QName> NAME_START_MIRROR = createArchiveQNameList("startMirror");
 
-    /** openRole 要素の QName */
-    public static final QName NAME_OPEN_ROLE = new QName(NS_ARCHIVE, "openRole");
+    /** openRole 要素の QName リスト */
+    public static final List<QName> NAME_OPEN_ROLE = createArchiveQNameList("openRole");
 
-    /** murdered 要素の QName */
-    public static final QName NAME_MURDERED = new QName(NS_ARCHIVE, "murdered");
+    /** murdered 要素の QName リスト */
+    public static final List<QName> NAME_MURDERED = createArchiveQNameList("murdered");
 
-    /** startAssault 要素の QName */
-    public static final QName NAME_START_ASSAULT = new QName(NS_ARCHIVE, "startAssault");
+    /** startAssault 要素の QName リスト */
+    public static final List<QName> NAME_START_ASSAULT = createArchiveQNameList("startAssault");
 
-    /** survivor 要素の QName */
-    public static final QName NAME_SURVIVOR = new QName(NS_ARCHIVE, "survivor");
+    /** survivor 要素の QName リスト */
+    public static final List<QName> NAME_SURVIVOR = createArchiveQNameList("survivor");
 
-    /** counting 要素の QName */
-    public static final QName NAME_COUNTING = new QName(NS_ARCHIVE, "counting");
+    /** counting 要素の QName リスト */
+    public static final List<QName> NAME_COUNTING = createArchiveQNameList("counting");
 
-    /** suddenDeath 要素の QName */
-    public static final QName NAME_SUDDEN_DEATH = new QName(NS_ARCHIVE, "suddenDeath");
+    /** suddenDeath 要素の QName リスト */
+    public static final List<QName> NAME_SUDDEN_DEATH = createArchiveQNameList("suddenDeath");
 
-    /** noMurder 要素の QName */
-    public static final QName NAME_NO_MURDER = new QName(NS_ARCHIVE, "noMurder");
+    /** noMurder 要素の QName リスト */
+    public static final List<QName> NAME_NO_MURDER = createArchiveQNameList("noMurder");
 
-    /** winVillage 要素の QName */
-    public static final QName NAME_WIN_VILLAGE = new QName(NS_ARCHIVE, "winVillage");
+    /** winVillage 要素の QName リスト */
+    public static final List<QName> NAME_WIN_VILLAGE = createArchiveQNameList("winVillage");
 
-    /** winWolf 要素の QName */
-    public static final QName NAME_WIN_WOLF = new QName(NS_ARCHIVE, "winWolf");
+    /** winWolf 要素の QName リスト */
+    public static final List<QName> NAME_WIN_WOLF = createArchiveQNameList("winWolf");
 
-    /** winHamster 要素の QName */
-    public static final QName NAME_WIN_HAMSTER = new QName(NS_ARCHIVE, "winHamster");
+    /** winHamster 要素の QName リスト */
+    public static final List<QName> NAME_WIN_HAMSTER = createArchiveQNameList("winHamster");
 
-    /** playerList 要素の QName */
-    public static final QName NAME_PLAYER_LIST = new QName(NS_ARCHIVE, "playerList");
+    /** playerList 要素の QName リスト */
+    public static final List<QName> NAME_PLAYER_LIST = createArchiveQNameList("playerList");
 
-    /** panic 要素の QName */
-    public static final QName NAME_PANIC = new QName(NS_ARCHIVE, "panic");
+    /** panic 要素の QName リスト */
+    public static final List<QName> NAME_PANIC = createArchiveQNameList("panic");
     
     /* 
      * --------------------------------------------------
@@ -206,20 +218,20 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** askEntry 要素の QName */
-    public static final QName NAME_ASK_ENTRY = new QName(NS_ARCHIVE, "askEntry");
+    /** askEntry 要素の QName リスト */
+    public static final List<QName> NAME_ASK_ENTRY = createArchiveQNameList("askEntry");
 
-    /** askCommit 要素の QName */
-    public static final QName NAME_ASK_COMMIT = new QName(NS_ARCHIVE, "askCommit");
+    /** askCommit 要素の QName リスト */
+    public static final List<QName> NAME_ASK_COMMIT = createArchiveQNameList("askCommit");
     
-    /** noComment 要素の QName */
-    public static final QName NAME_NO_COMMENT = new QName(NS_ARCHIVE, "noComment");
+    /** noComment 要素の QName リスト */
+    public static final List<QName> NAME_NO_COMMENT = createArchiveQNameList("noComment");
     
-    /** stayEpilogue 要素の QName */
-    public static final QName NAME_STAY_EPILOGUE = new QName(NS_ARCHIVE, "stayEpilogue");
+    /** stayEpilogue 要素の QName リスト */
+    public static final List<QName> NAME_STAY_EPILOGUE = createArchiveQNameList("stayEpilogue");
     
-    /** gameOver 要素の QName */
-    public static final QName NAME_GAME_OVER = new QName(NS_ARCHIVE, "gameOver");
+    /** gameOver 要素の QName リスト */
+    public static final List<QName> NAME_GAME_OVER = createArchiveQNameList("gameOver");
     
     /* 
      * --------------------------------------------------
@@ -227,11 +239,11 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** judge 要素の QName */
-    public static final QName NAME_JUDGE = new QName(NS_ARCHIVE, "judge");
+    /** judge 要素の QName リスト */
+    public static final List<QName> NAME_JUDGE = createArchiveQNameList("judge");
     
-    /** guard 要素の QName */
-    public static final QName NAME_GUARD = new QName(NS_ARCHIVE, "guard");
+    /** guard 要素の QName リスト */
+    public static final List<QName> NAME_GUARD = createArchiveQNameList("guard");
     
     
     /* 
@@ -240,8 +252,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
     
-    /** assault 要素の QName */
-    public static final QName NAME_ASSAULT = new QName(NS_ARCHIVE, "assault");
+    /** assault 要素の QName リスト */
+    public static final List<QName> NAME_ASSAULT = createArchiveQNameList("assault");
 
     /** byWhom 属性の QName */
     public static final QName NAME_BY_WHOM = new QName("byWhom");
@@ -252,8 +264,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
     
-    /** talk 要素の QName */
-    public static final QName NAME_TALK = new QName(NS_ARCHIVE, "talk");
+    /** talk 要素の QName リスト */
+    public static final List<QName> NAME_TALK = createArchiveQNameList("talk");
     
     /** type 属性の QName */
     public static final QName NAME_TYPE = new QName("type");
@@ -282,8 +294,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** li 要素の QName */
-    public static final QName NAME_LI = new QName(NS_ARCHIVE, "li");
+    /** li 要素の QName リスト */
+    public static final List<QName> NAME_LI = createArchiveQNameList("li");
     
     /* 
      * --------------------------------------------------
@@ -291,8 +303,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** rawdata 要素の QName */
-    public static final QName NAME_RAWDATA = new QName(NS_ARCHIVE, "rawdata");
+    /** rawdata 要素の QName リスト */
+    public static final List<QName> NAME_RAWDATA = createArchiveQNameList("rawdata");
 
     /* 
      * --------------------------------------------------
@@ -300,8 +312,8 @@ public class SchemaConstants {
      * --------------------------------------------------
      */
 
-    /** playerInfo 要素の QName */
-    public static final QName NAME_PLAYER_INFO = new QName(NS_ARCHIVE, "playerInfo");
+    /** playerInfo 要素の QName リスト */
+    public static final List<QName> NAME_PLAYER_INFO = createArchiveQNameList("playerInfo");
     
 //    /** avatarId 属性の QName */
 //    public static final QName NAME_AVATAR_ID = new QName("avatarId");     // 既に定義されているので省略

@@ -34,7 +34,6 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +94,7 @@ public class ArchivedStory extends BasicStory implements Story {
                 for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
                     if (eventType == XmlPullParser.START_TAG) {
                         QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                        if (SchemaConstants.NAME_VILLAGE.equals(elemName)) {
+                        if (SchemaConstants.NAME_VILLAGE.contains(elemName)) {
                             loadVillageElement(staxReader);
                         } else {
                             throw new MoltonfException("Not a bbs play-data archive.");
@@ -169,9 +168,9 @@ public class ArchivedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_AVATAR_LIST.equals(elemName)) {
+                if (SchemaConstants.NAME_AVATAR_LIST.contains(elemName)) {
                     setAvatarList(loadAvatarList(staxReader));
-                } else if (SchemaConstants.NAME_PERIOD.equals(elemName)) {
+                } else if (SchemaConstants.NAME_PERIOD.contains(elemName)) {
                     periodList.add(loadPeriod(staxReader));
                 } else {
                     skipElement(staxReader);
@@ -221,7 +220,7 @@ public class ArchivedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_AVATAR.equals(elemName)) {
+                if (SchemaConstants.NAME_AVATAR.contains(elemName)) {
                     avatarList.add(loadAvatar(staxReader));
                 } else {
                     skipElement(staxReader);
@@ -312,7 +311,8 @@ public class ArchivedStory extends BasicStory implements Story {
             }
         }
         
-        final List<QName> eventAnnounceGroup = Arrays.asList(new QName[] {
+        @SuppressWarnings("unchecked")
+        final List<QName> eventAnnounceGroup = SmartUtils.concatLists(
             SchemaConstants.NAME_START_ENTRY, SchemaConstants.NAME_ON_STAGE,
             SchemaConstants.NAME_START_MIRROR, SchemaConstants.NAME_OPEN_ROLE,
             SchemaConstants.NAME_MURDERED, SchemaConstants.NAME_START_ASSAULT,
@@ -320,16 +320,20 @@ public class ArchivedStory extends BasicStory implements Story {
             SchemaConstants.NAME_SUDDEN_DEATH, SchemaConstants.NAME_NO_MURDER,
             SchemaConstants.NAME_WIN_VILLAGE, SchemaConstants.NAME_WIN_WOLF,
             SchemaConstants.NAME_WIN_HAMSTER, SchemaConstants.NAME_PLAYER_LIST,
-            SchemaConstants.NAME_PANIC,
-        });
-        final List<QName> eventOrderGroup = Arrays.asList(new QName[] {
+            SchemaConstants.NAME_PANIC
+        );
+
+        @SuppressWarnings("unchecked")
+        final List<QName> eventOrderGroup = SmartUtils.concatLists(
             SchemaConstants.NAME_ASK_ENTRY, SchemaConstants.NAME_ASK_COMMIT,
             SchemaConstants.NAME_NO_COMMENT, SchemaConstants.NAME_STAY_EPILOGUE,
-            SchemaConstants.NAME_GAME_OVER,
-        });
-        final List<QName> eventExtraGroup = Arrays.asList(new QName[] {
-            SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD,
-        });
+            SchemaConstants.NAME_GAME_OVER
+        );
+
+        @SuppressWarnings("unchecked")
+        final List<QName> eventExtraGroup = SmartUtils.concatLists(
+            SchemaConstants.NAME_JUDGE, SchemaConstants.NAME_GUARD
+        );
         
         // 子ノード
         for (int eventType = staxReader.next(); eventType != XmlPullParser.END_DOCUMENT; eventType = staxReader.next()) {
@@ -337,7 +341,7 @@ public class ArchivedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_TALK.equals(elemName)) {
+                if (SchemaConstants.NAME_TALK.contains(elemName)) {
                     elementList.add(loadTalk(staxReader, period));
                 } else if (eventAnnounceGroup.contains(elemName)) {
                     elementList.add(loadStoryEvent(staxReader, period, EventFamily.ANNOUNCE));
@@ -345,7 +349,7 @@ public class ArchivedStory extends BasicStory implements Story {
                     elementList.add(loadStoryEvent(staxReader, period, EventFamily.ORDER));
                 } else if (eventExtraGroup.contains(elemName)) {
                     elementList.add(loadStoryEvent(staxReader, period, EventFamily.EXTRA));
-                } else if (SchemaConstants.NAME_ASSAULT.equals(elemName)) {
+                } else if (SchemaConstants.NAME_ASSAULT.contains(elemName)) {
                     elementList.add(loadAssault(staxReader, period));
                 } else {
                     skipElement(staxReader);
@@ -416,7 +420,7 @@ public class ArchivedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                if (SchemaConstants.NAME_LI.contains(elemName)) {
                     messageLines.add(loadLi(staxReader));
                 } else {
                     skipElement(staxReader);
@@ -473,10 +477,10 @@ public class ArchivedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                if (SchemaConstants.NAME_LI.contains(elemName)) {
                     messageLines.add(loadLi(staxReader));
-                } else if (SchemaConstants.NAME_PLAYER_LIST.equals(storyEventElemName) &&
-                        SchemaConstants.NAME_PLAYER_INFO.equals(elemName)) {
+                } else if (SchemaConstants.NAME_PLAYER_LIST.contains(storyEventElemName) &&
+                        SchemaConstants.NAME_PLAYER_INFO.contains(elemName)) {
                     loadPlayerInfo(staxReader);
                 } else {
                     skipElement(staxReader);
@@ -594,7 +598,7 @@ public class ArchivedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_LI.equals(elemName)) {
+                if (SchemaConstants.NAME_LI.contains(elemName)) {
                     messageLines.add(loadLi(staxReader));
                 } else {
                     skipElement(staxReader);
@@ -623,7 +627,7 @@ public class ArchivedStory extends BasicStory implements Story {
                 break;
             } else if (eventType == XmlPullParser.START_TAG) {
                 QName elemName = new QName(staxReader.getNamespace(), staxReader.getName());
-                if (SchemaConstants.NAME_RAWDATA.equals(elemName)) {
+                if (SchemaConstants.NAME_RAWDATA.contains(elemName)) {
                     loadRawdata(staxReader, buf);
                 } else {
                     skipElement(staxReader);
