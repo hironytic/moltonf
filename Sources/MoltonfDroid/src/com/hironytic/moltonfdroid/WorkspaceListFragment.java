@@ -303,8 +303,8 @@ public class WorkspaceListFragment extends ListFragment {
      */
     @TargetApi(19)
     private boolean processMenuNewDataV19() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("application/xml");
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
         startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE_V19);
         return true;
     }
@@ -366,14 +366,18 @@ public class WorkspaceListFragment extends ListFragment {
                     packageDirName = archiveFileName.substring(0, extIndex);
                 } else if (archiveUri != null) {
                     Cursor cursor = getActivity().getContentResolver().query(archiveUri, null, null, null, null, null);
-                    try {
-                        cursor.moveToFirst();
-                        String displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                        int extIndex = displayName.lastIndexOf(".");
-                        packageDirName = displayName.substring(0, extIndex);
-                    } finally {
-                        cursor.close();
-                    }                    
+                    if (cursor != null) {
+                        try {
+                            cursor.moveToFirst();
+                            String displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                            int extIndex = displayName.lastIndexOf(".");
+                            packageDirName = displayName.substring(0, extIndex);
+                        } finally {
+                            cursor.close();
+                        }
+                    } else {
+                        packageDirName = "newdata";
+                    }
                 }
                 if (packageDirName == null) {
                     return Boolean.FALSE;
@@ -420,6 +424,8 @@ public class WorkspaceListFragment extends ListFragment {
                 
                 return Boolean.TRUE;
             } catch (MoltonfException ex) {
+                // packageDirNameがnullじゃなければ、そのディレクトリを消さないと
+                
                 return Boolean.FALSE;
             }
         }
