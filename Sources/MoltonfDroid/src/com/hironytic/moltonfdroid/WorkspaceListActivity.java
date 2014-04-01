@@ -36,7 +36,7 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.ListActivity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -47,6 +47,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -61,11 +63,12 @@ import com.hironytic.moltonfdroid.model.Workspace;
 import com.hironytic.moltonfdroid.model.WorkspaceManager;
 import com.hironytic.moltonfdroid.model.archived.ArchiveToPackageConverter;
 import com.hironytic.moltonfdroid.model.archived.PackagedStory;
+import com.hironytic.moltonfdroid.util.RetainedDialogFragment;
 
 /**
  * 
  */
-public class WorkspaceListActivity extends ListActivity {
+public class WorkspaceListActivity extends FragmentActivity {
 
     private static final int REQUEST_SELECT_ARCHIVE_FILE = 100;
     private static final int REQUEST_SELECT_ARCHIVE_FILE_V19 = 101;
@@ -117,6 +120,47 @@ public class WorkspaceListActivity extends ListActivity {
         }
     }
     
+    public static class WorkspaceListFragment extends ListFragment {
+        private WorkspaceListActivity getWorkspaceListActivity() {
+            return (WorkspaceListActivity)getActivity();
+        }
+        
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            
+            // ワークスペースの一覧を更新
+            reloadList();
+        }
+        
+        @Override
+        public void onListItemClick(ListView listView, View view, int position, long id) {
+            super.onListItemClick(listView, view, position, id);
+            
+            WorkspaceListItem item = (WorkspaceListItem)listView.getItemAtPosition(position);
+            getWorkspaceListActivity().processWorkspaceListItemClick(item);
+        }
+
+        /**
+         * ワークスペースの一覧を更新します。
+         */
+        private void reloadList() {
+            List<WorkspaceListItem> listItems = new ArrayList<WorkspaceListItem>();
+            Cursor cursor = getWorkspaceListActivity().workspaceManager.list();
+            try {
+                boolean hasData = cursor.moveToFirst();
+                while (hasData) {
+                    listItems.add(new WorkspaceListItem(cursor));
+                    hasData = cursor.moveToNext();
+                }
+            } finally {
+                cursor.close();
+            }
+            ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(getActivity(), android.R.layout.simple_list_item_1, listItems);
+            setListAdapter(adapter);
+        }
+    }
+    
     /** ワークスペース管理オブジェクト */
     private WorkspaceManager workspaceManager;
 
@@ -126,13 +170,11 @@ public class WorkspaceListActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        workspaceManager = new WorkspaceManager(getApplicationContext());
         setContentView(R.layout.workspace_list);
 
-        // ワークスペースの一覧を更新
-        workspaceManager = new WorkspaceManager(getApplicationContext());
-        reloadList();
-        
-        registerForContextMenu(getListView());
+        registerForContextMenu(getWorkspaceListFragment().getListView());
     }
 
     /**
@@ -190,9 +232,9 @@ public class WorkspaceListActivity extends ListActivity {
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        if (v == getListView()) {
+        if (v == getWorkspaceListFragment().getListView()) {
             AdapterContextMenuInfo listMenuInfo = (AdapterContextMenuInfo)menuInfo;
-            WorkspaceListItem listItem = (WorkspaceListItem)getListAdapter().getItem(listMenuInfo.position);
+            WorkspaceListItem listItem = (WorkspaceListItem)getWorkspaceListFragment().getListAdapter().getItem(listMenuInfo.position);
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.workspace_item_option, menu);
             menu.setHeaderTitle(listItem.getTitle());
@@ -220,19 +262,6 @@ public class WorkspaceListActivity extends ListActivity {
     }
 
     /**
-     * @see android.app.ListActivity#onListItemClick(android.widget.ListView, android.view.View, int, long)
-     */
-    @Override
-    protected void onListItemClick(ListView listView, View view, int position, long id) {
-        super.onListItemClick(listView, view, position, id);
-        
-        WorkspaceListItem item = (WorkspaceListItem)listView.getItemAtPosition(position);
-        Intent intent = new Intent(this, StoryActivity.class);
-        intent.putExtra(StoryActivity.EXTRA_KEY_WORKSPACE_ID, item.getWorkspaceId());
-        startActivity(intent);
-    }
-    
-    /**
      * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
      */
     @Override
@@ -251,24 +280,23 @@ public class WorkspaceListActivity extends ListActivity {
     }
 
     /**
-     * ワークスペースの一覧を更新します。
+     * WorkspaceListFragmentを得ます。
+     * @return WorkspaceListFragment
      */
-    private void reloadList() {
-        List<WorkspaceListItem> listItems = new ArrayList<WorkspaceListItem>();
-        Cursor cursor = workspaceManager.list();
-        try {
-            boolean hasData = cursor.moveToFirst();
-            while (hasData) {
-                listItems.add(new WorkspaceListItem(cursor));
-                hasData = cursor.moveToNext();
-            }
-        } finally {
-            cursor.close();
-        }
-        ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(this, android.R.layout.simple_list_item_1, listItems);
-        setListAdapter(adapter);
+    private WorkspaceListFragment getWorkspaceListFragment() {
+        return (WorkspaceListFragment)getSupportFragmentManager().findFragmentById(R.id.workspace_list_fragment);
     }
-
+    
+    /**
+     * 一覧のアイテムがクリックされたときの処理
+     * @param item クリックされたアイテム
+     */
+    private void processWorkspaceListItemClick(WorkspaceListItem item) {
+        Intent intent = new Intent(this, StoryActivity.class);
+        intent.putExtra(StoryActivity.EXTRA_KEY_WORKSPACE_ID, item.getWorkspaceId());
+        startActivity(intent);
+    }
+    
     /**
      * 新しい観戦データ作成メニューが選ばれたときの処理
      * @return 処理したらtrue
@@ -445,7 +473,7 @@ public class WorkspaceListActivity extends ListActivity {
                 
                 workspaceManager.save(ws);
                 
-                reloadList();
+                getWorkspaceListFragment().reloadList();
             } else {
                 // 作成失敗
                 AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListActivity.this);
@@ -469,26 +497,34 @@ public class WorkspaceListActivity extends ListActivity {
     private boolean processMenuRemoveData(MenuItem item) {
         AdapterContextMenuInfo listMenuInfo = (AdapterContextMenuInfo)item.getMenuInfo();
         int position = listMenuInfo.position;
-        final WorkspaceListItem listItem = (WorkspaceListItem)getListAdapter().getItem(position);
+        final WorkspaceListItem listItem = (WorkspaceListItem)getWorkspaceListFragment().getListAdapter().getItem(position);
 
         // 削除していいですか？
-        String message = getResources().getString(R.string.message_workspace_remove_data_alert, listItem.getTitle());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message);
-        builder.setNegativeButton(R.string.no, new OnClickListener() {
+        final RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
+        dialogFragment.setDialogCreator(new RetainedDialogFragment.DialogCreator() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // 何もしない
+            public Dialog createDialog() {
+                String message = getResources().getString(R.string.message_workspace_remove_data_alert, listItem.getTitle());
+                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListActivity.this);
+                builder.setMessage(message);
+                builder.setNegativeButton(R.string.no, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 何もしない
+                    }
+                });
+                builder.setPositiveButton(R.string.yes, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        WorkspaceListActivity workspaceListActivity = (WorkspaceListActivity)dialogFragment.getActivity();
+                        workspaceListActivity.workspaceManager.delete(listItem.getWorkspaceId());
+                        workspaceListActivity.getWorkspaceListFragment().reloadList();
+                    }
+                });
+                return builder.create();
             }
         });
-        builder.setPositiveButton(R.string.yes, new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                WorkspaceListActivity.this.workspaceManager.delete(listItem.getWorkspaceId());
-                reloadList();
-            }
-        });
-        builder.show();
+        dialogFragment.show(getSupportFragmentManager(), "deleteAlert");
         return true;
     }
 }
