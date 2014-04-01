@@ -121,20 +121,47 @@ public class WorkspaceListActivity extends FragmentActivity {
     }
     
     public static class WorkspaceListFragment extends ListFragment {
+        /** ワークスペース管理オブジェクト */
+        private WorkspaceManager workspaceManager = null;
+        
         private WorkspaceListActivity getWorkspaceListActivity() {
             return (WorkspaceListActivity)getActivity();
         }
         
+        public WorkspaceManager getWorkspaceManager() {
+            return workspaceManager;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true);
+        }
+
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
-            setEmptyText(getActivity().getString(R.string.no_workspace_data));
-            
-            // ワークスペースの一覧を更新
-            reloadList();
+            if (workspaceManager == null) {
+                workspaceManager = new WorkspaceManager(getActivity().getApplicationContext());
+
+                setEmptyText(getActivity().getString(R.string.no_workspace_data));
+                
+                // ワークスペースの一覧を更新
+                reloadList();                
+            }
         }
         
+        @Override
+        public void onDestroy() {
+            if (workspaceManager != null) {
+                workspaceManager.close();
+                workspaceManager = null;
+            }
+            
+            super.onDestroy();
+        }
+
         @Override
         public void onListItemClick(ListView listView, View view, int position, long id) {
             super.onListItemClick(listView, view, position, id);
@@ -148,7 +175,7 @@ public class WorkspaceListActivity extends FragmentActivity {
          */
         private void reloadList() {
             List<WorkspaceListItem> listItems = new ArrayList<WorkspaceListItem>();
-            Cursor cursor = getWorkspaceListActivity().workspaceManager.list();
+            Cursor cursor = workspaceManager.list();
             try {
                 boolean hasData = cursor.moveToFirst();
                 while (hasData) {
@@ -163,9 +190,6 @@ public class WorkspaceListActivity extends FragmentActivity {
         }
     }
     
-    /** ワークスペース管理オブジェクト */
-    private WorkspaceManager workspaceManager;
-
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
@@ -173,25 +197,11 @@ public class WorkspaceListActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        workspaceManager = new WorkspaceManager(getApplicationContext());
         setContentView(R.layout.workspace_list);
 
         registerForContextMenu(getWorkspaceListFragment().getListView());
     }
 
-    /**
-     * @see android.app.ListActivity#onDestroy()
-     */
-    @Override
-    protected void onDestroy() {
-        if (workspaceManager != null) {
-            workspaceManager.close();
-            workspaceManager = null;
-        }
-        
-        super.onDestroy();
-    }
-    
     /**
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
      */
@@ -473,9 +483,9 @@ public class WorkspaceListActivity extends FragmentActivity {
                 ws.setPackageDir(packageDir);
                 ws.setTitle(workspaceTitle);
                 
-                workspaceManager.save(ws);
-                
-                getWorkspaceListFragment().reloadList();
+                WorkspaceListFragment workspaceListFragment = getWorkspaceListFragment();
+                workspaceListFragment.getWorkspaceManager().save(ws);
+                workspaceListFragment.reloadList();
             } else {
                 // 作成失敗
                 AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListActivity.this);
@@ -519,8 +529,9 @@ public class WorkspaceListActivity extends FragmentActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         WorkspaceListActivity workspaceListActivity = (WorkspaceListActivity)dialogFragment.getActivity();
-                        workspaceListActivity.workspaceManager.delete(listItem.getWorkspaceId());
-                        workspaceListActivity.getWorkspaceListFragment().reloadList();
+                        WorkspaceListFragment workspaceListFragment = workspaceListActivity.getWorkspaceListFragment();
+                        workspaceListFragment.getWorkspaceManager().delete(listItem.getWorkspaceId());
+                        workspaceListFragment.reloadList();
                     }
                 });
                 return builder.create();
