@@ -128,6 +128,8 @@ public class WorkspaceListActivity extends FragmentActivity {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
+
+            setEmptyText(getActivity().getString(R.string.no_workspace_data));
             
             // ワークスペースの一覧を更新
             reloadList();
