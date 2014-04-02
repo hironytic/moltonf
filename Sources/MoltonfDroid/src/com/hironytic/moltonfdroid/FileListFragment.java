@@ -29,12 +29,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ListFragment;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -42,9 +45,11 @@ import android.widget.ListView;
 /**
  * ファイル選択アクティビティ
  */
-public class FileListActivity extends ListActivity {
+public class FileListFragment extends ListFragment {
 
     public static final String EXTRA_KEY_FILE = "Moltonf.File";
+    
+    private boolean listInitialized = false; 
     
     /**
      * 一覧に表示するアイテム
@@ -86,24 +91,45 @@ public class FileListActivity extends ListActivity {
     }
     
     /**
-     * @see android.app.Activity#onCreate(android.os.Bundle)
+     * @see android.support.v4.app.Fragment#onCreate(android.os.Bundle)
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.file_list);
-        
-        Button cancelButton = (Button)findViewById(R.id.cancel);
+        setRetainInstance(true);
+    }
+
+    /**
+     * @see android.support.v4.app.ListFragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
+     */
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.file_list, container, false);
+
+        Button cancelButton = (Button)view.findViewById(R.id.cancel);
         cancelButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(RESULT_CANCELED);
-                finish();
+                getActivity().setResult(Activity.RESULT_CANCELED);
+                getActivity().finish();
             }
         });
+
+        return view;
+    }
+
+    /**
+     * @see android.support.v4.app.Fragment#onActivityCreated(android.os.Bundle)
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         
-        File extStrageDir = Environment.getExternalStorageDirectory();
-        reloadList(extStrageDir);        
+        if (!listInitialized) {
+            File extStrageDir = Environment.getExternalStorageDirectory();
+            reloadList(extStrageDir);        
+            listInitialized = true;
+        }
     }
 
     /**
@@ -125,26 +151,26 @@ public class FileListActivity extends ListActivity {
                 }
             }
         }
-        ArrayAdapter<ListItem> adapter = new ArrayAdapter<ListItem>(this, android.R.layout.simple_list_item_1, itemList);
+        ArrayAdapter<ListItem> adapter = new ArrayAdapter<ListItem>(getActivity(), android.R.layout.simple_list_item_1, itemList);
         setListAdapter(adapter);
     }
     
     /**
-     * @see android.app.ListActivity#onListItemClick(android.widget.ListView, android.view.View, int, long)
+     * @see android.support.v4.app.ListFragment#onListItemClick(android.widget.ListView, android.view.View, int, long)
      */
     @Override
-    protected void onListItemClick(ListView listView, View v, int position, long id) {
+    public void onListItemClick(ListView listView, View v, int position, long id) {
         super.onListItemClick(listView, v, position, id);
-        
+
         ListItem item = (ListItem)listView.getItemAtPosition(position);
         File file = item.getFile();
         if (file.isFile()) {
             Intent resultIntent = new Intent();
             resultIntent.putExtra(EXTRA_KEY_FILE, file);
-            setResult(RESULT_OK, resultIntent);
-            finish();
+            getActivity().setResult(Activity.RESULT_OK, resultIntent);
+            getActivity().finish();
         } else if (file.isDirectory()) {
             reloadList(file);
         }        
-    }    
+    }
 }
