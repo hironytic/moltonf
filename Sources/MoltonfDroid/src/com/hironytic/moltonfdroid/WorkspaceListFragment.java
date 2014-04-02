@@ -68,7 +68,7 @@ import com.hironytic.moltonfdroid.util.RetainedDialogFragment;
 /**
  * 
  */
-public class WorkspaceListActivity extends FragmentActivity {
+public class WorkspaceListFragment extends FragmentActivity {
 
     private static final int REQUEST_SELECT_ARCHIVE_FILE = 100;
     private static final int REQUEST_SELECT_ARCHIVE_FILE_V19 = 101;
@@ -120,12 +120,12 @@ public class WorkspaceListActivity extends FragmentActivity {
         }
     }
     
-    public static class WorkspaceListFragment extends ListFragment {
+    public static class WorkspaceListFragment_ extends ListFragment {
         /** ワークスペース管理オブジェクト */
         private WorkspaceManager workspaceManager = null;
         
-        private WorkspaceListActivity getWorkspaceListActivity() {
-            return (WorkspaceListActivity)getActivity();
+        private WorkspaceListFragment getWorkspaceListActivity() {
+            return (WorkspaceListFragment)getActivity();
         }
         
         public WorkspaceManager getWorkspaceManager() {
@@ -295,8 +295,8 @@ public class WorkspaceListActivity extends FragmentActivity {
      * WorkspaceListFragmentを得ます。
      * @return WorkspaceListFragment
      */
-    private WorkspaceListFragment getWorkspaceListFragment() {
-        return (WorkspaceListFragment)getSupportFragmentManager().findFragmentById(R.id.workspace_list_fragment);
+    private WorkspaceListFragment_ getWorkspaceListFragment() {
+        return (WorkspaceListFragment_)getSupportFragmentManager().findFragmentById(R.id.workspace_list_fragment);
     }
     
     /**
@@ -467,8 +467,8 @@ public class WorkspaceListActivity extends FragmentActivity {
          */
         @Override
         protected void onPreExecute() {
-            String message = WorkspaceListActivity.this.getString(R.string.message_creating_new_workspace);
-            progressDialog = ProgressDialog.show(WorkspaceListActivity.this, "", message);
+            String message = WorkspaceListFragment.this.getString(R.string.message_creating_new_workspace);
+            progressDialog = ProgressDialog.show(WorkspaceListFragment.this, "", message);
         }
 
         /**
@@ -483,12 +483,12 @@ public class WorkspaceListActivity extends FragmentActivity {
                 ws.setPackageDir(packageDir);
                 ws.setTitle(workspaceTitle);
                 
-                WorkspaceListFragment workspaceListFragment = getWorkspaceListFragment();
+                WorkspaceListFragment_ workspaceListFragment = getWorkspaceListFragment();
                 workspaceListFragment.getWorkspaceManager().save(ws);
                 workspaceListFragment.reloadList();
             } else {
                 // 作成失敗
-                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListFragment.this);
                 builder.setMessage(R.string.message_failed_to_create_new_workspace);
                 builder.setNeutralButton(R.string.ok, new OnClickListener() {
                     @Override
@@ -517,7 +517,7 @@ public class WorkspaceListActivity extends FragmentActivity {
             @Override
             public Dialog createDialog() {
                 String message = getResources().getString(R.string.message_workspace_remove_data_alert, listItem.getTitle());
-                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListFragment.this);
                 builder.setMessage(message);
                 builder.setNegativeButton(R.string.no, new OnClickListener() {
                     @Override
@@ -528,8 +528,8 @@ public class WorkspaceListActivity extends FragmentActivity {
                 builder.setPositiveButton(R.string.yes, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        WorkspaceListActivity workspaceListActivity = (WorkspaceListActivity)dialogFragment.getActivity();
-                        WorkspaceListFragment workspaceListFragment = workspaceListActivity.getWorkspaceListFragment();
+                        WorkspaceListFragment workspaceListActivity = (WorkspaceListFragment)dialogFragment.getActivity();
+                        WorkspaceListFragment_ workspaceListFragment = workspaceListActivity.getWorkspaceListFragment();
                         workspaceListFragment.getWorkspaceManager().delete(listItem.getWorkspaceId());
                         workspaceListFragment.reloadList();
                     }
