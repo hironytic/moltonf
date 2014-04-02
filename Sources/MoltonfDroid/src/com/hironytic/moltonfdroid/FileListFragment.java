@@ -43,12 +43,10 @@ import android.widget.Button;
 import android.widget.ListView;
 
 /**
- * ファイル選択アクティビティ
+ * ファイル選択アクティビティのメインフラグメント
  */
 public class FileListFragment extends ListFragment {
 
-    public static final String EXTRA_KEY_FILE = "Moltonf.File";
-    
     private boolean listInitialized = false; 
     
     /**
@@ -166,7 +164,7 @@ public class FileListFragment extends ListFragment {
         File file = item.getFile();
         if (file.isFile()) {
             Intent resultIntent = new Intent();
-            resultIntent.putExtra(EXTRA_KEY_FILE, file);
+            resultIntent.putExtra(FileListActivity.EXTRA_KEY_FILE, file);
             getActivity().setResult(Activity.RESULT_OK, resultIntent);
             getActivity().finish();
         } else if (file.isDirectory()) {
