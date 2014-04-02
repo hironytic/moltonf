@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -47,7 +48,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -68,7 +69,7 @@ import com.hironytic.moltonfdroid.util.RetainedDialogFragment;
 /**
  * 
  */
-public class WorkspaceListFragment extends FragmentActivity {
+public class WorkspaceListFragment extends ListFragment {
 
     private static final int REQUEST_SELECT_ARCHIVE_FILE = 100;
     private static final int REQUEST_SELECT_ARCHIVE_FILE_V19 = 101;
@@ -119,104 +120,84 @@ public class WorkspaceListFragment extends FragmentActivity {
             return getTitle();
         }
     }
+
+    /** ワークスペース管理オブジェクト */
+    private WorkspaceManager workspaceManager = null;
     
-    public static class WorkspaceListFragment_ extends ListFragment {
-        /** ワークスペース管理オブジェクト */
-        private WorkspaceManager workspaceManager = null;
-        
-        private WorkspaceListFragment getWorkspaceListActivity() {
-            return (WorkspaceListFragment)getActivity();
-        }
-        
-        public WorkspaceManager getWorkspaceManager() {
-            return workspaceManager;
-        }
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setRetainInstance(true);
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-
-            if (workspaceManager == null) {
-                workspaceManager = new WorkspaceManager(getActivity().getApplicationContext());
-
-                setEmptyText(getActivity().getString(R.string.no_workspace_data));
-                
-                // ワークスペースの一覧を更新
-                reloadList();                
-            }
-        }
-        
-        @Override
-        public void onDestroy() {
-            if (workspaceManager != null) {
-                workspaceManager.close();
-                workspaceManager = null;
-            }
-            
-            super.onDestroy();
-        }
-
-        @Override
-        public void onListItemClick(ListView listView, View view, int position, long id) {
-            super.onListItemClick(listView, view, position, id);
-            
-            WorkspaceListItem item = (WorkspaceListItem)listView.getItemAtPosition(position);
-            getWorkspaceListActivity().processWorkspaceListItemClick(item);
-        }
-
-        /**
-         * ワークスペースの一覧を更新します。
-         */
-        private void reloadList() {
-            List<WorkspaceListItem> listItems = new ArrayList<WorkspaceListItem>();
-            Cursor cursor = workspaceManager.list();
-            try {
-                boolean hasData = cursor.moveToFirst();
-                while (hasData) {
-                    listItems.add(new WorkspaceListItem(cursor));
-                    hasData = cursor.moveToNext();
-                }
-            } finally {
-                cursor.close();
-            }
-            ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(getActivity(), android.R.layout.simple_list_item_1, listItems);
-            setListAdapter(adapter);
-        }
-    }
-    
-    /**
-     * @see android.app.Activity#onCreate(android.os.Bundle)
-     */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        setContentView(R.layout.workspace_list);
+        setRetainInstance(true);
+        setHasOptionsMenu(true);
+    }
 
-        registerForContextMenu(getWorkspaceListFragment().getListView());
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (workspaceManager == null) {
+            workspaceManager = new WorkspaceManager(getActivity().getApplicationContext());
+
+            setEmptyText(getActivity().getString(R.string.no_workspace_data));
+            
+            // ワークスペースの一覧を更新
+            reloadList();
+        }
+        registerForContextMenu(getListView());            
+    }
+    
+    @Override
+    public void onDestroy() {
+        if (workspaceManager != null) {
+            workspaceManager.close();
+            workspaceManager = null;
+        }
+        
+        super.onDestroy();
+    }
+
+    @Override
+    public void onListItemClick(ListView listView, View view, int position, long id) {
+        super.onListItemClick(listView, view, position, id);
+        
+        WorkspaceListItem item = (WorkspaceListItem)listView.getItemAtPosition(position);
+        Intent intent = new Intent(getActivity(), StoryActivity.class);
+        intent.putExtra(StoryActivity.EXTRA_KEY_WORKSPACE_ID, item.getWorkspaceId());
+        startActivity(intent);
     }
 
     /**
-     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     * ワークスペースの一覧を更新します。
+     */
+    private void reloadList() {
+        List<WorkspaceListItem> listItems = new ArrayList<WorkspaceListItem>();
+        Cursor cursor = workspaceManager.list();
+        try {
+            boolean hasData = cursor.moveToFirst();
+            while (hasData) {
+                listItems.add(new WorkspaceListItem(cursor));
+                hasData = cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(getActivity(), android.R.layout.simple_list_item_1, listItems);
+        setListAdapter(adapter);
+    }
+    
+    
+    /**
+     * @see android.support.v4.app.Fragment#onCreateOptionsMenu(android.view.Menu, android.view.MenuInflater)
      */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
         
-        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.workspace_option, menu);
-
-        return menu.hasVisibleItems();
     }
 
     /**
-     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     * @see android.support.v4.app.Fragment#onOptionsItemSelected(android.view.MenuItem)
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -240,14 +221,14 @@ public class WorkspaceListFragment extends FragmentActivity {
     }
 
     /**
-     * @see android.app.Activity#onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo)
+     * @see android.support.v4.app.Fragment#onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo)
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        if (v == getWorkspaceListFragment().getListView()) {
+        if (v == getListView()) {
             AdapterContextMenuInfo listMenuInfo = (AdapterContextMenuInfo)menuInfo;
-            WorkspaceListItem listItem = (WorkspaceListItem)getWorkspaceListFragment().getListAdapter().getItem(listMenuInfo.position);
-            MenuInflater inflater = getMenuInflater();
+            WorkspaceListItem listItem = (WorkspaceListItem)getListAdapter().getItem(listMenuInfo.position);
+            MenuInflater inflater = getActivity().getMenuInflater();
             inflater.inflate(R.menu.workspace_item_option, menu);
             menu.setHeaderTitle(listItem.getTitle());
         } else {        
@@ -256,7 +237,7 @@ public class WorkspaceListFragment extends FragmentActivity {
     }
 
     /**
-     * @see android.app.Activity#onContextItemSelected(android.view.MenuItem)
+     * @see android.support.v4.app.Fragment#onContextItemSelected(android.view.MenuItem)
      */
     @Override
     public boolean onContextItemSelected(MenuItem item) {
@@ -274,10 +255,10 @@ public class WorkspaceListFragment extends FragmentActivity {
     }
 
     /**
-     * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+     * @see android.support.v4.app.Fragment#onActivityResult(int, int, android.content.Intent)
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
         case REQUEST_SELECT_ARCHIVE_FILE:
             processSelectArchiveFileRequest(resultCode, data);
@@ -292,30 +273,12 @@ public class WorkspaceListFragment extends FragmentActivity {
     }
 
     /**
-     * WorkspaceListFragmentを得ます。
-     * @return WorkspaceListFragment
-     */
-    private WorkspaceListFragment_ getWorkspaceListFragment() {
-        return (WorkspaceListFragment_)getSupportFragmentManager().findFragmentById(R.id.workspace_list_fragment);
-    }
-    
-    /**
-     * 一覧のアイテムがクリックされたときの処理
-     * @param item クリックされたアイテム
-     */
-    private void processWorkspaceListItemClick(WorkspaceListItem item) {
-        Intent intent = new Intent(this, StoryActivity.class);
-        intent.putExtra(StoryActivity.EXTRA_KEY_WORKSPACE_ID, item.getWorkspaceId());
-        startActivity(intent);
-    }
-    
-    /**
      * 新しい観戦データ作成メニューが選ばれたときの処理
      * @return 処理したらtrue
      */
     private boolean processMenuNewData() {
         // プレイデータアーカイブを選択させる
-        Intent intent = new Intent(this, FileListActivity.class);
+        Intent intent = new Intent(getActivity(), FileListActivity.class);
         startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE);
         return true;
     }
@@ -326,7 +289,7 @@ public class WorkspaceListFragment extends FragmentActivity {
      * @param data
      */
     private void processSelectArchiveFileRequest(int resultCode, Intent data) {
-        if (resultCode != RESULT_OK) {
+        if (resultCode != Activity.RESULT_OK) {
             return;
         }
         
@@ -353,7 +316,7 @@ public class WorkspaceListFragment extends FragmentActivity {
      * @param data
      */
     private void processSelectArchiveFileRequestV19(int resultCode, Intent data) {
-        if (resultCode != RESULT_OK) {
+        if (resultCode != Activity.RESULT_OK) {
             return;
         }
         
@@ -366,8 +329,8 @@ public class WorkspaceListFragment extends FragmentActivity {
      * プレイデータアーカイブから新規ワークスペースを作成するタスク
      */
     private class CreateNewWorkspaceTask extends AsyncTask<Object, Void, Boolean> {
-        /** 読み込み中に表示するプログレスダイアログ */
-        private ProgressDialog progressDialog;
+        /** 読み込み中に表示するプログレスダイアログのフラグメント */
+        private DialogFragment progressDialogFragment;
         
         /** 変換結果のパッケージディレクトリ */
         private File packageDir;
@@ -403,7 +366,7 @@ public class WorkspaceListFragment extends FragmentActivity {
                     int extIndex = archiveFileName.lastIndexOf(".");
                     packageDirName = archiveFileName.substring(0, extIndex);
                 } else if (archiveUri != null) {
-                    Cursor cursor = getContentResolver().query(archiveUri, null, null, null, null, null);
+                    Cursor cursor = getActivity().getContentResolver().query(archiveUri, null, null, null, null, null);
                     try {
                         cursor.moveToFirst();
                         String displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
@@ -435,7 +398,7 @@ public class WorkspaceListFragment extends FragmentActivity {
                     converter.convert(archiveFile, packageDir);
                 } else if (archiveUri != null) {
                     try {
-                        InputStream inputStream = getContentResolver().openInputStream(archiveUri);
+                        InputStream inputStream = getActivity().getContentResolver().openInputStream(archiveUri);
                         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                         try {
                             converter.convert(reader, packageDir);
@@ -467,8 +430,18 @@ public class WorkspaceListFragment extends FragmentActivity {
          */
         @Override
         protected void onPreExecute() {
-            String message = WorkspaceListFragment.this.getString(R.string.message_creating_new_workspace);
-            progressDialog = ProgressDialog.show(WorkspaceListFragment.this, "", message);
+            final String message = WorkspaceListFragment.this.getString(R.string.message_creating_new_workspace);
+            RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
+            dialogFragment.setDialogCreator(new RetainedDialogFragment.DialogCreator() {
+                @Override
+                public Dialog createDialog() {
+                    ProgressDialog dialog = new ProgressDialog(getActivity());
+                    dialog.setMessage(message);
+                    return dialog;
+                }
+            });
+            progressDialogFragment = dialogFragment;
+            progressDialogFragment.show(getFragmentManager(), "createNewWorkspace");
         }
 
         /**
@@ -476,19 +449,18 @@ public class WorkspaceListFragment extends FragmentActivity {
          */
         @Override
         protected void onPostExecute(Boolean result) {
-            progressDialog.dismiss();
+            progressDialogFragment.dismiss();
 
             if (result.booleanValue()) {
                 Workspace ws = new Workspace();
                 ws.setPackageDir(packageDir);
                 ws.setTitle(workspaceTitle);
                 
-                WorkspaceListFragment_ workspaceListFragment = getWorkspaceListFragment();
-                workspaceListFragment.getWorkspaceManager().save(ws);
-                workspaceListFragment.reloadList();
+                workspaceManager.save(ws);
+                reloadList();
             } else {
                 // 作成失敗
-                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListFragment.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(R.string.message_failed_to_create_new_workspace);
                 builder.setNeutralButton(R.string.ok, new OnClickListener() {
                     @Override
@@ -509,7 +481,7 @@ public class WorkspaceListFragment extends FragmentActivity {
     private boolean processMenuRemoveData(MenuItem item) {
         AdapterContextMenuInfo listMenuInfo = (AdapterContextMenuInfo)item.getMenuInfo();
         int position = listMenuInfo.position;
-        final WorkspaceListItem listItem = (WorkspaceListItem)getWorkspaceListFragment().getListAdapter().getItem(position);
+        final WorkspaceListItem listItem = (WorkspaceListItem)getListAdapter().getItem(position);
 
         // 削除していいですか？
         final RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
@@ -517,7 +489,7 @@ public class WorkspaceListFragment extends FragmentActivity {
             @Override
             public Dialog createDialog() {
                 String message = getResources().getString(R.string.message_workspace_remove_data_alert, listItem.getTitle());
-                AlertDialog.Builder builder = new AlertDialog.Builder(WorkspaceListFragment.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(message);
                 builder.setNegativeButton(R.string.no, new OnClickListener() {
                     @Override
@@ -528,16 +500,14 @@ public class WorkspaceListFragment extends FragmentActivity {
                 builder.setPositiveButton(R.string.yes, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        WorkspaceListFragment workspaceListActivity = (WorkspaceListFragment)dialogFragment.getActivity();
-                        WorkspaceListFragment_ workspaceListFragment = workspaceListActivity.getWorkspaceListFragment();
-                        workspaceListFragment.getWorkspaceManager().delete(listItem.getWorkspaceId());
-                        workspaceListFragment.reloadList();
+                        workspaceManager.delete(listItem.getWorkspaceId());
+                        reloadList();
                     }
                 });
                 return builder.create();
             }
         });
-        dialogFragment.show(getSupportFragmentManager(), "deleteAlert");
+        dialogFragment.show(getFragmentManager(), "deleteAlert");
         return true;
     }
 }
