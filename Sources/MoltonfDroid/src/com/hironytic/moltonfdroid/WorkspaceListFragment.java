@@ -156,36 +156,6 @@ public class WorkspaceListFragment extends ListFragment {
         super.onDestroy();
     }
 
-    @Override
-    public void onListItemClick(ListView listView, View view, int position, long id) {
-        super.onListItemClick(listView, view, position, id);
-        
-        WorkspaceListItem item = (WorkspaceListItem)listView.getItemAtPosition(position);
-        Intent intent = new Intent(getActivity(), StoryActivity.class);
-        intent.putExtra(StoryActivity.EXTRA_KEY_WORKSPACE_ID, item.getWorkspaceId());
-        startActivity(intent);
-    }
-
-    /**
-     * ワークスペースの一覧を更新します。
-     */
-    private void reloadList() {
-        List<WorkspaceListItem> listItems = new ArrayList<WorkspaceListItem>();
-        Cursor cursor = workspaceManager.list();
-        try {
-            boolean hasData = cursor.moveToFirst();
-            while (hasData) {
-                listItems.add(new WorkspaceListItem(cursor));
-                hasData = cursor.moveToNext();
-            }
-        } finally {
-            cursor.close();
-        }
-        ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(getActivity(), android.R.layout.simple_list_item_1, listItems);
-        setListAdapter(adapter);
-    }
-    
-    
     /**
      * @see android.support.v4.app.Fragment#onCreateOptionsMenu(android.view.Menu, android.view.MenuInflater)
      */
@@ -254,6 +224,16 @@ public class WorkspaceListFragment extends ListFragment {
         return result;
     }
 
+    @Override
+    public void onListItemClick(ListView listView, View view, int position, long id) {
+        super.onListItemClick(listView, view, position, id);
+        
+        WorkspaceListItem item = (WorkspaceListItem)listView.getItemAtPosition(position);
+        Intent intent = new Intent(getActivity(), StoryActivity.class);
+        intent.putExtra(StoryActivity.EXTRA_KEY_WORKSPACE_ID, item.getWorkspaceId());
+        startActivity(intent);
+    }
+
     /**
      * @see android.support.v4.app.Fragment#onActivityResult(int, int, android.content.Intent)
      */
@@ -270,6 +250,25 @@ public class WorkspaceListFragment extends ListFragment {
             super.onActivityResult(requestCode, resultCode, data);
             break;
         }
+    }
+
+    /**
+     * ワークスペースの一覧を更新します。
+     */
+    private void reloadList() {
+        List<WorkspaceListItem> listItems = new ArrayList<WorkspaceListItem>();
+        Cursor cursor = workspaceManager.list();
+        try {
+            boolean hasData = cursor.moveToFirst();
+            while (hasData) {
+                listItems.add(new WorkspaceListItem(cursor));
+                hasData = cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(getActivity(), android.R.layout.simple_list_item_1, listItems);
+        setListAdapter(adapter);
     }
 
     /**
@@ -460,15 +459,22 @@ public class WorkspaceListFragment extends ListFragment {
                 reloadList();
             } else {
                 // 作成失敗
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(R.string.message_failed_to_create_new_workspace);
-                builder.setNeutralButton(R.string.ok, new OnClickListener() {
+                RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
+                dialogFragment.setDialogCreator(new RetainedDialogFragment.DialogCreator() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 何もしない
+                    public Dialog createDialog() {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage(R.string.message_failed_to_create_new_workspace);
+                        builder.setNeutralButton(R.string.ok, new OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // 何もしない
+                            }
+                        });
+                        return builder.create();
                     }
                 });
-                builder.show();
+                dialogFragment.show(getFragmentManager(), "createNewWorkspaceFailedAlert");
             }
         }
     }
