@@ -67,7 +67,7 @@ import com.hironytic.moltonfdroid.model.archived.PackagedStory;
 import com.hironytic.moltonfdroid.util.RetainedDialogFragment;
 
 /**
- * 
+ * ワークスペース一覧アクティビティのメインフラグメント
  */
 public class WorkspaceListFragment extends ListFragment {
 
@@ -490,7 +490,7 @@ public class WorkspaceListFragment extends ListFragment {
         final WorkspaceListItem listItem = (WorkspaceListItem)getListAdapter().getItem(position);
 
         // 削除していいですか？
-        final RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
+        RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
         dialogFragment.setDialogCreator(new RetainedDialogFragment.DialogCreator() {
             @Override
             public Dialog createDialog() {

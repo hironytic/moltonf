@@ -29,7 +29,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
 /**
- * 
+ * ワークスペース一覧アクティビティ
  */
 public class WorkspaceListActivity extends FragmentActivity {
 
