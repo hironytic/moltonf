@@ -55,7 +55,7 @@ import com.hironytic.moltonfdroid.model.WorkspaceManager;
 /**
  * ストーリーを表示するActivity
  */
-public class StoryActivity extends Activity {
+public class StoryFragment extends Activity {
 
     /** 表示するワークスペースのID */
     public static final String EXTRA_KEY_WORKSPACE_ID = "Moltonf.WorkspaceID";
@@ -357,7 +357,7 @@ public class StoryActivity extends Activity {
         @Override
         protected MoltonfException doInBackground(Void... params) {
             try {
-                StoryActivity.this.workspace.getStory().ready();
+                StoryFragment.this.workspace.getStory().ready();
                 return null;
             } catch (MoltonfException ex) {
                 return ex;
@@ -370,7 +370,7 @@ public class StoryActivity extends Activity {
         @Override
         protected void onPreExecute() {
             String message = getString(R.string.loading_story);
-            progressDialog = ProgressDialog.show(StoryActivity.this, "", message);
+            progressDialog = ProgressDialog.show(StoryFragment.this, "", message);
         }
 
         /**
@@ -381,10 +381,10 @@ public class StoryActivity extends Activity {
             progressDialog.dismiss();
 
             if (result == null) {
-                StoryActivity.this.onStoryIsReady();
+                StoryFragment.this.onStoryIsReady();
             } else {
                 // MoltonfException が発生したとき
-                StoryActivity.this.onStoryLoadError(result);
+                StoryFragment.this.onStoryLoadError(result);
             }
         }
     }
@@ -416,7 +416,7 @@ public class StoryActivity extends Activity {
         @Override
         protected void onPreExecute() {
             String message = getString(R.string.loading_story);
-            progressDialog = ProgressDialog.show(StoryActivity.this, "", message);
+            progressDialog = ProgressDialog.show(StoryFragment.this, "", message);
         }
 
         /**
@@ -427,10 +427,10 @@ public class StoryActivity extends Activity {
             progressDialog.dismiss();
 
             if (result instanceof StoryPeriod) {
-                StoryActivity.this.onStoryPeriodIsReady((StoryPeriod)result);
+                StoryFragment.this.onStoryPeriodIsReady((StoryPeriod)result);
             } else if (result instanceof MoltonfException) {
                 // MoltonfException が発生したとき
-                StoryActivity.this.onStoryPeriodLoadError((MoltonfException)result);
+                StoryFragment.this.onStoryPeriodLoadError((MoltonfException)result);
             }
         }
     }
