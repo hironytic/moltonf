@@ -30,17 +30,20 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
-import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -50,16 +53,13 @@ import com.hironytic.moltonfdroid.model.Story;
 import com.hironytic.moltonfdroid.model.StoryElement;
 import com.hironytic.moltonfdroid.model.StoryPeriod;
 import com.hironytic.moltonfdroid.model.Workspace;
-import com.hironytic.moltonfdroid.model.WorkspaceManager;
+import com.hironytic.moltonfdroid.util.RetainedDialogFragment;
 
 /**
  * ストーリーを表示するActivity
  */
-public class StoryFragment extends Activity {
+public class StoryFragment extends Fragment {
 
-    /** 表示するワークスペースのID */
-    public static final String EXTRA_KEY_WORKSPACE_ID = "Moltonf.WorkspaceID";
-    
     /** ストーリーを表示するメインとなるリストビュー */
     private ListView storyListView = null;
     
@@ -69,90 +69,105 @@ public class StoryFragment extends Activity {
     /** 現在のピリオドのインデックス */
     private int currentPeriodIndex = -1;
     
+    private StoryElementListAdapter storyElementListAdapter = null;    
+    
     /**
      * ストーリー中の画像を読み込むためのタスク
      */
     private LoadStoryImageTask loadStoryImageTask = null;
     
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
+    
     /**
-     * @see android.app.Activity#onCreate(android.os.Bundle)
+     * @see android.support.v4.app.Fragment#onCreate(android.os.Bundle)
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.story);
+        setRetainInstance(true);
+        setHasOptionsMenu(true);
+    }
 
-        // 読み込むストーリーの受け渡し
-        Intent intent = getIntent();
-        if (intent != null) {
-            long workspaceId = intent.getLongExtra(EXTRA_KEY_WORKSPACE_ID, 0);
-            if (workspaceId > 0) {
-                WorkspaceManager wsManager = new WorkspaceManager(getApplicationContext());
-                try {
-                    workspace = wsManager.load(workspaceId);
-                } finally {
-                    wsManager.close();
-                }
-                
-                Story story = workspace.getStory();
-                if (story != null) {
-                    if (story.isReady()) {
-                        onStoryIsReady();
-                    } else {
-                        ReadyStoryTask readyStoryTask = new ReadyStoryTask();
-                        readyStoryTask.execute();
-                    }
-                }
+    /**
+     * @see android.support.v4.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
+     */
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.story, container, false);
+        return view;
+    }
+
+    /**
+     * @see android.support.v4.app.Fragment#onActivityCreated(android.os.Bundle)
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        
+        Story story = workspace.getStory();
+        if (story != null) {
+            if (story.isReady()) {
+                onStoryIsReady();
+            } else {
+                ReadyStoryTask readyStoryTask = new ReadyStoryTask();
+                readyStoryTask.execute();
             }
         }
     }
 
     /**
-     * @see android.app.Activity#onDestroy()
+     * @see android.support.v4.app.Fragment#onDestroyView()
      */
     @Override
-    protected void onDestroy() {
+    public void onDestroyView() {
         if (storyListView != null) {
-            StoryElementListAdapter adapter = (StoryElementListAdapter)storyListView.getAdapter();
             storyListView.setAdapter(null);
             storyListView.setRecyclerListener(null);
-            
-            if (adapter != null) {
-                adapter.destroy();
-            }
+            storyListView = null;
         }
         
         if (loadStoryImageTask != null) {
             loadStoryImageTask.cancel(true);
         }
         
+        super.onDestroyView();
+    }
+
+    /**
+     * @see android.support.v4.app.Fragment#onDestroy()
+     */
+    @Override
+    public void onDestroy() {
+        if (storyElementListAdapter != null) {
+            storyElementListAdapter.destroy();
+        }
+        
         super.onDestroy();
     }
 
     /**
-     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     * @see android.support.v4.app.Fragment#onCreateOptionsMenu(android.view.Menu, android.view.MenuInflater)
      */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
         
-        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.story_option, menu);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             menu.removeItem(R.id.menu_story_select_period);
         }            
-        
-        return menu.hasVisibleItems();
     }
 
     /**
-     * @see android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
+     * @see android.support.v4.app.Fragment#onPrepareOptionsMenu(android.view.Menu)
      */
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean result = super.onPrepareOptionsMenu(menu);
-        
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
         MenuItem selectPeriodMenu = menu.findItem(R.id.menu_story_select_period);
         if (selectPeriodMenu != null) {
             SubMenu selectPeriodSubMenu = selectPeriodMenu.getSubMenu();
@@ -166,11 +181,10 @@ public class StoryFragment extends Activity {
             }
             selectPeriodSubMenu.setGroupCheckable(R.id.menugroup_story_select_period, true, true);
         }        
-        return result;
     }
-    
+
     /**
-     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     * @see android.support.v4.app.Fragment#onOptionsItemSelected(android.view.MenuItem)
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -191,7 +205,7 @@ public class StoryFragment extends Activity {
             return;
         }
         
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getActivity().getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         ActionBar.OnNavigationListener onNavigationListener = new ActionBar.OnNavigationListener() {
             @Override
@@ -200,7 +214,7 @@ public class StoryFragment extends Activity {
                 return true;
             }
         };
-        ArrayAdapter<String> periodListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, makePeriodStringList());        
+        ArrayAdapter<String> periodListAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, makePeriodStringList());        
         actionBar.setListNavigationCallbacks(periodListAdapter, onNavigationListener);
     }
     
@@ -214,7 +228,7 @@ public class StoryFragment extends Activity {
             return;
         }
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getActivity().getActionBar();
         actionBar.setSelectedNavigationItem(position);
     }
     
@@ -228,7 +242,7 @@ public class StoryFragment extends Activity {
         }
         
         // 村の名前をタイトルにセット
-        setTitle(story.getVillageFullName());
+        getActivity().setTitle(story.getVillageFullName());
         
         // バックグラウンドで画像を用意
         loadStoryImageTask = new LoadStoryImageTask();
@@ -275,7 +289,7 @@ public class StoryFragment extends Activity {
      */
     private void onStoryLoadError(MoltonfException ex) {
         String message = getString(R.string.failed_to_load_story);
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
     
     /**
@@ -284,7 +298,7 @@ public class StoryFragment extends Activity {
      */
     private void onStoryPeriodLoadError(MoltonfException ex) {
         String message = getString(R.string.failed_to_load_story);
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -322,25 +336,23 @@ public class StoryFragment extends Activity {
     private void onStoryPeriodIsReady(StoryPeriod period) {
         StoryPeriod currentPeriod = workspace.getStory().getPeriod(currentPeriodIndex);
         if (period == currentPeriod) {
-            StoryElementListAdapter adapter;
-            
             if (storyListView == null) {
                 // ストーリーを表示するListViewの準備
-                storyListView = (ListView)findViewById(R.id.story_list);
-                View emptyView = findViewById(R.id.story_list_empty);
+                storyListView = (ListView)getView().findViewById(R.id.story_list);
+                View emptyView = getView().findViewById(R.id.story_list_empty);
                 if (emptyView != null) {
                     storyListView.setEmptyView(emptyView);
                 }
                 
-                adapter = new StoryElementListAdapter(this, Moltonf.getInstance().getHighlightSettings(getApplicationContext()));
-                storyListView.setRecyclerListener(adapter);
-                storyListView.setAdapter(adapter);
-            } else {
-                adapter = (StoryElementListAdapter)storyListView.getAdapter();
+                if (storyElementListAdapter == null) {
+                    storyElementListAdapter = new StoryElementListAdapter(getActivity(), Moltonf.getInstance().getHighlightSettings(getActivity().getApplicationContext()));
+                }
+                storyListView.setRecyclerListener(storyElementListAdapter);
+                storyListView.setAdapter(storyElementListAdapter);
             }
             
             List<StoryElement> elemList = period.getStoryElements();
-            adapter.replaceStoryElements(elemList);
+            storyElementListAdapter.replaceStoryElements(elemList);
         }
     }
     
@@ -348,8 +360,8 @@ public class StoryFragment extends Activity {
      * Storyをready状態にするタスク
      */
     private class ReadyStoryTask extends AsyncTask<Void, Void, MoltonfException> {
-        /** 読み込み中に表示するプログレスダイアログ */
-        private ProgressDialog progressDialog;
+        /** 読み込み中に表示するプログレスダイアログのフラグメント */
+        private DialogFragment progressDialogFragment;
         
         /**
          * @see android.os.AsyncTask#doInBackground(Params[])
@@ -369,8 +381,18 @@ public class StoryFragment extends Activity {
          */
         @Override
         protected void onPreExecute() {
-            String message = getString(R.string.loading_story);
-            progressDialog = ProgressDialog.show(StoryFragment.this, "", message);
+            RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
+            dialogFragment.setDialogCreator(new RetainedDialogFragment.DialogCreator() {
+                @Override
+                public Dialog createDialog() {
+                    String message = getString(R.string.loading_story);
+                    ProgressDialog dialog = new ProgressDialog(getActivity());
+                    dialog.setMessage(message);
+                    return dialog;
+                }
+            });
+            progressDialogFragment = dialogFragment;
+            progressDialogFragment.show(getFragmentManager(), "readyStory");
         }
 
         /**
@@ -378,7 +400,7 @@ public class StoryFragment extends Activity {
          */
         @Override
         protected void onPostExecute(MoltonfException result) {
-            progressDialog.dismiss();
+            progressDialogFragment.dismiss();
 
             if (result == null) {
                 StoryFragment.this.onStoryIsReady();
@@ -393,8 +415,8 @@ public class StoryFragment extends Activity {
      * Storyをready状態にするタスク
      */
     private class ReadyStoryPeriodTask extends AsyncTask<StoryPeriod, Void, Object> {
-        /** 読み込み中に表示するプログレスダイアログ */
-        private ProgressDialog progressDialog;
+        /** 読み込み中に表示するプログレスダイアログのフラグメント */
+        private DialogFragment progressDialogFragment;
         
         /**
          * @see android.os.AsyncTask#doInBackground(Params[])
@@ -415,8 +437,18 @@ public class StoryFragment extends Activity {
          */
         @Override
         protected void onPreExecute() {
-            String message = getString(R.string.loading_story);
-            progressDialog = ProgressDialog.show(StoryFragment.this, "", message);
+            RetainedDialogFragment dialogFragment = new RetainedDialogFragment();
+            dialogFragment.setDialogCreator(new RetainedDialogFragment.DialogCreator() {
+                @Override
+                public Dialog createDialog() {
+                    String message = getString(R.string.loading_story);
+                    ProgressDialog dialog = new ProgressDialog(getActivity());
+                    dialog.setMessage(message);
+                    return dialog;
+                }
+            });
+            progressDialogFragment = dialogFragment;
+            progressDialogFragment.show(getFragmentManager(), "readyStoryPeriod");
         }
 
         /**
@@ -424,7 +456,7 @@ public class StoryFragment extends Activity {
          */
         @Override
         protected void onPostExecute(Object result) {
-            progressDialog.dismiss();
+            progressDialogFragment.dismiss();
 
             if (result instanceof StoryPeriod) {
                 StoryFragment.this.onStoryPeriodIsReady((StoryPeriod)result);
@@ -433,6 +465,5 @@ public class StoryFragment extends Activity {
                 StoryFragment.this.onStoryPeriodLoadError((MoltonfException)result);
             }
         }
-    }
-    
+    }    
 }
