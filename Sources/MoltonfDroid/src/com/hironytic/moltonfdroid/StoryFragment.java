@@ -60,6 +60,9 @@ import com.hironytic.moltonfdroid.util.RetainedDialogFragment;
  */
 public class StoryFragment extends Fragment {
 
+    /** 一度でもActivityCreatedを通ったらtrueになる */
+    private boolean isInitialized = false;
+    
     /** ストーリーを表示するメインとなるリストビュー */
     private ListView storyListView = null;
     
@@ -69,6 +72,7 @@ public class StoryFragment extends Fragment {
     /** 現在のピリオドのインデックス */
     private int currentPeriodIndex = -1;
     
+    /** ストーリー要素の一覧のためのアダプタ */
     private StoryElementListAdapter storyElementListAdapter = null;    
     
     /**
@@ -109,12 +113,17 @@ public class StoryFragment extends Fragment {
         Story story = workspace.getStory();
         if (story != null) {
             if (story.isReady()) {
-                onStoryIsReady();
+                displayStory(isInitialized);
             } else {
-                ReadyStoryTask readyStoryTask = new ReadyStoryTask();
-                readyStoryTask.execute();
+                // ストーリーがまだ読み込まれていない場合
+                // すでに初期化されているなら、ReadyStoryTaskが今まさに動いているはず
+                if (!isInitialized) {
+                    ReadyStoryTask readyStoryTask = new ReadyStoryTask();
+                    readyStoryTask.execute();
+                }
             }
         }
+        isInitialized = true;
     }
 
     /**
@@ -128,10 +137,6 @@ public class StoryFragment extends Fragment {
             storyListView = null;
         }
         
-        if (loadStoryImageTask != null) {
-            loadStoryImageTask.cancel(true);
-        }
-        
         super.onDestroyView();
     }
 
@@ -142,6 +147,12 @@ public class StoryFragment extends Fragment {
     public void onDestroy() {
         if (storyElementListAdapter != null) {
             storyElementListAdapter.destroy();
+            storyElementListAdapter = null;
+        }
+        
+        if (loadStoryImageTask != null) {
+            loadStoryImageTask.cancel(true);
+            loadStoryImageTask = null;
         }
         
         super.onDestroy();
@@ -236,6 +247,15 @@ public class StoryFragment extends Fragment {
      * ストーリーのロードが終わったら呼ばれます。
      */
     private void onStoryIsReady() {
+        currentPeriodIndex = -1;
+        displayStory(false);
+    }
+    
+    /**
+     * ストーリーを表示します。
+     * @param isRecreated デバイスの回転などでActivityが作り直された結果の呼び出しならtrue
+     */
+    private void displayStory(boolean isRecreated) {
         Story story = workspace.getStory();
         if (story == null) {
             return;
@@ -244,17 +264,22 @@ public class StoryFragment extends Fragment {
         // 村の名前をタイトルにセット
         getActivity().setTitle(story.getVillageFullName());
         
-        // バックグラウンドで画像を用意
-        loadStoryImageTask = new LoadStoryImageTask();
-        loadStoryImageTask.execute(story);
-
-        currentPeriodIndex = -1;
+        if (!isRecreated) {
+            // バックグラウンドで画像を用意
+            loadStoryImageTask = new LoadStoryImageTask();
+            loadStoryImageTask.execute(story);
+        }
 
         // ActionBarにピリオド切り替えを追加
         setPeriodListToActionBar();
 
-        // TODO: とりあえず初日を出しとくか
-        onPeriodIndexChange(0);
+        if (-1 == currentPeriodIndex) {
+            // TODO: とりあえず初日を出しとくか
+            onPeriodIndexChange(0);
+        } else {
+            StoryPeriod currentPeriod = workspace.getStory().getPeriod(currentPeriodIndex);
+            displayStoryPeriod(currentPeriod, isRecreated);
+        }
     }
 
     /**
@@ -336,21 +361,32 @@ public class StoryFragment extends Fragment {
     private void onStoryPeriodIsReady(StoryPeriod period) {
         StoryPeriod currentPeriod = workspace.getStory().getPeriod(currentPeriodIndex);
         if (period == currentPeriod) {
-            if (storyListView == null) {
-                // ストーリーを表示するListViewの準備
-                storyListView = (ListView)getView().findViewById(R.id.story_list);
-                View emptyView = getView().findViewById(R.id.story_list_empty);
-                if (emptyView != null) {
-                    storyListView.setEmptyView(emptyView);
-                }
-                
-                if (storyElementListAdapter == null) {
-                    storyElementListAdapter = new StoryElementListAdapter(getActivity(), Moltonf.getInstance().getHighlightSettings(getActivity().getApplicationContext()));
-                }
-                storyListView.setRecyclerListener(storyElementListAdapter);
-                storyListView.setAdapter(storyElementListAdapter);
+            displayStoryPeriod(period, false);
+        }        
+    }
+
+    /**
+     * ピリオドを表示します。
+     * @param period ピリオド
+     * @param isRecreated デバイスの回転などでActivityが作り直された結果の呼び出しならtrue
+     */
+    private void displayStoryPeriod(StoryPeriod period, boolean isRecreated) {
+        if (storyListView == null) {
+            // ストーリーを表示するListViewの準備
+            storyListView = (ListView)getView().findViewById(R.id.story_list);
+            View emptyView = getView().findViewById(R.id.story_list_empty);
+            if (emptyView != null) {
+                storyListView.setEmptyView(emptyView);
             }
             
+            if (storyElementListAdapter == null) {
+                storyElementListAdapter = new StoryElementListAdapter(getActivity().getApplicationContext(), Moltonf.getInstance().getHighlightSettings(getActivity().getApplicationContext()));
+            }
+            storyListView.setRecyclerListener(storyElementListAdapter);
+            storyListView.setAdapter(storyElementListAdapter);
+        }
+        
+        if (!isRecreated) {
             List<StoryElement> elemList = period.getStoryElements();
             storyElementListAdapter.replaceStoryElements(elemList);
         }
