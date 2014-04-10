@@ -277,8 +277,12 @@ public class StoryFragment extends Fragment {
             // TODO: とりあえず初日を出しとくか
             onPeriodIndexChange(0);
         } else {
-            StoryPeriod currentPeriod = workspace.getStory().getPeriod(currentPeriodIndex);
-            displayStoryPeriod(currentPeriod, isRecreated);
+            setSelectedPeriodOnActionBar(currentPeriodIndex);
+            
+            StoryPeriod period = story.getPeriod(currentPeriodIndex);
+            if (period.isReady()) {
+                displayStoryPeriod(period, isRecreated);
+            }
         }
     }
 
