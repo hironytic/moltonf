@@ -267,7 +267,7 @@ public class WorkspaceListFragment extends ListFragment {
         } finally {
             cursor.close();
         }
-        ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(getActivity(), android.R.layout.simple_list_item_1, listItems);
+        ArrayAdapter<WorkspaceListItem> adapter = new ArrayAdapter<WorkspaceListItem>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, listItems);
         setListAdapter(adapter);
     }
 

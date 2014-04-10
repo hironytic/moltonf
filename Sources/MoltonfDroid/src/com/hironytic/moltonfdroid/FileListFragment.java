@@ -149,7 +149,7 @@ public class FileListFragment extends ListFragment {
                 }
             }
         }
-        ArrayAdapter<ListItem> adapter = new ArrayAdapter<ListItem>(getActivity(), android.R.layout.simple_list_item_1, itemList);
+        ArrayAdapter<ListItem> adapter = new ArrayAdapter<ListItem>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, itemList);
         setListAdapter(adapter);
     }
     
