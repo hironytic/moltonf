@@ -72,7 +72,6 @@ import com.hironytic.moltonfdroid.util.RetainedDialogFragment;
 public class WorkspaceListFragment extends ListFragment {
 
     private static final int REQUEST_SELECT_ARCHIVE_FILE = 100;
-    private static final int REQUEST_SELECT_ARCHIVE_FILE_V19 = 101;
     
     /**
      * ワークスペース一覧に表示する1つ分のデータ
@@ -175,9 +174,8 @@ public class WorkspaceListFragment extends ListFragment {
         int id = item.getItemId();
         switch (id) {
         case R.id.menu_workspace_new_data:
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                // KitKat以降なら、OSの選択UI (Storage Access Framework) を使う
-                result = processMenuNewDataV19();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR) {
+                result = processMenuNewDataV5();
             } else {
                 result = processMenuNewData();
             }
@@ -243,9 +241,6 @@ public class WorkspaceListFragment extends ListFragment {
         case REQUEST_SELECT_ARCHIVE_FILE:
             processSelectArchiveFileRequest(resultCode, data);
             break;
-        case REQUEST_SELECT_ARCHIVE_FILE_V19:
-            processSelectArchiveFileRequestV19(resultCode, data);
-            break;
         default:
             super.onActivityResult(requestCode, resultCode, data);
             break;
@@ -272,13 +267,35 @@ public class WorkspaceListFragment extends ListFragment {
     }
 
     /**
-     * 新しい観戦データ作成メニューが選ばれたときの処理
+     * 新しい観戦データ作成メニューが選ばれたときの処理 (Android 1.6用)
      * @return 処理したらtrue
      */
     private boolean processMenuNewData() {
-        // プレイデータアーカイブを選択させる
+        // ユーザーにプレイデータアーカイブを選択させる
+        
         Intent intent = new Intent(getActivity(), FileListActivity.class);
         startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE);
+        return true;
+    }
+    
+    /**
+     * 新しい観戦データ作成メニューが選ばれたときの処理 (Android 2.0以降)
+     * @return 処理したらtrue
+     */
+    @TargetApi(5)
+    private boolean processMenuNewDataV5() {
+        // ユーザーにプレイデータアーカイブを選択させる
+        
+        // ACTION_GET_CONTENTで開けるものも対象にする（他のアプリ）
+        Intent getContentIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getContentIntent.setType("*/*");
+
+        // 適切な他のアプリがいなくてもいいように、ファイルを選択するアクティビティも追加
+        Intent fileListIntent = new Intent(getActivity(), FileListActivity.class);
+        
+        Intent chooserIntent = Intent.createChooser(getContentIntent, getString(R.string.title_select_play_data_archive));
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {fileListIntent});
+        startActivityForResult(chooserIntent, REQUEST_SELECT_ARCHIVE_FILE);
         return true;
     }
 
@@ -292,38 +309,16 @@ public class WorkspaceListFragment extends ListFragment {
             return;
         }
         
+        CreateNewWorkspaceTask task = new CreateNewWorkspaceTask();
         File archiveFile = (File)data.getSerializableExtra(FileListActivity.EXTRA_KEY_FILE);
-        CreateNewWorkspaceTask task = new CreateNewWorkspaceTask();
-        task.execute(archiveFile);
-    }
-    
-    /**
-     * 新しい観戦データ作成メニューが選ばれたときの処理
-     * @return 処理したらtrue
-     */
-    @TargetApi(19)
-    private boolean processMenuNewDataV19() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        startActivityForResult(intent, REQUEST_SELECT_ARCHIVE_FILE_V19);
-        return true;
-    }
-    
-    /**
-     * 新しい観戦データ作成メニューでアーカイブファイル選択から戻ってきたときの処理
-     * @param resultCode
-     * @param data
-     */
-    private void processSelectArchiveFileRequestV19(int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_OK) {
-            return;
+        if (archiveFile != null) {
+            task.execute(archiveFile);
+        } else {
+            Uri archiveUri = data.getData();
+            task.execute(archiveUri);
         }
+    }
         
-        Uri archiveUri = data.getData();
-        CreateNewWorkspaceTask task = new CreateNewWorkspaceTask();
-        task.execute(archiveUri);
-    }    
-    
     /**
      * プレイデータアーカイブから新規ワークスペースを作成するタスク
      */
@@ -365,7 +360,7 @@ public class WorkspaceListFragment extends ListFragment {
                     int extIndex = archiveFileName.lastIndexOf(".");
                     packageDirName = archiveFileName.substring(0, extIndex);
                 } else if (archiveUri != null) {
-                    Cursor cursor = getActivity().getContentResolver().query(archiveUri, null, null, null, null, null);
+                    Cursor cursor = getActivity().getContentResolver().query(archiveUri, null, null, null, null);
                     if (cursor != null) {
                         try {
                             cursor.moveToFirst();
@@ -424,7 +419,7 @@ public class WorkspaceListFragment extends ListFragment {
                 
                 return Boolean.TRUE;
             } catch (MoltonfException ex) {
-                // packageDirNameがnullじゃなければ、そのディレクトリを消さないと
+                // TODO: packageDirNameがnullじゃなければ、そのディレクトリを消さないと
                 
                 return Boolean.FALSE;
             }

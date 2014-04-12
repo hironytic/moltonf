@@ -17,6 +17,7 @@
     <string name="menu_story_select_period">日の切り替え</string>
     <string name="no_workspace_data">観戦データがありません。</string>
     <string name="menu_workspace_new_data">新しい観戦データ</string>
+    <string name="title_select_play_data_archive">プレイデータアーカイブを選択</string>
     <string name="message_creating_new_workspace">新しい観戦データを作成中&#8230;</string>
     <string name="message_failed_to_create_new_workspace">観戦データを作成できませんでした。</string>
     <string name="menu_workspace_remove_data">削除</string>
