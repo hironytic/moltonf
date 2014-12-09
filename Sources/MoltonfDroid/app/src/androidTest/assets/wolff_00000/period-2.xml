@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<period
+  xmlns="http://jindolf.sourceforge.jp/xml/ns/401"
+  xml:lang="ja-JP"
+  type="progress" day="2"
+  nextCommitDay="--07-11+09:00" commitTime="08:15:00+09:00"
+  sourceURI="index.rb?vid=0&amp;meslog=0_progress_1&amp;mes=all"
+  loadedTime="2009-07-12T16:23:54.000+09:00"
+>
+
+<judge byWhom="jacob" target="simson" >
+<li>農夫 ヤコブ は、神父 ジムゾン を占った。</li>
+</judge>
+
+<murdered>
+<li>次の日の朝、楽天家 ゲルト が無残な姿で発見された。</li>
+<li/>
+<avatarRef avatarId="gerd" />
+</murdered>
+
+<startAssault>
+<li>ついに犠牲者が出た。人狼はこの村人達のなかにいる。</li>
+<li>しかし、それを見分ける手段はない。</li>
+<li/>
+<li>村人達は、疑わしい者を排除するため、投票を行う事にした。</li>
+<li>無実の犠牲者が出るのもやむをえない。村が全滅するよりは……。</li>
+<li/>
+<li>最後まで残るのは村人か、それとも人狼か。</li>
+<li/>
+</startAssault>
+
+<survivor>
+<li>現在の生存者は、司書 クララ、シスター フリーデル、少女 リーザ、宿屋の女主人 レジーナ、ならず者 ディーター、神父 ジムゾン、少年 ペーター、青年 ヨアヒム、旅人 ニコラス、農夫 ヤコブ、負傷兵 シモン、仕立て屋 エルナ、パン屋 オットー、老人 モーリッツ、羊飼い カタリナ の 15 名。</li>
+<avatarRef avatarId="clara" />
+<avatarRef avatarId="fridel" />
+<avatarRef avatarId="liesa" />
+<avatarRef avatarId="regina" />
+<avatarRef avatarId="dieter" />
+<avatarRef avatarId="simson" />
+<avatarRef avatarId="peter" />
+<avatarRef avatarId="joachim" />
+<avatarRef avatarId="nicolas" />
+<avatarRef avatarId="jacob" />
+<avatarRef avatarId="simon" />
+<avatarRef avatarId="erna" />
+<avatarRef avatarId="otto" />
+<avatarRef avatarId="moritz" />
+<avatarRef avatarId="katharina" />
+</survivor>
+
+<talk
+  type="public" avatarId="otto"
+  xname="mes1246663001" time="08:16:00+09:00"
+>
+<li>2日目</li>
+</talk>
+
+</period>
+
